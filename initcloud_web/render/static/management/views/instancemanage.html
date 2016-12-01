@@ -1,3 +1,4 @@
+<!-- BEGIN MAIN CONTENT -->
 <div class="row">
     <div class="col-md-12">
         <div class="portlet">
@@ -6,15 +7,19 @@
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="instancemanage_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
-                    <!--
-                    <a class="btn btn-info" href="#" ng-click="openBroadcastModal()">
-                        <i class="fa  fa-bullhorn"></i> {[{ 'notification.broadcast' | i18next }]}
+                    <a class="btn btn-primary" href="#" ng-click="openNewTemplatemanagerModal()">
+                        <i class="fa fa-plus"></i>{[{ 'action.add' | i18next }]}
                     </a>
+                    <!--
                     <a class="btn btn-info" href="javascript:void(0)"
                        data-ng-click="openDataCenterBroadcastModal();">
                         <i class="fa  fa-bullhorn"></i> {[{ 'notification.data_center_broadcast' | i18next }]}
                     </a>
                     -->
+                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
+                        <i class="fa fa-trash"></i>
+                        {[{ 'action.batch_delete' | i18next }]}
+                    </a>
                 </div>
                 </div>
             </div>
@@ -28,11 +33,17 @@
                                 <td width="30" header="'checkbox-header.html'">
                                     <input type="checkbox" data-ng-model="instancemanage.checked"/>
                                 </td>
+                                <td data-title="'instancemanage.username' | i18next">
+                                    <span> {[{ instancemanage.username }]} </span>
+                                </td>
                                 <td data-title="'instancemanage.name' | i18next">
                                     <span> {[{ instancemanage.name }]} </span>
                                 </td>
                                 <td data-title="'instancemanage.public_ip' | i18next">
                                     <span> {[{ instancemanage.public_ip }]} </span>
+                                </td>
+                                <td data-title="'instancemanage.private_ip' | i18next">
+                                    <span> {[{ instancemanage.private_ip }]} </span>
                                 </td>
                                 <td data-title="'instancemanage.cpu' | i18next">
                                     <span> {[{ instancemanage.cpu }]} </span>
@@ -43,6 +54,33 @@
                                 <td data-title="'instancemanage.sys_disk' | i18next">
                                     <span> {[{ instancemanage.sys_disk }]} </span>
                                 </td>
+                            <td width="160" data-title="'instance.status' | i18next">
+                                <span>
+                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/vnc-black.png">
+
+                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'spice_console')"><img src="/static/assets/global/img/spice.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/spice-black.png">
+
+                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'novnc_console')"><img src="/static/assets/global/img/novnc.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/novnc-black.png">
+
+                                    <!--
+                                    <a href="spicevm:vnc:{[{instance.private_ip}]}:5900" data-ng-if="instancemanage.status == 1" ><img src="/static/assets/global/img/docker.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/docker-black.png"> 
+                                    -->
+                                </span>
+
+                                <div data-ng-if="instance.isUnstable"
+                                     class="progress progress-striped active"
+                                     style="width:140px; margin-bottom:0px;">
+                                    <div class="progress-bar progress-bar-success"
+                                         role="progressbar" aria-valuenow="20"
+                                         aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                        <span class="">{[{ instance.status_text }]} </span>
+                                    </div>
+                                </div>
+                            </td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
                                         <button class="btn btn-default"
@@ -59,6 +97,12 @@
                                             <a href="#" ng-click="instance_action(instance, 'power_on')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.power_on' | i18next }]}
+                                            </a>
+                                        </li>
+                                        <li >
+                                            <a href="#" ng-click="instance_action(instance, 'power_on')">
+                                                <i class="fa fa-play"></i>
+                                                {[{ 'instance.assign' | i18next }]}
                                             </a>
                                         </li>
                                         <li data-ng-if="instance.is_running">
@@ -92,277 +136,81 @@
 </div>
 <!-- END MAIN CONTENT -->
 
-
-<!-- BEGIN TEMPLATE DETAIL -->
-<script type="text/ng-template" id="udc_list.html">
-    <div class="modal-header">
-       <div class="modal-title"> {[{ 'user.user_data_centers' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-        <table ng-table="udc_table"
-               class="table table-striped table-bordered table-advance table-hover">
-            <tbody>
-                <tr ng-repeat="udc in $data">
-                    <td data-title="'udc.data_center' | i18next">
-                        <span> {[{ udc.data_center.name }]} </span>
-                    </td>
-                    <td data-title="'udc.tenant' | i18next">
-                        <span> {[{ udc.tenant_name }]} </span>
-                    </td>
-                    <td data-title="'udc.tenant_uuid' | i18next">
-                        <span> {[{ udc.tenant_uuid }]} </span>
-                    </td>
-                    <td data-title="'udc.keystone_user' | i18next">
-                        <span> {[{ udc.keystone_user}]} </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-    </div>
-</script>
-<!-- END TEMPLATE DETAIL-->
-
-<!-- BEGIN TEMPLATE BROADCAST -->
-<script type="text/ng-template" id="broadcast.html">
-    <div class="modal-header">
-       <div class="modal-title"> {[{ 'notification.notify' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-        <form id="notificationForm" instancemanage="form" class="form-horizontal form-bordered">
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="users">
-                    {[{ 'notification.receivers' | i18next }]}
-                </label>
-                <div class="col-md-9">
-                    <ul data-ng-if="users.length > 0" class="list-inline" style="margin-top: 8px;">
-                        <li class="static-info" data-ng-repeat="user in users">{[{ user.username }]}</li>
-                    </ul>
-                    <p data-ng-if="users.length == 0" style="margin-top: 8px;">{[{ 'notification.all_users' | i18next }]}</p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="level">
-                    {[{ 'notification.level' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <select id="level" name="level" data-ng-model="notification.level"
-                            class="form-control input-medium"
-                            data-ng-options="option.key as option.label for option in options">
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="title">
-                    {[{ 'notification.title' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <input id="title" name="title"
-                        data-ng-model="notification.title"
-                        class="form-control input-medium"
-                        data-rule-required="true"
-                        data-rule-maxlength="100">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="content">
-                    {[{ 'notification.content' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <textarea id="content" name="content" rows="5" class="form-control"
-                          data-rule-required="true"
-                          data-ng-model="notification.content" >
-                    </textarea>
-                </div>
-            </div>
-            <div class="clear"></div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn btn-primary" data-ng-click="broadcast(notification)" data-nap-after-click>
-            {[{ 'submit' | i18next }]}
-        </a>
-    </div>
-</script>
-<!-- END TEMPLATE BROADCAST -->
-
-<!-- BEGIN TEMPLATE BROADCAST -->
-<script type="text/ng-template" id="data_center_broadcast.html">
-    <div class="modal-header">
-       <div class="modal-title"> {[{ 'notification.data_center_broadcast' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-        <form id="notificationForm" instancemanage="form" class="form-horizontal form-bordered">
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="data_center">
-                    {[{ 'notification.data_center' | i18next }]}
-                </label>
-                <div class="col-md-9">
-                    <select id="data_center" name="data_center" multiple="true"
-                            class="form-control input-medium"
-                            data-ng-model="notification.data_centers"
-                            data-ng-options="dc.id as dc.name for dc in data_centers"
-                            data-rule-required="true">
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="level">
-                    {[{ 'notification.level' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <select id="level" name="kind"
-                            class="form-control input-medium"
-                            data-ng-model="notification.level"
-                            data-ng-options="option.key as option.label for option in options"
-                            data-rule-required="true">
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="title">
-                    {[{ 'notification.title' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <input id="title" name="title"
-                        class="form-control input-medium"
-                        data-ng-model="notification.title"
-                        data-rule-required="true"
-                        data-rule-maxlength="100">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="content">
-                    {[{ 'notification.content' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <textarea id="content" name="content" rows="5" class="form-control"
-                          data-rule-required="true"
-                          data-ng-model="notification.content" >
-                    </textarea>
-                </div>
-            </div>
-            <div class="clear"></div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn btn-primary" data-ng-click="broadcast(notification)" data-nap-after-click>
-            {[{ 'submit' | i18next }]}
-        </a>
-    </div>
-</script>
-<!-- END TEMPLATE BROADCAST -->
-
-
-<!-- BEGIN TEMPLATE BROADCAST -->
-<script type="text/ng-template" id="announce.html">
-    <div class="modal-header">
-       <div class="modal-title"> {[{ 'notification.announce' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-        <form id="notificationForm" instancemanage="form" class="form-horizontal form-bordered">
-            <div class="form-group">
-                <div class="form-group">
-                    <label class="col-md-3 control-label" for="level">
-                        {[{ 'notification.level' | i18next }]}
-                    </label>
-                    <div class="col-md-5">
-                        <select id="level" name="kind"
-                                class="form-control input-medium"
-                                data-ng-model="notification.level"
-                                data-ng-options="option.key as option.label for option in options"
-                                data-rule-required="true">
-                        </select>
-                    </div>
-                </div>
-                <label class="col-md-3 control-label" for="title">
-                    {[{ 'notification.title' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <input id="title" name="title"
-                        data-ng-model="notification.title"
-                        class="form-control input-medium"
-                        data-rule-required="true"
-                        data-rule-maxlength="100">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="content">
-                    {[{ 'notification.content' | i18next }]}
-                </label>
-                <div class="col-md-5">
-                    <textarea id="content" name="content" rows="5" class="form-control"
-                          data-rule-required="true"
-                          data-ng-model="notification.content" >
-                    </textarea>
-                </div>
-            </div>
-            <div class="clear"></div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn btn-primary" data-ng-click="announce(notification)" data-nap-after-click>
-            {[{ 'submit' | i18next }]}
-        </a>
-    </div>
-</script>
-<!-- END TEMPLATE BROADCAST -->
-
 <script type="text/ng-template" id="checkbox-header.html">
     <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
 </script>
 
-
-
-<!-- BEGIN TEMPLATE NEW-USER -->
-<script type="text/ng-template" id="new-instancemanage.html">
+<script type="text/ng-template" id="novnc_console.html">
     <div class="modal-header">
-       <div class="modal-title"> {[{ 'instancemanage.new_instancemanage' | i18next }]}</div>
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
     </div>
-    <div class="modal-body">
-        <form id="instancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'instancemanage.name' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="text"
-                           placeholder="{[{ 'instancemanage.name' | i18next }]}"
-                           name="instancemanagename" data-ng-model="instancemanage.instancemanagename"
-                           data-message-remote="test"/>
-                </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.vnc_prompt' | i18next }]}
+        <a href="{[{ novnc_console.novnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.vnc_new_window' | i18next }]}
+        </a>
+    </p>
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+                <iframe ng-src="{[{ novnc_sce_url(novnc_console) }]}" style="width:898px;height:700px;" frameBorder="0"></iframe>
             </div>
-            </div>
-            <div class="clear"></div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn" data-ng-show="is_submitting">
-            <img src="/static/assets/global/img/throbber.gif"/>
-        </a>
-        <a class="btn btn-primary" data-ng-click="create()" data-ng-hide="is_submitting">
-            {[{ 'submit' | i18next }]}
-        </a>
+        </div>
     </div>
 </script>
-<!-- END TEMPLATE DETAIL-->
+
+<script type="text/ng-template" id="vnc_console.html">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
+    </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.vnc_prompt' | i18next }]}
+        <a href="{[{ vnc_console.vnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.vnc_new_window' | i18next }]}
+        </a>
+    </p>
+
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a><a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
+      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="spice_console.html">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.spice_console' | i18next }]}</h4>
+    </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.spice_prompt' | i18next }]}
+        <a href="{[{ spice_console.spice_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.spice_new_window' | i18next }]}
+        </a>
+    </p>
+
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a>  <a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
+      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
+            </div>
+        </div>
+    </div>
+</script>
+
 
 <!-- BEGIN TEMPLATE UPDATE -->
 <script type="text/ng-template" id="update.html">
@@ -396,4 +244,3 @@
            data-nap-after-click> {[{ 'submit' | i18next }]}</a>
     </div>
 </script>
-<!-- END TEMPLATE UPDATE -->

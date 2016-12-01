@@ -9,6 +9,10 @@ angular.module('cloud.resources', [])
     return $resource("/api/images/:id");
 }])
 
+.factory('Templatemanager', ['$resource', function ($resource) {
+    return $resource("/api/templatemanager/:id", {id: '@id'});
+}])
+
 .factory('Instancemanage', ['$resource', function ($resource) {
     return $resource("/api/instancemanage/:id", {id: '@id'});
 }])

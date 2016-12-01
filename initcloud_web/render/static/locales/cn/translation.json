@@ -51,6 +51,9 @@
     "desc": "提供虚拟机服务",
     "name": "主机名称",
     "add_sc": "指定数据包过滤",
+    "spice_console": "spice连接",
+    "spice_prompt": "提示",
+    "spice_new_window":"请在新窗口打开spice",
     "add_qos": "限速",
     "image": "镜像",
     "flavor": "规格",
@@ -277,8 +280,14 @@
 
   "sidebar": {
     "cloud": "云平台",
+    "servers": "云主机",
+    "volumemanage": "云磁盘管理",
+    "networkmanage": "网络管理",
+    "floatingips": "公网ip",
+    "volumes": "云磁盘",
     "cloud_management": "后台管理",
     "instancemanage": "虚拟机管理",
+    "templatemanager": "模版管理",
     "authority_management": "权限管理",
     "policy": "权限",
     "roles": "角色",
@@ -898,10 +907,13 @@
   "instancemanage": {
 
       "name": "虚拟机名称",
+      "username": "用户名",
       "cpu": "cpu",
+      "assign":"分配云主机",
       "memory": "内存",
       "sys_disk": "系统盘",
       "public_ip": "公网ip",
+      "private_ip": "内网IP",
       "policy": "usb重定向权限",
       "update_instancemanage_title": "分配权限",
       "edit": "分配权限",
@@ -930,6 +942,30 @@
     "ordered": "已申请",
     "update_heat_title": "更新服务",
     "confirm_delete": "确认删除服务"
-  }
+  },
+
+  "templatemanager":{
+
+       "id": "id",
+       "name": "名称",
+       "template_uuid": "通用标示符",
+       "create_date": "创建日期",
+       "software": "软件",
+       "disk": "硬盘",
+       "pro": "协议",
+       "console":"控制台",
+       "template": "模版",
+       "os":"操作系统",
+       "iso": "iso镜像",
+       "new_templatemanager": "新建镜像",
+       "power_on": "开机",
+       "power_off": "关机",
+       "upload": "上传镜像",
+       "confirm_power_on": "确认开机",
+       "confirm_delete": "确认批量删除吗",
+       "confirm_power_off": "确认关机",
+       "confirm_upload": "确认上传镜像",
+       "confirm_template_delete": "确定删除模版"
+}
 
 }

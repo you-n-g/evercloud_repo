@@ -58,6 +58,12 @@ CloudApp.config(['$httpProvider', function($httpProvider){
 CloudApp.config(['$ocLazyLoadProvider', function ($ocLazyLoadProvider) {
     $ocLazyLoadProvider.config({});
 }]);
+CloudApp.config(['$compileProvider', function ($compileProvider) {
+
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|spicevm):/);
+        // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
+        //         //         //     }
+                               }]);
 
 /* Setup App Main Controller */
 CloudApp.controller('AppController', ['$scope', '$rootScope', function ($scope, $rootScope) {
@@ -501,6 +507,25 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                     }
                 }
             })
+
+          .state("templatemanager", {
+                url: "/templatemanager/",
+                templateUrl: "/static/management/views/templatemanager.html",
+                data: {pageTitle: 'Templatemanager'},
+                controller: "TemplatemanagerController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/templatemanager_ctrl.js'
+                            ]
+                        });
+                    }]
+                }
+            })
+
 
             // workflow
             .state("workflow", {

@@ -1,6 +1,7 @@
 #-*- coding=utf-8 -*- 
 
 import datetime
+import subprocess
 import logging
 import time
 
@@ -134,10 +135,12 @@ def instance_get(instance):
 
 def instance_get_vnc_console(instance):
     assert instance
+    LOG.info("*** start to get novnc ****")
     if instance.uuid is None:
         return None
 
     rc = create_rc_by_instance(instance)
+    LOG.info("  rc is " + str(rc))
     try:
         return nova.server_vnc_console(rc, instance_id=instance.uuid)
     except Exception:
@@ -696,3 +699,111 @@ def delete_user_instance_network(request, instance_id):
         LOG.info("*** server delete failed ***")
         pass
     return True
+
+def instance_get_realvnc_console(instance):
+
+    assert instance
+    if instance.uuid is None:
+        return None
+
+
+    LOG.info("****** i am vdi view with method get ********")
+
+    spice = {}
+    if instance:
+        LOG.info("******")
+        novaAdmin = get_nova_admin(instance)
+        LOG.info("******")
+        server = novaAdmin.servers.get(instance.uuid)
+        LOG.info("******")
+        server_dict = server.to_dict()
+        LOG.info("******")
+        server_host = server_dict['OS-EXT-SRV-ATTR:host']
+        server_status = server_dict['status']
+        LOG.info("******* server_status is *******" + str(server_status))
+        LOG.info("******* server_host is *******" + str(server_host))
+        host_ip = settings.COMPUTE_HOSTS[server_host]
+        LOG.info("host ip is" + str(host_ip))
+        cmd="virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid
+        LOG.info("cmd=" + cmd)
+        p = subprocess.Popen("virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        LOG.info(" p is " + str(p))
+        port = None
+        for line in p.stdout.readlines():
+            port = line
+            LOG.info(" line is " + str(line))
+            break
+        LOG.info("host_ip=" + host_ip)
+        LOG.info("port=" + str(port))
+        if "error" in str(port):
+            return Response({"success": False, "msg": _('Failed to create flavor for unknown reason.')})
+        split_port = port.split(":")
+        LOG.info(split_port)
+        port_1 = split_port[1]
+        LOG.info(port_1)
+        port_2 = port_1.split("\\")
+        LOG.info(port_2)
+        port_3 = port_2[0]
+        LOG.info(port_3)
+        vnc_port = 5900 + int(port_3)
+        LOG.info(vnc_port)
+        vnc_url = "spicevm:vnc:" + host_ip + ":" + str(vnc_port)
+        vnc = {"url": vnc_url, "type": "realvnc"}
+        LOG.info(spice)
+
+        return vnc
+
+def instance_get_spice_console(instance):
+
+    assert instance
+    if instance.uuid is None:
+        return None
+
+
+    LOG.info("****** i am vdi view with method get ********")
+
+    spice = {}
+    if instance:
+        LOG.info("******")
+        novaAdmin = get_nova_admin(instance)
+        LOG.info("******")
+        server = novaAdmin.servers.get(instance.uuid)
+        LOG.info("******")
+        server_dict = server.to_dict()
+        LOG.info("******")
+        server_host = server_dict['OS-EXT-SRV-ATTR:host']
+        server_status = server_dict['status']
+        LOG.info("******* server_status is *******" + str(server_status))
+        LOG.info("******* server_host is *******" + str(server_host))
+        host_ip = settings.COMPUTE_HOSTS[server_host]
+        LOG.info("host ip is" + str(host_ip))
+        cmd="virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid
+        LOG.info("cmd=" + cmd)
+        p = subprocess.Popen("virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        port = None
+        for line in p.stdout.readlines():
+            port = line
+            break
+        LOG.info("host_ip=" + host_ip)
+        LOG.info("port=" + str(port))
+        if "error" in str(port):
+            return Response({"success": False, "msg": _('Failed to create flavor for unknown reason.')})
+        split_port = port.split(":")
+        LOG.info(split_port)
+        port_1 = split_port[1]
+        LOG.info(port_1)
+        port_2 = port_1.split("\\")
+        LOG.info(port_2)
+        port_3 = port_2[0]
+        LOG.info(port_3)
+        vnc_port = 5900 + int(port_3)
+        LOG.info(vnc_port)
+        spice_port = int(vnc_port) + 1
+        LOG.info(spice_port)
+        spice_url = "spicevm:spice:" + host_ip + ":" + str(spice_port)
+        LOG.info("*** spice_url is ***" + str(spice_url))
+        spice = {"url": spice_url, "type": "spice"}
+        LOG.info(spice)
+
+        return spice
+

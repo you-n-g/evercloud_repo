@@ -13,7 +13,7 @@ from cloud.cloud_utils import create_rc_by_instance
 from biz.billing.models import Order
 
 from cloud.tasks import (instance_status_synchronize_task,
-                         instance_get_vnc_console, )
+                         instance_get_vnc_console, instance_get_spice_console, instance_get_realvnc_console)
 from cloud.api import nova
 
 OPERATION_SUCCESS = 1
@@ -22,12 +22,34 @@ OPERATION_FORBID = 2
 
 LOG = logging.getLogger(__name__)
 
+def get_instance_spice_console(instance):
+    spice = instance_get_spice_console(instance)
+    LOG.info("*** spice is ***" + str(spice))
+    LOG.info(spice['url'])
+    if spice and spice['url']:
+        LOG.info("success")
+        return {"OPERATION_STATUS": OPERATION_SUCCESS,
+                "spice_url": spice['url']}
+
+    else:
+        return {"OPERATION_STATUS": OPERATION_FAILED}
+
 
 def get_instance_vnc_console(instance):
+    vnc = instance_get_realvnc_console(instance)
+    LOG.info("**** vnc is ****" + str(vnc))
+    if vnc and vnc['url']:
+        return {"OPERATION_STATUS": OPERATION_SUCCESS,
+                "vnc_url": vnc['url']}
+    else:
+        return {"OPERATION_STATUS": OPERATION_FAILED}
+
+
+def get_instance_novnc_console(instance):
     vnc = instance_get_vnc_console(instance) 
     if vnc and vnc.url:
         return {"OPERATION_STATUS": OPERATION_SUCCESS,
-                "vnc_url": "%s&instance_name=%s(%s)" % (
+                "novnc_url": "%s&instance_name=%s(%s)" % (
                     vnc.url, instance.name, instance.uuid)}
     else:
         return {"OPERATION_STATUS": OPERATION_FAILED}
@@ -109,10 +131,20 @@ def instance_action(user, instance_id, action):
     if action == 'terminate':
         Order.disable_order_and_bills(instance)
 
-    Operation.log(instance, obj_name=instance.name, action=action)
-    
     if action == "vnc_console":
         return get_instance_vnc_console(instance)
+
+    if action == "spice_console":
+        LOG.info("*** start to get spice console ***")
+        return get_instance_spice_console(instance)
+
+
+    if action == "novnc_console":
+        return get_instance_novnc_console(instance)
+
+
+    Operation.log(instance, obj_name=instance.name, action=action)
+    
 
     _ACTION_MAPPING = {
         "reboot": _server_reboot,
@@ -137,3 +169,4 @@ def instance_action(user, instance_id, action):
                 "status": "%s" % ex.message}
     else: 
         return {"OPERATION_STATUS": OPERATION_SUCCESS, "status": instance.status}
+

@@ -35,6 +35,11 @@ from biz.UserGrouper import views as user_grouper_view
 #heat
 from biz.heat import views as heat_view
 
+from biz.templatemanager import views as templatemanager_view
+
+
+
+
 # various options and configurations
 urlpatterns = [
     url(r'^settings/monitor/$', instance_view.monitor_settings),
@@ -42,6 +47,18 @@ urlpatterns = [
     url(r'^settings/data-centers/switch/$', idc_views.switch_list),
 ]
 
+
+#qos
+urlpatterns += [
+    url(r'^templatemanager/$', templatemanager_view.TemplateManagerList.as_view()),
+    url(r'^templatemanager/isos/$', templatemanager_view.get_isos),
+    url(r'^templatemanager/batch-delete/$', templatemanager_view.batch_delete),
+    url(r'^templatemanager/templates/$', templatemanager_view.get_templates),
+    url(r'^templatemanager/create/$', templatemanager_view.create_templatemanager),
+    url(r'^templatemanager/(?P<template_id>[0-9]+)/action/$', templatemanager_view.template_action),
+
+
+]
 
 #qos
 urlpatterns += [

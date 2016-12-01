@@ -1,0 +1,253 @@
+<!-- BEGIN MAIN CONTENT -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="caption font-green-sharp">
+                    <a class="btn btn-icon-only btn-default" href="#" ng-click="templatemanager_table.reload();">
+                        <i class="fa fa-refresh"></i>
+                    </a>
+                    <a class="btn btn-primary" href="#" ng-click="openNewTemplatemanagerModal()">
+                        <i class="fa fa-plus"></i>{[{ 'action.add' | i18next }]}
+                    </a>
+                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
+                        <i class="fa fa-trash"></i>
+                        {[{ 'action.batch_delete' | i18next }]}
+                    </a>
+                </div>
+                </div>
+            </div>
+
+            <div class="portlet-body">
+                <div id="" class="dataTables_wrapper no-footer">
+                    <table ng-table="templatemanager_table"
+                           class="table table-striped table-bordered table-advance table-hover">
+                        <tbody>
+                            <tr ng-repeat="templatemanager in $data">
+                                 {[{ templatemanager }]}
+                                <td width="30" header="'checkbox-header.html'">
+                                    <input type="checkbox" data-ng-model="templatemanager.checked"/>
+                                </td>
+                                <td data-title="'templatemanager.name' | i18next">
+                                    <span> {[{ templatemanager.template_name }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.template_uuid' | i18next">
+                                    <span> {[{ templatemanager.template_uuid }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.create_date' | i18next">
+                                    <span> {[{ templatemanager.create_date }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.software' | i18next">
+                                    <span> {[{ templatemanager.template_softwarelist }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.disk' | i18next">
+                                    <span> {[{ templatemanager.template_disksize }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.pro' | i18next">
+                                    <span> {[{ templatemanager.template_protocol }]} </span>
+                                </td>
+                                <td data-title="'templatemanager.console' | i18next">
+                                   <a href="{[{templatemanager.template_console}]}" target="_blank"> <span> 控制台 </span> </a>
+                                </td>
+                                <td data-title="'actions' | i18next">
+                                    <div class="btn-group">
+                                        <button class="btn btn-default"
+                                                type="button" ng-click="template_action(templatemanager, 'power_on')">
+                                            <i class="fa fa-edit"></i>
+                                            {[{ 'templatemanager.power_on' | i18next }]}
+                                        </button>
+                                        <button data-toggle="dropdown" class="btn btn-default dropdown-toggle"
+                                                type="button" aria-expanded="false">
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul templatemanager="menu" class="dropdown-menu">
+                                            <li>
+                                                <a href="javascript:void(0);"  ng-click="template_action(templatemanager, 'delete')">
+                                                    <i class="fa fa-trash"></i>
+                                                    {[{ 'action.delete' | i18next }]} </a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);"  ng-click="template_action(templatemanager, 'power_off')">
+                                                    <i class="fa fa-trash"></i>
+                                                    {[{ 'templatemanager.power_off' | i18next }]} </a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0);"  ng-click="template_action(templatemanager, 'upload')">
+                                                    <i class="fa fa-trash"></i>
+                                                    {[{ 'templatemanager.upload' | i18next }]} </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MAIN CONTENT -->
+
+<script type="text/ng-template" id="checkbox-header.html">
+    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
+</script>
+
+
+
+<!-- BEGIN TEMPLATE-MANAGER CREATE -->
+<script type="text/ng-template" id="new-templatemanager.html">
+    <div class="modal-header">
+       <div class="modal-title"> {[{ 'templatemanager.new_templatemanager' | i18next }]}</div>
+    </div>
+    <div class="modal-body">
+        <form id="templatemanagerForm" templatemanager="form" class="form-horizontal form-bordered">
+
+            <div class="form-group">
+                 <label class="col-md-3 control-label" for="title">{[{'templatemanager.template' |i18next}]}<span
+                         class="required">* </span></label>
+
+                <div class="col-md-8">
+                      <div class="input-group">
+                        <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
+                         <select class="form-control" ng-model="templatemanager.template">
+                             <option value="root">根目录</option>
+                             <option ng-repeat="template in templates" value="{[{template.template_uuid}]}">{[{template.name}]} </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'templatemanager.name' | i18next }]}
+                    <span class="required" aria-required="true"> * </span>
+                </label>
+                <div class="col-md-5">
+                    <input class="form-control placeholder-no-fix" type="text"
+                           placeholder="{[{ 'templatemanager.name' | i18next }]}"
+                           name="name" data-ng-model="templatemanager.name"
+                           data-message-remote="test"/>
+                </div>
+            </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="title">{[{'templatemanager.os' |i18next}]}<span
+                            class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
+                            <select class="form-control" ng-model="templatemanager.select_os">
+                                <option value="linux">Linux
+                                </option>
+                                <option value="windows">Windows
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'templatemanager.disk' | i18next }]}
+                    <span class="required" aria-required="true"> * </span>
+                </label>
+                <div class="col-md-5">
+                    <input class="form-control placeholder-no-fix" type="text"
+                           placeholder="{[{ 'templatemanager.disk' | i18next }]}"
+                           name="disk" data-ng-model="templatemanager.disk"
+                           data-message-remote="test"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'templatemanager.software' | i18next }]}
+                    <span class="required" aria-required="true"> * </span>
+                </label>
+                <div class="col-md-5">
+                    <input class="form-control placeholder-no-fix" type="text"
+                           placeholder="{[{ 'templatemanager.software' | i18next }]}"
+                           name="software" data-ng-model="templatemanager.software"
+                           data-message-remote="test"/>
+                </div>
+            </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="title">{[{'templatemanager.pro' |i18next}]}<span
+                            class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
+                            <select class="form-control" ng-model="templatemanager.pro">
+                                <option value="vnc">VNC
+                                </option>
+                                <option value="spice">Spice
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="title">{[{'templatemanager.iso' |i18next}]}<span
+                            class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
+                            <select class="form-control" ng-model="templatemanager.iso">
+                                <option ng-repeat="iso in isos" value="{[{iso}]}">{[{iso.name}]} </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="clear"></div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
+            {[{ 'cancel' | i18next }]}
+        </a>
+        <a class="btn" data-ng-show="is_submitting">
+            <img src="/static/assets/global/img/throbber.gif"/>
+        </a>
+        <a class="btn btn-primary" data-ng-click="create()" data-ng-hide="is_submitting">
+            {[{ 'submit' | i18next }]}
+        </a>
+    </div>
+</script>
+<!-- END TEMPLATE-MANAGER CREATE -->
+
+<!-- BEGIN TEMPLATE-MANAGER UPDATE -->
+<script type="text/ng-template" id="update.html">
+    <div class="modal-header">
+       <div id="updateTitle" class="modal-title"> {[{ 'templatemanager.update_templatemanager_title' | i18next }]}</div>
+    </div>
+    <div class="modal-body">
+        <form id="TemplatemanagerForm" templatemanager="form" class="form-horizontal form-bordered">
+            <input type="hidden"  name="id" data-ng-model="templatemanager.id">
+            <div class="form-group">
+                <label class="col-md-3 control-label" for="name">
+                    {[{ 'templatemanager.name' | i18next }]}
+                    <span class="required" aria-required="true"> * </span>
+                </label>
+                <div class="col-md-5">
+                    <input id="templatemanager_name" name="templatemanager_name"  data-ng-model="templatemanager.templatemanagername"  maxlength="64"
+                           class="form-control input-medium required">
+                </div>
+            </div>
+            <div class="clear"></div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
+            {[{ 'cancel' | i18next }]}
+        </a>
+        <a class="btn btn-primary"
+           data-ng-click="submit(templatemanager)"
+           data-nap-after-click> {[{ 'submit' | i18next }]}</a>
+    </div>
+</script>
+<!-- END TEMPLATE-MANAGER UPDATE -->

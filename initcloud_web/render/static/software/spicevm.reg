@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+[HKEY_CLASSES_ROOT\spicevm]
+"URL Protocol"="C:\\Windows\\spicevm.exe"
+@="spicevmProtocol"
+[HKEY_CLASSES_ROOT\spicevm\DefaultIcon]
+@="C:\\Windows\\spicevm.exe,1"
+[HKEY_CLASSES_ROOT\spicevm\shell]
+[HKEY_CLASSES_ROOT\spicevm\shell\open]
+[HKEY_CLASSES_ROOT\spicevm\shell\open\command]
+@="\"C:\\Windows\\spicevm.exe\" \"%1\""

@@ -265,6 +265,7 @@ def instance_create_view(request):
 @api_view(["POST"])
 def instance_action_view(request, pk):
     instance_id, action = request.data['instance'], request.data['action']
+    LOG.info(" action is " + str(request.data['action']))
     data = instance_action(request.user, instance_id, action)
     return Response(data)
 

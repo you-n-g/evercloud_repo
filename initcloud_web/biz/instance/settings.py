@@ -114,6 +114,8 @@ ALLOWED_INSTANCE_ACTIONS = {
     "power_on": _("Instance Power On"),
     "power_off": _("Instance Power Off"),
     "vnc_console": _("Instance VNC"),
+    "novnc_console": _("Instance NOVNC"),
+    "spice_console": _("Spice VNC"),
     "bind_floating": _("Instance Bind Floating"),
     "unbind_floating": _("Instance Unbind Floating"),
     "change_firewall": _("Instance Change Firewall"),

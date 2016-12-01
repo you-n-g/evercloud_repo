@@ -11,6 +11,110 @@ CloudApp.controller('InstancemanageController',
                 Metronic.initAjax();
         });
 
+        var need_confirm = true;
+        var no_confirm = false;
+
+        var post_action = function (ins, action) {
+            var post_data = {
+                "action": action,
+                "instance": ins.id
+            };
+
+            CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data).then(function (data) {
+                if (data.OPERATION_STATUS == 1) {
+                    $scope.instance_table.reload();
+                } else if (data.OPERATION_STATUS == 2) {
+                    var msg = data.MSG || $i18next("op_forbid_msg");
+                    ToastrService.warning(msg, $i18next("op_failed"));
+                } else {
+                    var msg = data.MSG || $i18next("op_failed_msg");
+                    ToastrService.error(msg, $i18next("op_failed"));
+                }
+            });
+        };
+        var do_instance_action = function (ins, action, need_confirm) {
+            if (need_confirm) {
+                bootbox.confirm($i18next("instance.confirm_" + action) + "[" + ins.name + "]", function (confirm) {
+                    if (confirm) {
+                        post_action(ins, action);
+                    }
+                });
+            }
+            else {
+                post_action(ins, action);
+            }
+        };
+
+        var instance_novnc_console = function (ins) {
+            var post_data = {
+                "action": "novnc_console",
+                "instance": ins.id
+            };
+            $modal.open({
+                templateUrl: 'novnc_console.html',
+                controller: 'InstanceNOVNCController',
+                backdrop: "static",
+                size: 'lg',
+                scope: $scope,
+                resolve: {
+                    'novnc_console': function (CommonHttpService) {
+                        return CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data);
+                    }
+                }
+            });
+        };
+
+
+        var instance_vnc_console = function (ins) {
+            var post_data = {
+                "action": "vnc_console",
+                "instance": ins.id
+            };
+            $modal.open({
+                templateUrl: 'vnc_console.html',
+                controller: 'InstanceVNCController',
+                backdrop: "static",
+                size: 'lg',
+                scope: $scope,
+                resolve: {
+                    'vnc_console': function (CommonHttpService) {
+                        return CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data);
+                    }
+                }
+            });
+        };
+        var instance_spice_console = function (ins) {
+            var post_data = {
+                "action": "spice_console",
+                "instance": ins.id
+            };
+            $scope.test = "test"
+            $modal.open({
+                templateUrl: 'spice_console.html',
+                controller: 'InstanceSPICEController',
+                backdrop: "static",
+                size: 'lg',
+                scope: $scope,
+                resolve: {
+                    'spice_console': function (CommonHttpService) {
+                        return CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data);
+                    }
+                }
+            });
+        };
+
+        var action_func = {
+            "novnc_console": instance_novnc_console,
+            "vnc_console": instance_vnc_console,
+            "spice_console": instance_spice_console
+        };
+
+        $scope.instance_action = function (ins, action) {
+            action_func[action](ins);
+        };
+
+
+
         $scope.instancemanages = [];
         var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
 
@@ -72,10 +176,10 @@ CloudApp.controller('InstancemanageController',
 
         $scope.batchDelete = function(){
 
-            deleteInstancemanages(function(){
+            delete_Instancemanages(function(){
                 var ids = [];
 
-                checkboxGroup.forEachChecked(function(Instancemanage){
+                checkboxGroup.forEachChecked(function(instancemanage){
                     if(instancemanage.checked){
                         ids.push(instancemanage.id);
                     }
@@ -300,4 +404,42 @@ CloudApp.controller('InstancemanageController',
                     return ValidationTool.init('#InstancemanageForm', config);
                 }
             }
-        }]);
+        }])    .controller('InstanceNOVNCController', function ($rootScope, $scope, $sce,
+                                                   $modalInstance, novnc_console) {
+        $scope.novnc_console = novnc_console;
+        $scope.novnc_sce_url = function (novnc_console) {
+            return $sce.trustAsResourceUrl(novnc_console.novnc_url);
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss();
+        };
+    })
+
+
+    .controller('InstanceVNCController', function ($rootScope, $scope, $sce,
+                                                   $modalInstance, vnc_console) {
+        $scope.vnc_console = vnc_console;
+        $scope.vnc_sce_url = function (vnc_console) {
+            return $sce.trustAsResourceUrl(vnc_console.vnc_url);
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss();
+        };
+    })
+
+
+    .controller('InstanceSPICEController', function ($rootScope, $location,$scope, $sce,
+                                                   $modalInstance, spice_console) {
+        $scope.spice_console = spice_console;
+        $scope.spice_sce_url = function (spice_console) {
+            return $sce.trustAsResourceUrl(spice_console.spice_url);
+        };
+
+
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss();
+        };
+    });
