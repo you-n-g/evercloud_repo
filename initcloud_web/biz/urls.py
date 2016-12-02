@@ -36,6 +36,7 @@ from biz.UserGrouper import views as user_grouper_view
 from biz.heat import views as heat_view
 
 from biz.templatemanager import views as templatemanager_view
+from biz.snapshot import views as snapshot_view
 
 
 
@@ -65,6 +66,10 @@ urlpatterns += [
     url(r'^qos/$', user_grouper_view.update_UserGrouper),
 ]
 
+#snapshot
+urlpatterns += [
+    url(r'^snapshot/$', snapshot_view.SnapshotList.as_view()),
+]
 
 #user_grouper
 urlpatterns += [

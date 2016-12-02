@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'biz.vir_desktop',
     'biz.heat',
     'biz.templatemanager',
+    'biz.snapshot',
 ]
 
 MIDDLEWARE_CLASSES = (
