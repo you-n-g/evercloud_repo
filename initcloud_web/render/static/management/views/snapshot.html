@@ -6,9 +6,9 @@
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="snapshot_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
-                    <a class="btn btn-primary" href="#" ng-click="openNewSnapshotModal()">
+                    <!-- <a class="btn btn-primary" href="#" ng-click="openNewSnapshotModal()">
                         <i class="fa fa-plus"></i>{[{ 'action.add' | i18next }]}
-                    </a>
+                    </a> -->
                     <!--
                     <a class="btn btn-info" href="#" ng-click="openBroadcastModal()">
                         <i class="fa  fa-bullhorn"></i> {[{ 'notification.broadcast' | i18next }]}
@@ -33,6 +33,12 @@
                                 </td>
                                 <td data-title="'snapshot.name' | i18next">
                                     <span> {[{ snapshot.snapshotname }]} </span>
+                                </td>
+				<td data-title="'snapshot.id' | i18next">
+                                    <span> {[{ snapshot.snapshot_id }]} </span>
+                                </td>
+				<td data-title="'snapshot.type' | i18next">
+                                    <span> {[{ snapshot.snapshot_type }]} </span>
                                 </td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">

@@ -288,3 +288,6 @@ VLAN_ENABLED = False
 
 CONSOLE_IP = "192.168.1.51"
 CONSOLE_PORT = "6081"
+
+#glance endpoint
+GLANCE_ENDPOINT = "http://192.168.1.64:9292"

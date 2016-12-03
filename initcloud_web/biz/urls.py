@@ -69,6 +69,8 @@ urlpatterns += [
 #snapshot
 urlpatterns += [
     url(r'^snapshot/$', snapshot_view.SnapshotList.as_view()),
+    url(r'^snapshot/create_instance_snapshot$', snapshot_view.create_instance_snapshot),
+    url(r'^snapshot/batch-delete/$', snapshot_view.delete_snapshots),
 ]
 
 #user_grouper

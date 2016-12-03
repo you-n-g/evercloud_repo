@@ -4,13 +4,17 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class Snapshot(models.Model):
-    #user = models.ForeignKey(User)
+    #user = models.ForeignKey('auth.User')
     #udc = models.ForeignKey('idc.UserDataCenter')
-
+   
+    id = models.AutoField(primary_key=True)
     snapshotname = models.CharField(_("Role"), max_length=15, null=False)
     datacenter = models.IntegerField(_("Result"), default=0, null=False)
     deleted = models.BooleanField(_("Deleted"), default=False)
     create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
+    snapshot_id = models.CharField(_("Snap_id"), max_length=255, null=False, default='')
+    snapshot_type = models.CharField(_("Type"), max_length=255, null=False, default='')
+    volume_id = models.CharField(_("Volume"), max_length=255, null=False, default='')
 
     """
     @classmethod

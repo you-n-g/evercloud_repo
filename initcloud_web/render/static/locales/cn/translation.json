@@ -46,6 +46,14 @@
         "owner": "没有拥有者的镜像将成为公共镜像"
     }
   },
+    "snapshot": {
+    "name":"快照名称",
+    "id":"快照ID",
+    "type":"快照类型",
+    "update_snapshot_title":"编辑快照",
+    "confirm_delete":"删除快照"
+
+  },
 
   "instance": {
     "desc": "提供虚拟机服务",
@@ -129,6 +137,7 @@
     "network_gateway_prompt": "请选择已经连接到路由器的网络，否则会引起主机内置功能异常",
     "batch_launch_prompt": "一次可批量创建__num__台云主机",
     "infinite": "无限",
+    "create_snap": "创建快照",
     "network_detail": "网络详情"
   },
 
@@ -340,6 +349,7 @@
     "policy_neutron": "网络",
     "policy_glance": "资源",
     "alarm": "监控报警",
+    "snapshot": "快照管理",
     "zabbix": "系统性能监控"
   },
 
@@ -920,6 +930,7 @@
       "delete": "取消权限",
       "confirm_delete": "确定取消吗",
       "deleteinstance": "删除虚拟机",
+      "create_snap": "创建快照",
       "assignrole": "分配权限"
 
 },
