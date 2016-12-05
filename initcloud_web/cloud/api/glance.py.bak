@@ -31,26 +31,21 @@ from six.moves import _thread as thread
 from cloud.utils import functions as utils
 from cloud.utils.memoized import memoized  # noqa
 from cloud.api import base
-from keystoneclient import v2_0
-from glanceclient.v1 import client
+
 
 LOG = logging.getLogger(__name__)
 
 
-#@memoized
-def glanceclient(request, url, version='1'):
-    #url = base.url_for(request, 'image')
+@memoized
+def glanceclient(request, version='1'):
+    url = base.url_for(request, 'image')
     insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', True)
     cacert = getattr(settings, 'OPENSTACK_SSL_CACERT', None)
-    #LOG.debug('glanceclient connection created using token "%s" and url "%s"'
-    #          % (request.user.token.id, url))
+    LOG.debug('glanceclient connection created using token "%s" and url "%s"'
+              % (request.user.token.id, url))
     # TODO: change token to RC
-    keystone = v2_0.client.Client(username = request.get('username'), password = request.get('password'),auth_url = request.get('auth_url'), tenant_name = request.get('tenant_name'))
-    token = keystone.auth_ref
-    LOG.info(url)
-    LOG.info(token)
-    return client.Client(url,
-                                token=token['token']['id'],
+    return glance_client.Client(version, url,
+                                token=request.user.token.id,
                                 insecure=insecure, cacert=cacert)
 
 

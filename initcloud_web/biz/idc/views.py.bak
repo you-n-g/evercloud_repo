@@ -15,10 +15,7 @@ from biz.account.models import Contract
 from biz.common.views import IsSystemUser, IsAuditUser, IsSafetyUser
 #update end
 from biz.idc.serializer import DataCenterSerializer, UserDataCenterSerializer
-import traceback
-import os
-import subprocess
-import MySQLdb
+
 LOG = logging.getLogger(__name__)
 
 #update 2016.06.02
@@ -95,43 +92,10 @@ def update_data_center(request):
                             status=status.HTTP_400_BAD_REQUEST)
 
         data_center = DataCenter.objects.get(pk=pk)
-	LOG.info("--------------------------- test for data_center ------------------")
-	old_host = data_center.host
-	new_host = request.data['host']
         for field, value in request.data.items():
             setattr(data_center, field, value)
-	#ip_files = open('/var/www/initcloud_web/ips.conf', 'r')
-	#db = MySQLdb.connect(user='keystone_admin', passwd='d62246baf4464581', db='keystone')
-	#cur = db.cursor()
-	#try:
-	#    cur.execute('update endpoint set url = replace(url, %s,%s)',(old_host,new_host))
-	#    db.commit()
-	#except:
-	#    db.rollback()
-	#cur.close()
-	#db.close()
-	try:
-	#    for files in ip_files.readlines():
-	#        full_ip_file = '/etc/' + files
-	#	cp_cmd = 'sudo cp -f ' + full_ip_file.strip('\n') + ' /var/www/initcloud_web/test_ip'
-	#	subprocess.Popen(cp_cmd, shell=True)
-	#	sed_cmd = 'sudo sed -i \'s/' + old_host + '/' + new_host + '/g\' ' + full_ip_file.strip('\n')
-	#	subprocess.Popen(sed_cmd, shell=True)
-	#	restart_openstack_cmd = 'openstack-service restart'
-	#	wait1 = subprocess.Popen(restart_openstack_cmd, shell=True)
-	#	wait1.wait()
-	#	restart_rabbit_cmd = 'systemctl restart rabbitmq-server.service'
-	#	wait2 = subprocess.Popen(restart_rabbit_cmd, shell=True)
-	#	wait2.wait()
-	#	restart_network_cmd = 'systemctl restart network.service'
-	#	wait3 = subprocess.Popen(restart_network_cmd, shell=True)
-	#	wait3.wait()
-	    cmd = 'sudo /var/www/initcloud_web/change_ip.sh ' + old_host + ' ' + new_host
-	    subprocess.Popen(cmd,shell=True)
-	except:
-	    traceback.print_exc()
         data_center.save()
-	
+
         return Response({'success': True,
                         "msg": _('Data Center is updated successfully!')},
                         status=status.HTTP_201_CREATED)
