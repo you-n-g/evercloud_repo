@@ -205,6 +205,7 @@ CloudApp.controller('InstancemanageController',
             });
         };
 
+
         $scope.batchDelete = function(){
 
             delete_Instancemanages(function(){
@@ -228,7 +229,21 @@ CloudApp.controller('InstancemanageController',
         $scope.delete_instance = function(instancemanage){
             delete_Instancemanages([instancemanage.id]);
         };
+	$scope.snapshot = function(instancemanage){
 
+            $modal.open({
+                templateUrl: 'snapshot.html',
+                controller: 'InstancemanageSnapshotController',
+                backdrop: "static",
+                size: 'lg',
+                resolve: {
+                    instancemanage_table: function () {
+                        return $scope.instancemanage_table;
+                    },
+                    instancemanage: function(){return instancemanage},
+                }
+            });
+        };
 
         $scope.edit = function(instancemanage){
 
@@ -248,6 +263,7 @@ CloudApp.controller('InstancemanageController',
                 }
             });
         };
+
 
         $scope.openNewInstancemanageModal = function(){
             $modal.open({
@@ -674,4 +690,80 @@ CloudApp.controller('InstancemanageController',
         $scope.cancel = function () {
             $modalInstance.dismiss();
         };
-    });
+    }).controller('InstancemanageSnapshotController',
+        function($rootScope, $scope, $modalInstance, $i18next,
+                 instancemanage, instancemanage_table, CheckboxGroup,
+                 Instancemanage, UserDataCenter, //instancemanageForm,
+                 CommonHttpService, ToastrService, ResourceTool){
+
+            $scope.instancemanage = instancemanage = angular.copy(instancemanage);
+            $scope.cancel = $modalInstance.dismiss;
+
+            //$modalInstance.rendered.then(instancemanageForm.init);
+
+
+            $scope.cancel = function () {
+                $modalInstance.dismiss();
+            };
+
+
+            var form = null;
+            //$modalInstance.rendered.then(function(){
+            //    form = instancemanageForm.init($scope.site_config.WORKFLOW_ENABLED);
+            //});
+            $scope.submit = function(instancemanage){
+
+                var params_data = {"id": instancemanage.id, "instance_id":instancemanage.uuid, "snap_name": $scope.snapshot.snapshotname}
+                if(!$("#InstancemanageForm").validate().form()){
+                    return;
+                }
+		
+ 
+                CommonHttpService.post("/api/snapshot/create_instance_snapshot", params_data).then(function(data){
+                    if (data.success) {
+                        ToastrService.success(data.msg, $i18next("success"));
+                        $modalInstance.dismiss();
+                    } else {
+                        ToastrService.error(data.msg, $i18next("op_failed"));
+                    }
+                });
+            };
+        }
+   ).factory('instancemanageForm', ['ValidationTool', '$i18next',
+        function(ValidationTool, $i18next){
+            return {
+                init: function(){
+
+                    var config = {
+
+                        rules: {
+                            instancemanagename: {
+                                required: true,
+                                remote: {
+                                    url: "/api/instancemanage/is-name-unique/",
+                                    data: {
+                                        instancemanagename: $("#instancemanagename").val()
+                                    },
+                                    async: false
+                                }
+                            },
+                            user_type: 'required'
+                        },
+                        messages: {
+                            instancemanagename: {
+                                remote: $i18next('instancemanage.name_is_used')
+                            },
+                        },
+                        errorPlacement: function (error, element) {
+
+                            var name = angular.element(element).attr('name');
+                            if(name != 'user_type'){
+                                error.insertAfter(element);
+                            }
+                        }
+                    };
+
+                    return ValidationTool.init('#InstancemanageForm', config);
+                }
+            }
+        }]);

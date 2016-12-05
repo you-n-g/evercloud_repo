@@ -89,6 +89,27 @@
                 </li>
          </ul>
        </li>
+	<!-- 快照管理 -->
+        <li class="">
+            <a href="javascript:;">
+                <i class="fa fa-building"></i>
+                <span class="title">{[{ 'sidebar.snapshot' | i18next }]}</span>
+                <span class="arrow"></span>
+            </a>
+         <ul class="sub-menu">
+          <!-- 快照管理 快照 -->
+                <li id="snapshot"
+                    data-ng-if="current_user.is_system_user">
+                    <a href="#/snapshot/">
+                        <i class="fa fa-adjust"></i>
+                        <span class="title">
+                            {[{ 'sidebar.snapshot' | i18next }]}
+                        </span>
+                    <span class="selected"></span></a>
+                </li>
+         </ul>
+       </li>
+
         <!-- 云磁盘管理 -->
         <li class="">
             <a href="javascript:;">
