@@ -1,10 +1,12 @@
-<!-- BEGIN MAIN CONTENT -->
+<!-- BEGIN PAGE HEADER-->
+<!-- END PAGE HEADER-->
+<!-- BEGIN MAIN CONTENT ng-controller="instancemanageController"-->
 <div class="row">
     <div class="col-md-12">
-        <div class="portlet">
+         <div class="portlet">
             <div class="portlet-title">
                 <div class="caption font-green-sharp">
-                    <a class="btn btn-icon-only btn-default" href="#" ng-click="instancemanage_table.reload();">
+                    <a class="btn btn-icon-only btn-default" href="#" ng-click="instancemanagemanage_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
                     <a class="btn btn-primary" href="#" ng-click="openNewTemplatemanagerModal()">
@@ -25,35 +27,59 @@
             </div>
             <div class="portlet-body">
                 <div id="" class="dataTables_wrapper no-footer">
+
                     <table ng-table="instancemanage_table"
                            class="table table-striped table-bordered table-advance table-hover">
                         <tbody>
-                            <tr ng-repeat="instancemanage in $data">
-                                 {[{ instancemanage }]}
-                                <td width="30" header="'checkbox-header.html'">
-                                    <input type="checkbox" data-ng-model="instancemanage.checked"/>
-                                </td>
-                                <td data-title="'instancemanage.username' | i18next">
-                                    <span> {[{ instancemanage.username }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.name' | i18next">
-                                    <span> {[{ instancemanage.name }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.public_ip' | i18next">
-                                    <span> {[{ instancemanage.public_ip }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.private_ip' | i18next">
-                                    <span> {[{ instancemanage.private_ip }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.cpu' | i18next">
-                                    <span> {[{ instancemanage.cpu }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.memory' | i18next">
-                                    <span> {[{ instancemanage.memory }]} </span>
-                                </td>
-                                <td data-title="'instancemanage.sys_disk' | i18next">
-                                    <span> {[{ instancemanage.sys_disk }]} </span>
-                                </td>
+                        <tr ng-repeat="instancemanage in $data">
+                            <td width="30" style="text-align: left" header="'ng-table/headers/checkbox.html'">
+                                <input type="checkbox" ng-model="checkboxes.items[instancemanage.id]"/>
+                            </td>
+                            <td width="100" data-title="'instancemanage.name' | i18next">
+                                <a class="btn default blue-stripe btn-xs"
+                                   data-tooltip="{[{ instancemanage.id }]}">
+                                    <i class="fa fa-desktop"></i> {[{ instancemanage.name }]}
+                                </a>
+                                <span data-ng-if="is_available(instancemanage) == false">{[{ instancemanage.name }]} </span>
+                            </td>
+                            <td data-title="'instance.flavor' | i18next">
+                                {[{ instancemanage.cpu }]}CPU/ {[{ instancemanage.memory }]}MB/ {[{ instancemanage.sys_disk }]}GB
+                            </td>
+                            <td data-title="'instance.network_detail' | i18next">
+                                <ul class="narrow-list">
+                                   <li>
+                                       <a class="btn default green-stripe btn-xs"
+                                          data-ng-href="#/network/"
+                                          data-tooltip="{[{'instancemanage.private_ip' | i18next}]}">
+                                           <i class="fa fa-rss"></i> {[{instancemanage.network_info.name}]} {[{instancemanage.private_ip}]}
+                                       </a>
+                                   </li>
+                                   <li data-ng-if="instancemanage.floating_info">
+                                       <a class="btn default blue-stripe btn-xs"
+                                          data-ng-href="#/floating/"
+                                          data-tooltip="{[{'instancemanage.public_ip' | i18next}]}">
+                                           <i class="fa fa-share"></i> {[{ instancemanage.floating_info}]}
+                                       </a>
+                                   </li>
+                                   <li>
+                                       <a class="btn default red-stripe btn-xs"
+                                          data-ng-href="#/firewall/">
+                                           <i class="fa fa-align-justify"></i> {[{ instancemanage.firewall_info.name}]}
+                                       </a>
+                                   </li>
+                                </ul>
+                            </td>
+                            <td data-title="'instancemanage.sys_disk' | i18next">
+                                <div class="general-item-list" data-ng-show="instancemanage.volumes.length > 0">
+                                    <div class="item" style="padding: 5px 0;"
+                                         data-ng-repeat="volume in instancemanage.volumes">
+                                        <a class="btn default green-stripe btn-xs"
+                                           data-ng-href="#/volume/">
+                                            <i class="fa fa-stack-exchange"></i> {[{ volume.name}]}({[{volume.size}]}GB)
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
                             <td width="160" data-title="'instance.status' | i18next">
                                 <span>
                                     <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
@@ -81,6 +107,7 @@
                                     </div>
                                 </div>
                             </td>
+                            <td class="create-time" data-title="'create_at' | i18next">{[{ instancemanage.create_date }]}</td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
                                         <button class="btn btn-default"
@@ -126,121 +153,303 @@
                                         </ul>
                                     </div>
                                 </td>
-                            </tr>
+                            
+                        </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        <!-- END instancemanage  -->
     </div>
 </div>
 <!-- END MAIN CONTENT -->
-
-<script type="text/ng-template" id="checkbox-header.html">
-    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
-</script>
-
-<script type="text/ng-template" id="novnc_console.html">
-    <div class="modal-header">
-        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
-            {[{ 'instance.vnc_window_close' |i18next }]}
-        </button>
-        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
-    </div>
-    <p class='alert alert-info'>
-        {[{ 'instance.vnc_prompt' | i18next }]}
-        <a href="{[{ novnc_console.novnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
-            {[{ 'instance.vnc_new_window' | i18next }]}
-        </a>
-    </p>
-    <div class="model-body">
-        <div class="row">
-            <div class="col-md-12">
-                <iframe ng-src="{[{ novnc_sce_url(novnc_console) }]}" style="width:898px;height:700px;" frameBorder="0"></iframe>
-            </div>
-        </div>
-    </div>
+<!-- BEGIN MAIN JS & CSS -->
+<!-- BEGIN MAIN JS & CSS -->
+<script type="text/ng-template" id="ng-table/headers/checkbox.html">
+    <input type="checkbox" ng-model="checkboxes.checked" id="select_all" name="filter-checkbox" value=""/>
 </script>
 
 <script type="text/ng-template" id="vnc_console.html">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
-            {[{ 'instance.vnc_window_close' |i18next }]}
+            {[{ 'instancemanage.vnc_window_close' |i18next }]}
         </button>
-        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
+        <h4 class="modal-title">{[{ 'instancemanage.vnc_console' | i18next }]}</h4>
     </div>
     <p class='alert alert-info'>
-        {[{ 'instance.vnc_prompt' | i18next }]}
+        {[{ 'instancemanage.vnc_prompt' | i18next }]}
         <a href="{[{ vnc_console.vnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
-            {[{ 'instance.vnc_new_window' | i18next }]}
+            {[{ 'instancemanage.vnc_new_window' | i18next }]}
         </a>
     </p>
-
     <div class="model-body">
         <div class="row">
             <div class="col-md-12">
-      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a><a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
-      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
+                <iframe ng-src="{[{ vnc_sce_url(vnc_console) }]}" style="width:898px;height:700px;" frameBorder="0"></iframe>
             </div>
         </div>
     </div>
 </script>
 
-
-<script type="text/ng-template" id="spice_console.html">
+<script type="text/ng-template" id="floating.html">
     <div class="modal-header">
-        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
-            {[{ 'instance.vnc_window_close' |i18next }]}
-        </button>
-        <h4 class="modal-title">{[{ 'instance.spice_console' | i18next }]}</h4>
-    </div>
-    <p class='alert alert-info'>
-        {[{ 'instance.spice_prompt' | i18next }]}
-        <a href="{[{ spice_console.spice_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
-            {[{ 'instance.spice_new_window' | i18next }]}
-        </a>
-    </p>
-
-    <div class="model-body">
-        <div class="row">
-            <div class="col-md-12">
-      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a>  <a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
-      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
-            </div>
-        </div>
-    </div>
-</script>
-
-
-<!-- BEGIN TEMPLATE UPDATE -->
-<script type="text/ng-template" id="update.html">
-    <div class="modal-header">
-       <div id="updateTitle" class="modal-title"> {[{ 'instancemanage.update_instancemanage_title' | i18next }]}</div>
+        <button type="button" class="close" aria-hidden="true" data-ng-click="cancel()"></button>
+        <h4 class="modal-title" ng-if="is_bind == true">{[{ 'instancemanage.bind_floating' | i18next }]}</h4>
+        <h4 class="modal-title" ng-if="is_bind == false">{[{ 'instancemanage.unbind_floating' | i18next }]}</h4>
     </div>
     <div class="modal-body">
-       <table>
-        <form id="InstancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
-            <input type="hidden"  name="id" data-ng-model="instancemanage.id">
-            <div class="form-group">
-                <tr data-ng-repeat="role in roles">
-                <td width="30" header="'checkbox-header.html'">
-                    <input type="checkbox" data-ng-model="role.checked"/>
-                </td>
-                <td data-title="'user.policy_nova' | i18next">
-                    <span> {[{ role.name }]} </span>
-                </td>
-                </tr>
+        <form role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{[{ 'instancemanage.name' | i18next }]}</label>
+
+                    <div class="col-md-9">
+                        <span class="form-control-static">{[{ instancemanage.name }]}</span>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': has_error && selected_ip == false}">
+                    <label class="col-md-3 control-label"> {[{ 'instancemanage.public_ip' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-9">
+                        <div class="input-inline input-large">
+                            <div class="input-group">
+                                <span class="input-group-addon"> <i class="fa fa-openid"></i> </span>
+                                <select class="form-control" ng-options="f.ip for f in floating_ips track by f.id" ng-model="selected_ip">
+                                </select>
+                            </div>
+                            <span ng-if="has_error && selected_ip == false" id="name-error"
+                                  class="help-block help-block-error">
+                                {[{ 'instancemanage.unselect_bind_error' | i18next }]}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="clear"></div>
         </form>
-       </table>
     </div>
     <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn btn-primary"
-           data-ng-click="submit(instancemanage)"
-           data-nap-after-click> {[{ 'submit' | i18next }]}</a>
+        <button type="button" class="btn btn-default" ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary" ng-if="is_bind == true"
+                ng-click="action(selected_ip, 'associate')"> {[{ 'instancemanage.bind' | i18next }]}
+        </button>
+        <button type="button" class="btn btn-primary" ng-if="is_bind == false"
+                ng-click="action(selected_ip, 'disassociate')"> {[{ 'instancemanage.unbind' | i18next }]}
+        </button>
     </div>
 </script>
+
+
+<script type="text/ng-template" id="firewall.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" ng-click="cancel()"></button>
+        <h4 class="modal-title">{[{ 'instancemanage.change_firewall' | i18next }]}</h4>
+    </div>
+    <div class="modal-body">
+        <form role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{[{ 'instancemanage.name' | i18next }]}</label>
+
+                    <div class="col-md-9">
+                        <span class="form-control-static">{[{ instancemanage.name }]}</span>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': has_error && selected_firewall == false}">
+                    <label class="col-md-3 control-label"> {[{ 'instancemanage.firewall' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-9">
+                        <div class="input-inline input-large">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                <i class="fa fa-openid"></i>
+                                </span>
+
+                                <select class="form-control" ng-options="f.name for f in firewalls track by f.id"
+                                        ng-model="selected_firewall">
+                                    <option value="-1" selected>-----</option>
+                                </select>
+                            </div>
+                            <span ng-if="has_error && selected_firewall == false" id="name-error"
+                                  class="help-block help-block-error">
+                                {[{ 'instancemanage.unselect_firewall_error' | i18next }]}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary" ng-click="action(selected_firewall)"> {[{ 'confirm' | i18next
+            }]}
+        </button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="qos.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" ng-click="cancel()"></button>
+        <h4 class="modal-title" >{[{ 'qos.add_qos' | i18next }]}</h4>
+    </div>
+    <div class="modal-body">
+        <form role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group" ng-class="{'has-error': has_error && selected_volume == false}">
+                    <label class="col-md-3 control-label"> {[{ 'qos.name' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-9">
+                        <div class="input-inline input-large">
+                            <div class="input-group">
+                                <span class="input-group-addon"> <i class="fa fa-hdd-o"></i>
+                                </span>
+
+                                <select class="form-control"
+                                    <option value="0" selected>1 MB</option>
+                                </select>
+                            </div>
+                            <span ng-if="has_error && selected_volume == false" class="help-block help-block-error">
+                                {[{ 'instancemanage.unselect_volume_error' | i18next }]}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary" ng-if="is_attach == true" ng-click="attach(selected_volume)"> {[{
+            'qos.add' | i18next }]}
+        </button>
+        <button type="button" class="btn btn-primary" ng-if="is_attach == false" ng-click="attach(selected_volume)"> {[{
+            'instancemanage.detach' | i18next }]}
+        </button>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="volume.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" ng-click="cancel()"></button>
+        <h4 class="modal-title" ng-if="is_attach == true">{[{ 'instancemanage.attach_volume' | i18next }]}</h4>
+        <h4 class="modal-title" ng-if="is_attach == false">{[{ 'instancemanage.detach_volume' | i18next }]}</h4>
+    </div>
+    <div class="modal-body">
+        <form role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group" ng-class="{'has-error': has_error && selected_volume == false}">
+                    <label class="col-md-3 control-label"> {[{ 'instancemanage.volume' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-9">
+                        <div class="input-inline input-large">
+                            <div class="input-group">
+                                <span class="input-group-addon"> <i class="fa fa-hdd-o"></i>
+                                </span>
+
+                                <select class="form-control"
+                                        ng-options="v.name + '(' + v.size + 'GB)' for v in volumes track by v.id"
+                                        ng-model="selected_volume">
+                                    <option value="-1" selected>-----</option>
+                                </select>
+                            </div>
+                            <span ng-if="has_error && selected_volume == false" class="help-block help-block-error">
+                                {[{ 'instancemanage.unselect_volume_error' | i18next }]}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary" ng-if="is_attach == true" ng-click="attach(selected_volume)"> {[{
+            'instancemanage.attach' | i18next }]}
+        </button>
+        <button type="button" class="btn btn-primary" ng-if="is_attach == false" ng-click="attach(selected_volume)"> {[{
+            'instancemanage.detach' | i18next }]}
+        </button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="backup.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" data-ng-click="cancel()"></button>
+        <h4 class="modal-title">{[{ 'instancemanage.backup' | i18next }]}</h4>
+    </div>
+    <div class="modal-body">
+        <form id="backupForm" role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group">
+                    <div class="alert alert-warning" style="margin-left: 1em;margin-right: 1em;">
+                        {[{ 'backup.warning_1' | i18next }]}
+                        <ul>
+                            <li>{[{ 'backup.warning_2' | i18next }]}</li>
+                            <li>{[{ 'backup.warning_3' | i18next }]}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{[{ 'backup.name' | i18next }]}<span class="required"> * </span></label>
+                    <div class="col-md-7">
+                        <input type="text" class="form-control input-medium"
+                               size="64" data-ng-model="backup_config.name"
+                               data-rule-required="true"
+                               data-rule-maxlength="64">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{[{ 'backup.new_chain' | i18next }]}</label>
+                    <div class="col-md-7" style="padding-top: 8px;">
+                        <input type="checkbox" data-ng-model="backup_config.is_full">
+                        <a data-tooltip="{[{ 'backup.new_chain_tip' | i18next }]}">
+                            <i class="fa fa-question-circle"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{[{ 'instancemanage.name' | i18next }]}</label>
+                    <div class="col-md-9">
+                        <span class="form-control-static">{[{ instancemanage.name }]}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        {[{ 'instancemanage.os_volume' | i18next }]} <span class="required"> * </span>
+                    </label>
+                    <div class="col-md-9">
+                        <label class="checkbox-inline"><input type="checkbox" checked disabled>
+                            {[{ instancemanage.sys_disk }]}GB
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" data-ng-if="volumes.length > 0">
+                    <label class="col-md-3 control-label"> {[{ 'instancemanage.volume' | i18next }]} </label>
+                    <div class="col-md-9">
+                        <div class="checkbox-list">
+                            <label data-ng-repeat="volume in volumes">
+                                <input type="checkbox" data-ng-model="volume.checked"> {[{ volume.name }]}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary" data-ng-click="startBackup()"> {[{ 'instancemanage.backup' | i18next }]}</button>
+    </div>
+</script>
+
+

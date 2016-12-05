@@ -5,7 +5,6 @@ angular.module("CloudApp")
     function ($rootScope, $scope, $state, $filter, $interval, $modal, $i18next,
               ngTableParams, ToastrService, CommonHttpService, ngTableHelper,
               Instance, InstanceState, PriceRule) {
-
         $scope.$on('$viewContentLoaded', function () {
             Metronic.initAjax();
         });

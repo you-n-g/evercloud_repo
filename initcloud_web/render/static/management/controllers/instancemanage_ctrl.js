@@ -5,14 +5,45 @@
 CloudApp.controller('InstancemanageController',
     function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox,
              CommonHttpService, ToastrService, ngTableParams, ngTableHelper,
-             Instancemanage, CheckboxGroup, DataCenter){
-
+             Instancemanage, CheckboxGroup, DataCenter,PriceRule){
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
-
+        
         var need_confirm = true;
         var no_confirm = false;
+        $scope.openNewTemplatemanagerModal = function () { 
+           $modal.open({
+                templateUrl: '/static/management/views/instance_create_wizard/instance_wizard.html?t=' + Math.random(),
+                controller: 'InstanceCreateController',
+                backdrop: "static",
+                size: 'lg',
+                resolve: {
+                    instance_table: function () {
+                        return $scope.instance_table;
+                    },
+                    quota: function (CommonHttpService) {
+                        return CommonHttpService.get("/api/account/quota/");
+                    },
+                    cpuPrices: function(){
+                        return PriceRule.query({'resource_type': 'cpu'}).$promise;
+                    },
+                    memoryPrices: function(){
+                        return PriceRule.query({'resource_type': 'memory'}).$promise;
+                    },
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/assets/global/plugins/bootstrap-wizard/jquery.bootstrap.wizard.min.js',
+                                '/static/cloud/scripts/create_instance_wizard.js',
+                            ]
+                        });
+                    }]
+                }
+            });
+        };
 
         var post_action = function (ins, action) {
             var post_data = {
@@ -428,8 +459,209 @@ CloudApp.controller('InstancemanageController',
             $modalInstance.dismiss();
         };
     })
+    .controller('InstanceCreateController',
+    function ($rootScope, $scope, $state, $filter, $interval, lodash,
+              $modalInstance, $i18next, site_config, ngTableParams, ToastrService,
+              CommonHttpService, PriceTool, Instance, Image, Flavor, Network,
+              instance_table, quota, cpuPrices, memoryPrices) {
 
+        $scope.instance_config = {
+            "instance": 1,
+            "pay_type": "hour",
+            "pay_num": 1
+        };
 
+        $scope.month_options =  [];
+        $scope.year_options =  [];
+
+        for(var i=1; i<=10; i++){
+            $scope.month_options.push({value: i, label: i + "月"});
+        }
+
+        for(var i=1; i<=5; i++){
+            $scope.year_options.push({value: i, label: i + "年"});
+        }
+
+        Image.query(function (data) {
+            $scope.images_list = data;
+            if (data.length > 0) {
+                $scope.instance_config.image = data[0];
+                $scope.instance_config.select_image = data[0];
+                $scope.instance_config.login_type = 'password';
+            }
+        });
+
+        Flavor.query(function (data) {
+            $scope.flavors_list = data;
+            if (data.length > 0) {
+                var cpu_memory_list = new Object();
+                var cpu_array = new Array();
+                var memory_array = new Array();
+
+                for (var i = 0; i < data.length; i++) {
+                    cpu_memory_list["" + data[i].cpu] = [];
+
+                    if (cpu_array.indexOf(data[i].cpu) == -1) {
+                        cpu_array.push(data[i].cpu);
+                    }
+
+                    if (memory_array.indexOf(data[i].memory) == -1) {
+                        memory_array.push(data[i].memory);
+                    }
+                }
+
+                for (var i = 0; i < data.length; i++) {
+                    if (cpu_memory_list["" + data[i].cpu].indexOf(data[i].memory) == -1) {
+                        cpu_memory_list["" + data[i].cpu].push(data[i].memory)
+                    }
+                }
+
+                if(cpu_array){
+                    cpu_array.sort(function(a, b){
+                        return a > b;
+                    });
+                }
+
+                if(memory_array){
+                    memory_array.sort(function(a, b){
+                        return a > b;
+                    });
+                }
+
+                $scope.cpu_list = cpu_array;
+                $scope.memory_list = memory_array;
+
+                $scope.cpu_memory_map = cpu_memory_list;
+
+                $scope.instance_config.vcpu = cpu_array[0];
+                $scope.instance_config.memory = cpu_memory_list["" + cpu_array[0]][0];
+                $scope.instance_config.cpu_memory = cpu_memory_list["" + cpu_array[0]];
+
+                $scope.cpu_click = function (cpu) {
+                    $scope.instance_config.vcpu = cpu;
+                    $scope.instance_config.memory = $scope.cpu_memory_map["" + cpu][0];
+                    $scope.instance_config.cpu_memory = $scope.cpu_memory_map[cpu];
+                };
+            }
+        });
+
+        Network.query(function (data) {
+            $scope.network_list = data;
+            if (data.length > 0) {
+                $scope.instance_config.network = data[0];
+            }
+            else {
+                $scope.instance_config.network = null;
+            }
+        });
+
+        $scope.instance_counter = function (step) {
+            if (typeof(step) != typeof(1)) {
+                return;
+            }
+            var expect = $scope.instance_config.instance + step;
+            if (expect < 1) {
+                return;
+            }
+
+            if(expect > site_config.BATCH_INSTANCE_LIMIT){
+                return;
+            }
+
+            $scope.instance_config.instance = expect;
+        };
+
+        $scope.cancel = function () {
+
+            $modalInstance.dismiss();
+        };
+
+        $scope.submit_click = function (instance_config) {
+            var post_data = {
+                "name": instance_config.name,
+                "cpu": instance_config.vcpu,
+                "memory": instance_config.memory,
+                "network_id": instance_config.network == null ? 0 : instance_config.network.id,
+                "image": instance_config.select_image.id,
+                "image_info": instance_config.select_image.id,
+                "sys_disk": instance_config.select_image.disk_size,
+                "password": instance_config.password,
+                "instance": instance_config.instance,
+                "pay_type": instance_config.pay_type,
+                "pay_num": instance_config.pay_num
+            };
+            CommonHttpService.post("/api/instances/create/", post_data).then(function (data) {
+                if (data.OPERATION_STATUS == 1) {
+                    ToastrService.success(data.msg, $i18next("success"));
+                    $modalInstance.dismiss();
+                    instance_table.reload();
+                }
+                else if (data.OPERATION_STATUS == 2) {
+                    ToastrService.warning($i18next("op_forbid_msg"), $i18next("op_failed"));
+                }
+                else {
+                    if (data.msg) {
+                        ToastrService.error(data.msg, $i18next("op_failed"));
+                    }
+                    else {
+                        ToastrService.error($i18next("op_failed_msg"), $i18next("op_failed"));
+                    }
+                }
+            });
+        };
+
+        $scope.quota = quota;
+        $scope.calcuate_resource_persent = function (resource) {
+            if (quota[resource] <= 0) {
+                return 0;
+            }
+            else {
+                var current = $scope.instance_config[resource];
+                if (resource != "instance")
+                    current = current * $scope.instance_config.instance;
+                return (quota[resource + "_used"] + current) / quota[resource] * 100;
+
+            }
+        };
+        $scope.resource_persent = function (resource) {
+            return $scope.calcuate_resource_persent(resource) + "%";
+        };
+        $scope.resource_persent_desc = function (resource) {
+            var str = "";
+            var current = $scope.instance_config[resource];
+            if (resource != "instance")
+                current = current * $scope.instance_config.instance;
+            str += (quota[resource + "_used"] + current) + "/";
+            if (quota[resource] <= 0) {
+                str += $i18next("instance.infinite");
+            }
+            else {
+                str += quota[resource];
+            }
+            return str;
+        };
+        $scope.check_can_submit = function () {
+            if ($scope.calcuate_resource_persent("instance") > 100) {
+                return true;
+            }
+            if ($scope.calcuate_resource_persent("vcpu") > 100) {
+                return true;
+            }
+            if ($scope.calcuate_resource_persent("memory") > 100) {
+                return true;
+            }
+            return false;
+        };
+
+        $scope.calculateCost = function(config){
+
+            var cpuPrice = PriceTool.getPrice(cpuPrices, config.vcpu, config.pay_type),
+                memoryPrice = PriceTool.getPrice(memoryPrices, config.memory, config.pay_type);
+
+            var totalPrice = (cpuPrice + memoryPrice) * config.pay_num * config.instance;
+            return totalPrice.toFixed(3);
+        };
+    })
     .controller('InstanceSPICEController', function ($rootScope, $location,$scope, $sce,
                                                    $modalInstance, spice_console) {
         $scope.spice_console = spice_console;
