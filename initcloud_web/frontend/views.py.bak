@@ -100,11 +100,6 @@ class LoginView(View):
         # Retrieve user to use some methods of UserProxy
         user = UserProxy.objects.get(pk=user.pk)
         if user.is_superuser or user.is_system_user or user.is_audit_user or user.is_safety_user:
-	#add session["UDC_ID"] for surperuser
-	
-            if UDC.objects.filter(user=user).exists():
-        	udc_set = UDC.objects.filter(user=user)
-                request.session["UDC_ID"] = udc_set[0].id
             return redirect('management')
 
         udc_set = UDC.objects.filter(user=user)
