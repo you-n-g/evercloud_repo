@@ -264,11 +264,11 @@ logging.config.dictConfig(LOG_CONFIG)
 
 ADMIN_TOKEN = "02c24f6ad9bd4f1f8212efe08b382adb"
 ADMIN_NAME = "admin"
-EDNPOINT = "http://192.168.1.51:35357/v2.0"
-HEAT_ENDPOINT = 'http://192.168.1.51:8004/v1/'
+EDNPOINT = "http://192.168.1.64:35357/v2.0"
+HEAT_ENDPOINT = 'http://192.168.1.64:8004/v1/'
 ADMIN_TENANT_NAME = "admin"
 ADMIN_PASS = "admin"
-AUTH_URL = "http://192.168.1.51:5000/v2.0/"
+AUTH_URL = "http://192.168.1.64:5000/v2.0/"
 NOVA_VERSION = "2"
 TENANT_DEFAULT_NETWORK = "10.0.0.0/24"
 GATEWAY_IP = "10.0.0.1"
@@ -281,12 +281,12 @@ RESULT = [{"meter_name": "cpu_util"},{'meter_name':"memory.usage"},{"meter_name"
 MGR_HTTP_ADDR = "http://192.168.1.20:8893/v1/vdstatus"
 MGR_WS_ADDR = "ws://192.168.1.20:8893/ws"
 
-COMPUTE_HOSTS = {'compute01': "192.168.1.52"}
+COMPUTE_HOSTS = {'compute01': "192.168.1.64"}
 
 DEVICEPOLICY = [{"name":"usb"}]
 VLAN_ENABLED = False
 
-CONSOLE_IP = "192.168.1.51"
+CONSOLE_IP = "192.168.1.64"
 CONSOLE_PORT = "6081"
 
 #glance endpoint
