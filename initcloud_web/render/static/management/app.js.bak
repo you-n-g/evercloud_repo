@@ -133,50 +133,6 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                     }
                 }
             })
-
-	    //floating_ip
-	    .state("floating", {
-                url: "/floating/",
-                templateUrl: "/static/management/views/floating.html",
-                data: {pageTitle: 'FloatingIP'},
-                controller: "FloatingController",
-                resolve: {
-                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-                        return $ocLazyLoad.load({
-                            name: 'CloudApp',
-                            insertBefore: '#ng_load_plugins_before',
-                            files: [
-
-                                '/static/management/controllers/floating_ctl.js'
-                            ]
-                        });
-                    }],
-                    status_desc: function (CommonHttpService) {
-                        return CommonHttpService.get("/api/floatings/status/")
-                    }
-                }
-            })
-
-
-	    //volume
-	    .state("volume", {
-                url: "/volume/",
-                templateUrl: "/static/management/views/volume.html",
-                data: {pageTitle: 'Volume'},
-                controller: "VolumeController",
-                resolve: {
-                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-                        return $ocLazyLoad.load({
-                            name: 'CloudApp',
-                            insertBefore: '#ng_load_plugins_before',
-                            files: [
-                                '/static/management/controllers/volume_ctl.js'
-                            ]
-                        });
-                    }]
-                }
-            })
-
 	    //snapshot
 	    .state("snapshot", {
                 url: "/snapshot/",

@@ -119,9 +119,9 @@
             </a>
          <ul class="sub-menu">
           <!-- 云磁盘管理 云磁盘 -->
-                <li id="instancemanage"
+                <li id="volume"
                     data-ng-if="current_user.is_system_user">
-                    <a href="#/volumemanage/">
+                    <a href="#/volume/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
                             {[{ 'sidebar.volumes' | i18next }]}
@@ -142,7 +142,7 @@
           <!-- 网络管理 公网ip -->
                 <li id="instancemanage"
                     data-ng-if="current_user.is_system_user">
-                    <a href="#/floatingip/">
+                    <a href="#/floating/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
                             {[{ 'sidebar.floatingips' | i18next }]}
