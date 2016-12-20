@@ -54,6 +54,9 @@ class Instance(models.Model):
     deleted = models.BooleanField(_("Deleted"), default=False)
     
     firewall_group = models.ForeignKey("firewall.Firewall", null=True)
+    
+    core = models.IntegerField(_("Cores"), default=1)
+    thread = models.IntegerField(_("Threads"), default=1)
 
     class Meta:
         db_table = "instance"
