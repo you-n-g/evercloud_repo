@@ -9,6 +9,21 @@ CloudApp.controller('InstancemanageController',
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
+	$scope.instancemanages = [];
+        var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
+
+        $scope.instancemanage_table = new ngTableParams({
+                page: 1,
+                count: 10
+            },{
+                counts: [],
+                getData: function($defer, params){
+                    Instancemanage.query(function(data){
+                        $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
+                        checkboxGroup.syncObjects($scope.instancemanages);
+                    });
+                }
+            });
         
         var need_confirm = true;
         var no_confirm = false;
@@ -31,6 +46,7 @@ CloudApp.controller('InstancemanageController',
                     memoryPrices: function(){
                         return PriceRule.query({'resource_type': 'memory'}).$promise;
                     },
+		    instancemanage_table: function(){return $scope.instancemanage_table;},
                     deps: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
                             name: 'CloudApp',
@@ -53,7 +69,8 @@ CloudApp.controller('InstancemanageController',
 
             CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data).then(function (data) {
                 if (data.OPERATION_STATUS == 1) {
-                    $scope.instance_table.reload();
+                    //$scope.instance_table.reload();
+                    $scope.instancemanage_table.reload();
                 } else if (data.OPERATION_STATUS == 2) {
                     var msg = data.MSG || $i18next("op_forbid_msg");
                     ToastrService.warning(msg, $i18next("op_failed"));
@@ -145,22 +162,6 @@ CloudApp.controller('InstancemanageController',
         };
 
 
-
-        $scope.instancemanages = [];
-        var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
-
-        $scope.instancemanage_table = new ngTableParams({
-                page: 1,
-                count: 10
-            },{
-                counts: [],
-                getData: function($defer, params){
-                    Instancemanage.query(function(data){
-                        $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
-                        checkboxGroup.syncObjects($scope.instancemanages);
-                    });
-                }
-            });
 
 
         var delete_Instancemanages = function(ids){
@@ -294,6 +295,9 @@ CloudApp.controller('InstancemanageController',
                 controller: 'NewInstancemanageController',
                 size: 'lg',
                 resolve: {
+		    instancemanage_table: function () {
+                        return $scope.instancemanage_table;
+                    },
                     dataCenters: function(){
                         return DataCenter.query().$promise;
                     }
@@ -306,7 +310,7 @@ CloudApp.controller('InstancemanageController',
 
 
     .controller('NewInstancemanageController',
-        function($scope, $modalInstance, $i18next,
+        function($scope, $modalInstance, $i18next, instancemanage_table,
                  CommonHttpService, ToastrService, InstancemanageForm, dataCenters){
 
             var form = null;
@@ -328,6 +332,7 @@ CloudApp.controller('InstancemanageController',
                 CommonHttpService.post('/api/instancemanage/create/', $scope.instancemanage).then(function(result){
                     if(result.success){
                         ToastrService.success(result.msg, $i18next("success"));
+                        instancemanage_table.reload();
                         $modalInstance.close();
                     } else {
                         ToastrService.error(result.msg, $i18next("op_failed"));
@@ -500,7 +505,7 @@ CloudApp.controller('InstancemanageController',
     .controller('InstanceCreateController',
     function ($rootScope, $scope, $state, $filter, $interval, lodash,
               $modalInstance, $i18next, site_config, ngTableParams, ToastrService,
-              CommonHttpService, PriceTool, Instance, Image, Flavor, Network,
+              CommonHttpService, PriceTool, Instance, Image, Flavor, Network, instancemanage_table,
               instance_table, quota, cpuPrices, memoryPrices) {
 
         $scope.instance_config = {
@@ -664,7 +669,7 @@ CloudApp.controller('InstancemanageController',
                 if (data.OPERATION_STATUS == 1) {
                     ToastrService.success(data.msg, $i18next("success"));
                     $modalInstance.dismiss();
-                    instance_table.reload();
+                    instancemanage_table.reload();
                 }
                 else if (data.OPERATION_STATUS == 2) {
                     ToastrService.warning($i18next("op_forbid_msg"), $i18next("op_failed"));
@@ -677,7 +682,7 @@ CloudApp.controller('InstancemanageController',
                         ToastrService.error($i18next("op_failed_msg"), $i18next("op_failed"));
                     }
                 }
-            });
+            }).then(instancemanage_table.reload());
         };
 
         $scope.quota = quota;

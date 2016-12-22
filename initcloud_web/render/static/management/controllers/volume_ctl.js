@@ -4,7 +4,7 @@ angular.module("CloudApp")
     .controller('VolumeController',
         function($rootScope, $scope, $filter, $interval,
                  $modal, $i18next, $timeout, $ngBootbox,
-                 ngTableParams, CommonHttpService, ToastrService, lodash, VolumeState,
+                 ngTableParams, CommonHttpService, ToastrService, lodash, //VolumeState,
                  ngTableHelper, Volume, PriceRule){
 
             $scope.$on('$viewContentLoaded', function () {
@@ -22,7 +22,7 @@ angular.module("CloudApp")
                 getData: function ($defer, params) {
                     Volume.query(function (data) {
                         $scope.current_volume_data = ngTableHelper.paginate(data, $defer, params);
-                        VolumeState.processList($scope.current_volume_data);
+                        //VolumeState.processList($scope.current_volume_data);
                     });
                 }
             });

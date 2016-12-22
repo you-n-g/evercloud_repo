@@ -54,7 +54,12 @@
     "confirm_delete":"删除快照"
 
   },
+    "assign": {
+    "select_user":"指派给",
+    "unselect_user":"取消指派",
+    "assigned":"已指派用户"
 
+  },
   "instance": {
     "desc": "提供虚拟机服务",
     "name": "主机名称",

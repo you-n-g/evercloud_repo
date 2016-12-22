@@ -318,10 +318,29 @@ def assign_ins(request):
     #serializer = UserSerializer(queryset, many=True)
     #return Response(serializer.data)
 
+def unassign_ins(request):
+    try:
+        check_user = User.objects.get(id = request.data["unassign"])
+        ins = Instance.objects.get(id = request.data["id"])
+        check_ins = Instance.objects.filter(uuid = ins.uuid, user = check_user)
+	LOG.info(check_user)
+	LOG.info(ins)
+	LOG.info(check_ins)
+	if check_ins.exists():
+	    re_ins = Instance.objects.get(uuid = ins.uuid, user = check_user)
+	    re_ins.deleted = True
+	    re_ins.save()
+	else:
+	    return 0
+    except:
+	pass
+	    
+
 @api_view(["POST"])
 def instance_assign_instance(request):
     LOG.info(request.data)
     assign_ins(request)
+    unassign_ins(request)
     return Response({'success': True, "msg": _('User have been assigned!')})
 
 
