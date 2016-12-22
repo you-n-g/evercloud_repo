@@ -40,7 +40,10 @@ class InstancemanageList(generics.ListCreateAPIView):
 
     def list(self, request):
         try:
-            serializer = self.serializer_class(self.get_queryset(), many=True)
+	    # filter instances which assigned to users
+	    queryset = self.get_queryset().filter(user = request.user)
+            serializer = self.serializer_class(queryset, many=True)
+            #serializer = self.serializer_class(self.get_queryset(), many=True)
             LOG.info("********* serializer.data is ********" + str(serializer.data))
             return Response(serializer.data)
         except Exception as e:

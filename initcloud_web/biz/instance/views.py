@@ -52,7 +52,9 @@ from novaclient.client import Client
 from biz.common.views import IsSystemUser, IsAuditUser, IsSafetyUser
 from cloud.cloud_utils import get_nova_admin
 import traceback
-
+from django.contrib.auth.models import User
+from biz.account.serializer import UserSerializer
+from biz.account.models import UserProxy
 
 from django.db.models import Q
 
@@ -260,6 +262,67 @@ def instance_create_view(request):
     else:
         return Response({"OPERATION_STATUS": OPERATION_SUCCESS,
                           "msg": msg}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+def instance_assignedusers(request):
+    ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
+    assign_set = []
+    for ins in ins_set:
+	if not ins.user.is_superuser:
+	    assign_set.append(ins.user)
+    #query_set = Instance.objects.all()
+    serializer = UserSerializer(assign_set, many=True)
+    return Response(serializer.data)
+
+@api_view(["POST"])
+def instance_unassignedusers(request):
+    ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
+    assign_set = []
+    return_set = []
+    for ins in ins_set:
+	if not ins.user.is_superuser:
+            assign_set.append(ins.user)
+    user_set = UserProxy.normal_users.filter(is_active=True)
+    for user in user_set:
+	if not user in assign_set:
+	    return_set.append(user)
+    serializer = UserSerializer(return_set, many=True)
+    return Response(serializer.data)
+
+def assign_ins(request):
+    try:
+        check_user = User.objects.get(id = request.data["assign"])
+	ins = Instance.objects.get(id = request.data["id"])
+        check_ins = Instance.objects.filter(uuid = ins.uuid, user = check_user)
+        if check_ins.exists():
+	    #if check_ins[0].deleted == 1:
+	#	check_ins[0].deleted = False
+	#	check_ins[0].save()
+	#	LOG.info(check_ins[0].deleted)
+	    re_ins = Instance.objects.get(uuid = ins.uuid, user = check_user)
+	    re_ins.deleted = False
+	    re_ins.save()
+	else:
+            ser = InstanceSerializer(ins)
+	    ser_data = ser.data
+	    del ser_data['id']
+	#Instance.objects.create(ser_data)
+	    serializer = InstanceSerializer(data = ser_data, context = {"request":request})
+	    if serializer.is_valid():
+	        ins = serializer.save()
+	    ins.user = User.objects.get(id = request.data["assign"])
+	    ins.save() 
+    except:
+	pass
+	#traceback.print_exc()
+    #serializer = UserSerializer(queryset, many=True)
+    #return Response(serializer.data)
+
+@api_view(["POST"])
+def instance_assign_instance(request):
+    LOG.info(request.data)
+    assign_ins(request)
+    return Response({'success': True, "msg": _('User have been assigned!')})
 
 
 @api_view(["POST"])

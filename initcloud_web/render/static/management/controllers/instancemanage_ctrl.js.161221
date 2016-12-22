@@ -244,28 +244,6 @@ CloudApp.controller('InstancemanageController',
                 }
             });
         };
-	
-	$scope.assign = function(instancemanage){
-
-            $modal.open({
-                templateUrl: 'assign.html',
-                controller: 'InstancemanageAssignController',
-                backdrop: "static",
-                size: 'lg',
-                resolve: {
-                    instancemanage_table: function () {
-                        return $scope.instancemanage_table;
-                    },
-		    assigned_users: function (CommonHttpService) {
-                        return CommonHttpService.post("/api/instancemanage/assignedusers/", {"uuid":instancemanage.uuid});
-                    },
-		    unassigned_users: function (CommonHttpService) {
-                        return CommonHttpService.post("/api/instancemanage/unassignedusers/", {"uuid":instancemanage.uuid});
-                    },
-                    instancemanage: function(){return instancemanage},
-                }
-            });
-        };
 
         $scope.edit = function(instancemanage){
 
@@ -820,85 +798,4 @@ CloudApp.controller('InstancemanageController',
                     return ValidationTool.init('#InstancemanageForm', config);
                 }
             }
-        }]).controller('InstancemanageAssignController',
-        function($rootScope, $scope, $modalInstance, $i18next,
-                 instancemanage, instancemanage_table, CheckboxGroup, 
-		 assigned_users, unassigned_users,
-                 Instancemanage, UserDataCenter, //instancemanageForm,
-                 CommonHttpService, ToastrService, ResourceTool){
-
-            $scope.instancemanage = instancemanage = angular.copy(instancemanage);
-            $scope.cancel = $modalInstance.dismiss;
-
-            //$modalInstance.rendered.then(instancemanageForm.init);
-	    //$scope.assigned_users = CommonHttpService.post("/api/instancemanage/assignedusers/", {"uuid":$scope.instancemanage.uuid})
-	    $scope.assigned_users = assigned_users;
-	    $scope.unassigned_users = unassigned_users;
-	    $scope.selected_users = new Object;
-	    $scope.unselected_users = new Object;
-            $scope.cancel = function () {
-                $modalInstance.dismiss();
-            };
-
-	    $scope.add = function(selected_users){
-		$scope.assigned_users.push($scope.selected_users);
-		alert($scope.assigned_users)
-	    };
-            //var form = null;
-            //$modalInstance.rendered.then(function(){
-            //    form = instancemanageForm.init($scope.site_config.WORKFLOW_ENABLED);
-            //});
-            $scope.assigned_id = []
-            $scope.submit = function(instancemanage){
-		//angular.forEach($scope.assigned_users, function (data){
-		//	$scope.assigned_id.push(data.id)})
-		//alert($scope.selected_users)
-                var params_data = {"id":instancemanage.id, "assign":$scope.selected_users.id, "unassign":$scope.unselected_users.id};
-                CommonHttpService.post("/api/instancemanage/assignins/", params_data).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-                        $modalInstance.dismiss();
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
-            };
-        }
-   ).factory('instancemanageForm', ['ValidationTool', '$i18next',
-        function(ValidationTool, $i18next){
-            return {
-                init: function(){
-
-                    var config = {
-
-                        rules: {
-                            instancemanagename: {
-                                required: true,
-                                remote: {
-                                    url: "/api/instancemanage/is-name-unique/",
-                                    data: {
-                                        instancemanagename: $("#instancemanagename").val()
-                                    },
-                                    async: false
-                                }
-                            },
-                            user_type: 'required'
-                        },
-                        messages: {
-                            instancemanagename: {
-                                remote: $i18next('instancemanage.name_is_used')
-                            },
-                        },
-                        errorPlacement: function (error, element) {
-
-                            var name = angular.element(element).attr('name');
-                            if(name != 'user_type'){
-                                error.insertAfter(element);
-                            }
-                        }
-                    };
-
-                    return ValidationTool.init('#InstancemanageForm', config);
-                }
-            }
-        }]);;
+        }]);
