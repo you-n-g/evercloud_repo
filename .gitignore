@@ -1,4 +1,5 @@
 *.pyc
 *.swp
 .venv/*
+docs/*
 initcloud_web/cloud/api/software_manager/config.yml
