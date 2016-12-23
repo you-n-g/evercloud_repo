@@ -9,21 +9,6 @@ CloudApp.controller('InstancemanageController',
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
-	$scope.instancemanages = [];
-        var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
-
-        $scope.instancemanage_table = new ngTableParams({
-                page: 1,
-                count: 10
-            },{
-                counts: [],
-                getData: function($defer, params){
-                    Instancemanage.query(function(data){
-                        $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
-                        checkboxGroup.syncObjects($scope.instancemanages);
-                    });
-                }
-            });
         
         var need_confirm = true;
         var no_confirm = false;
@@ -46,7 +31,6 @@ CloudApp.controller('InstancemanageController',
                     memoryPrices: function(){
                         return PriceRule.query({'resource_type': 'memory'}).$promise;
                     },
-		    instancemanage_table: function(){return $scope.instancemanage_table;},
                     deps: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
                             name: 'CloudApp',
@@ -69,8 +53,7 @@ CloudApp.controller('InstancemanageController',
 
             CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data).then(function (data) {
                 if (data.OPERATION_STATUS == 1) {
-                    //$scope.instance_table.reload();
-                    $scope.instancemanage_table.reload();
+                    $scope.instance_table.reload();
                 } else if (data.OPERATION_STATUS == 2) {
                     var msg = data.MSG || $i18next("op_forbid_msg");
                     ToastrService.warning(msg, $i18next("op_failed"));
@@ -163,6 +146,22 @@ CloudApp.controller('InstancemanageController',
 
 
 
+        $scope.instancemanages = [];
+        var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
+
+        $scope.instancemanage_table = new ngTableParams({
+                page: 1,
+                count: 10
+            },{
+                counts: [],
+                getData: function($defer, params){
+                    Instancemanage.query(function(data){
+                        $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
+                        checkboxGroup.syncObjects($scope.instancemanages);
+                    });
+                }
+            });
+
 
         var delete_Instancemanages = function(ids){
 
@@ -245,28 +244,6 @@ CloudApp.controller('InstancemanageController',
                 }
             });
         };
-	
-	$scope.assign = function(instancemanage){
-
-            $modal.open({
-                templateUrl: 'assign.html',
-                controller: 'InstancemanageAssignController',
-                backdrop: "static",
-                size: 'lg',
-                resolve: {
-                    instancemanage_table: function () {
-                        return $scope.instancemanage_table;
-                    },
-		    assigned_users: function (CommonHttpService) {
-                        return CommonHttpService.post("/api/instancemanage/assignedusers/", {"uuid":instancemanage.uuid});
-                    },
-		    unassigned_users: function (CommonHttpService) {
-                        return CommonHttpService.post("/api/instancemanage/unassignedusers/", {"uuid":instancemanage.uuid});
-                    },
-                    instancemanage: function(){return instancemanage},
-                }
-            });
-        };
 
         $scope.edit = function(instancemanage){
 
@@ -295,9 +272,6 @@ CloudApp.controller('InstancemanageController',
                 controller: 'NewInstancemanageController',
                 size: 'lg',
                 resolve: {
-		    instancemanage_table: function () {
-                        return $scope.instancemanage_table;
-                    },
                     dataCenters: function(){
                         return DataCenter.query().$promise;
                     }
@@ -310,7 +284,7 @@ CloudApp.controller('InstancemanageController',
 
 
     .controller('NewInstancemanageController',
-        function($scope, $modalInstance, $i18next, instancemanage_table,
+        function($scope, $modalInstance, $i18next,
                  CommonHttpService, ToastrService, InstancemanageForm, dataCenters){
 
             var form = null;
@@ -332,7 +306,6 @@ CloudApp.controller('InstancemanageController',
                 CommonHttpService.post('/api/instancemanage/create/', $scope.instancemanage).then(function(result){
                     if(result.success){
                         ToastrService.success(result.msg, $i18next("success"));
-                        instancemanage_table.reload();
                         $modalInstance.close();
                     } else {
                         ToastrService.error(result.msg, $i18next("op_failed"));
@@ -505,7 +478,7 @@ CloudApp.controller('InstancemanageController',
     .controller('InstanceCreateController',
     function ($rootScope, $scope, $state, $filter, $interval, lodash,
               $modalInstance, $i18next, site_config, ngTableParams, ToastrService,
-              CommonHttpService, PriceTool, Instance, Image, Flavor, Network, instancemanage_table,
+              CommonHttpService, PriceTool, Instance, Image, Flavor, Network,
               instance_table, quota, cpuPrices, memoryPrices) {
 
         $scope.instance_config = {
@@ -533,9 +506,7 @@ CloudApp.controller('InstancemanageController',
                 $scope.instance_config.login_type = 'password';
             }
         });
-	
-	$scope.core_list = [1,2,4,8];
-	$scope.thread_list = [1,2,4,8];
+
         Flavor.query(function (data) {
             $scope.flavors_list = data;
             if (data.length > 0) {
@@ -579,8 +550,6 @@ CloudApp.controller('InstancemanageController',
                 $scope.cpu_memory_map = cpu_memory_list;
 
                 $scope.instance_config.vcpu = cpu_array[0];
-                $scope.instance_config.core = $scope.core_list[0];
-                $scope.instance_config.thread = $scope.thread_list[0];
                 $scope.instance_config.memory = cpu_memory_list["" + cpu_array[0]][0];
                 $scope.instance_config.cpu_memory = cpu_memory_list["" + cpu_array[0]];
 
@@ -589,36 +558,9 @@ CloudApp.controller('InstancemanageController',
                     $scope.instance_config.memory = $scope.cpu_memory_map["" + cpu][0];
                     $scope.instance_config.cpu_memory = $scope.cpu_memory_map[cpu];
                 };
-
-		// core & thread control
-		$scope.core_thread_map = [[1,2,4,8],[2,4,8,-1],[4,8,-1,-1],[8,-1,-1,-1]]
-		$scope.core_click = function (core){
-		    $scope.cx = $scope.core_list.indexOf(core)
-		    $scope.cy = $scope.thread_list.indexOf($scope.instance_config.thread)
-           	    if ($scope.core_thread_map[$scope.cx][$scope.cy] == -1){
-                    $scope.instance_config.thread = $scope.thread_list[0];
-		    $scope.cy = $scope.thread_list.indexOf($scope.instance_config.thread)
-                    }
-                    $scope.instance_config.vcpu = $scope.core_thread_map[$scope.cx][$scope.cy]
-                    $scope.instance_config.core = core;
-                    $scope.instance_config.memory = $scope.cpu_memory_map["" + $scope.instance_config.vcpu][0];
-                    $scope.instance_config.cpu_memory = $scope.cpu_memory_map[$scope.instance_config.vcpu];
-        	};
-		$scope.thread_click = function (thread){
-                    $scope.tx = $scope.core_list.indexOf($scope.instance_config.core)
-                    $scope.ty = $scope.thread_list.indexOf(thread)
-                    if ($scope.core_thread_map[$scope.tx][$scope.ty] == -1){
-                    $scope.instance_config.core = $scope.core_list[0];
-                    $scope.tx = $scope.core_list.indexOf($scope.instance_config.core)
-                    }                    
-		    $scope.instance_config.vcpu = $scope.core_thread_map[$scope.tx][$scope.ty]
-                    $scope.instance_config.thread = thread;
-                    $scope.instance_config.memory = $scope.cpu_memory_map["" + $scope.instance_config.vcpu][0];
-                    $scope.instance_config.cpu_memory = $scope.cpu_memory_map[$scope.instance_config.vcpu];
-                };
             }
         });
-	
+
         Network.query(function (data) {
             $scope.network_list = data;
             if (data.length > 0) {
@@ -649,12 +591,11 @@ CloudApp.controller('InstancemanageController',
 
             $modalInstance.dismiss();
         };
+
         $scope.submit_click = function (instance_config) {
             var post_data = {
                 "name": instance_config.name,
                 "cpu": instance_config.vcpu,
-                "core": instance_config.core,
-                "thread": instance_config.thread,
                 "memory": instance_config.memory,
                 "network_id": instance_config.network == null ? 0 : instance_config.network.id,
                 "image": instance_config.select_image.id,
@@ -669,7 +610,7 @@ CloudApp.controller('InstancemanageController',
                 if (data.OPERATION_STATUS == 1) {
                     ToastrService.success(data.msg, $i18next("success"));
                     $modalInstance.dismiss();
-                    instancemanage_table.reload();
+                    instance_table.reload();
                 }
                 else if (data.OPERATION_STATUS == 2) {
                     ToastrService.warning($i18next("op_forbid_msg"), $i18next("op_failed"));
@@ -682,7 +623,7 @@ CloudApp.controller('InstancemanageController',
                         ToastrService.error($i18next("op_failed_msg"), $i18next("op_failed"));
                     }
                 }
-            }).then(instancemanage_table.reload());
+            });
         };
 
         $scope.quota = quota;
@@ -825,85 +766,4 @@ CloudApp.controller('InstancemanageController',
                     return ValidationTool.init('#InstancemanageForm', config);
                 }
             }
-        }]).controller('InstancemanageAssignController',
-        function($rootScope, $scope, $modalInstance, $i18next,
-                 instancemanage, instancemanage_table, CheckboxGroup, 
-		 assigned_users, unassigned_users,
-                 Instancemanage, UserDataCenter, //instancemanageForm,
-                 CommonHttpService, ToastrService, ResourceTool){
-
-            $scope.instancemanage = instancemanage = angular.copy(instancemanage);
-            $scope.cancel = $modalInstance.dismiss;
-
-            //$modalInstance.rendered.then(instancemanageForm.init);
-	    //$scope.assigned_users = CommonHttpService.post("/api/instancemanage/assignedusers/", {"uuid":$scope.instancemanage.uuid})
-	    $scope.assigned_users = assigned_users;
-	    $scope.unassigned_users = unassigned_users;
-	    $scope.selected_users = new Object;
-	    $scope.unselected_users = new Object;
-            $scope.cancel = function () {
-                $modalInstance.dismiss();
-            };
-
-	    $scope.add = function(selected_users){
-		$scope.assigned_users.push($scope.selected_users);
-		alert($scope.assigned_users)
-	    };
-            //var form = null;
-            //$modalInstance.rendered.then(function(){
-            //    form = instancemanageForm.init($scope.site_config.WORKFLOW_ENABLED);
-            //});
-            $scope.assigned_id = []
-            $scope.submit = function(instancemanage){
-		//angular.forEach($scope.assigned_users, function (data){
-		//	$scope.assigned_id.push(data.id)})
-		//alert($scope.selected_users)
-                var params_data = {"id":instancemanage.id, "assign":$scope.selected_users.id, "unassign":$scope.unselected_users.id};
-                CommonHttpService.post("/api/instancemanage/assignins/", params_data).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-                        $modalInstance.dismiss();
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
-            };
-        }
-   ).factory('instancemanageForm', ['ValidationTool', '$i18next',
-        function(ValidationTool, $i18next){
-            return {
-                init: function(){
-
-                    var config = {
-
-                        rules: {
-                            instancemanagename: {
-                                required: true,
-                                remote: {
-                                    url: "/api/instancemanage/is-name-unique/",
-                                    data: {
-                                        instancemanagename: $("#instancemanagename").val()
-                                    },
-                                    async: false
-                                }
-                            },
-                            user_type: 'required'
-                        },
-                        messages: {
-                            instancemanagename: {
-                                remote: $i18next('instancemanage.name_is_used')
-                            },
-                        },
-                        errorPlacement: function (error, element) {
-
-                            var name = angular.element(element).attr('name');
-                            if(name != 'user_type'){
-                                error.insertAfter(element);
-                            }
-                        }
-                    };
-
-                    return ValidationTool.init('#InstancemanageForm', config);
-                }
-            }
-        }]);;
+        }]);

@@ -177,6 +177,24 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
+          .state("networkmanager", {
+                url: "/networkmanager/",
+                templateUrl: "/static/management/views/networkmanager.html",
+                data: {pageTitle: 'Networkmanager'},
+                controller: "NetworkmanagerController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/networkmanager_ctrl.js'
+                            ]
+                        });
+                    }]
+                }
+            })
+
 	    //snapshot
 	    .state("snapshot", {
                 url: "/snapshot/",

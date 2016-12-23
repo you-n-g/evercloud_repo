@@ -10,6 +10,7 @@ from biz.network import views as network_view
 from biz.lbaas import views as lb_view
 from biz.volume import views as volume_view
 from biz.floating import views as floating_view
+from biz.tenants import views as tenants_view
 
 from biz.firewall import views as firewall_view
 from biz.forum import views as forums_view
@@ -26,6 +27,8 @@ from biz.vir_desktop import views as vir_desktop
 from biz.policy_nova import views as policy_nova_view
 from biz.policy_cinder import views as policy_cinder_view
 from biz.policy_neutron import views as policy_neutron_view
+from biz.networkmanager import views as networkmanager_view
+
 
 
 #alarm
@@ -73,6 +76,18 @@ urlpatterns += [
     url(r'^snapshot/batch-delete/$', snapshot_view.delete_snapshots),
 ]
 
+
+urlpatterns += [
+    url(r'^networkmanager/$', networkmanager_view.NetworkmanagerList.as_view()),
+    url(r'^templatemanager/isos/$', templatemanager_view.get_isos),
+    url(r'^networkmanager/batch-delete/$', networkmanager_view.batch_delete),
+    url(r'^templatemanager/templates/$', templatemanager_view.get_templates),
+    url(r'^networkmanager/create/$', networkmanager_view.create_network),
+    url(r'^templatemanager/(?P<template_id>[0-9]+)/action/$', templatemanager_view.template_action),
+
+
+]
+
 #user_grouper
 urlpatterns += [
     url(r'^UserGrouper/$', user_grouper_view.UsergrouperList.as_view()),
@@ -97,6 +112,9 @@ urlpatterns += [
     url(r'^init/images/$', overview_views.init_images),
     url(r'^instances/$', instance_view.InstanceList.as_view()),
     url(r'^instancemanage/$', instancemanage_view.InstancemanageList.as_view()),
+    url(r'^instancemanage/assignedusers/$', instance_view.instance_assignedusers),
+    url(r'^instancemanage/unassignedusers/$', instance_view.instance_unassignedusers),
+    url(r'^instancemanage/assignins/$', instance_view.instance_assign_instance),
     url(r'^instancemanage/devicepolicy/$', instancemanage_view.InstancemanageDevicePolicy.as_view()),
     url(r'^instancemanage/devicepolicy/update/$', instancemanage_view.devicepolicyupdate),
     url(r'^instancemanage/devicepolicy/undo/$', instancemanage_view.devicepolicyundo),
@@ -334,6 +352,16 @@ urlpatterns += [
     url(r'^alarm/resource/$', alarm_view.ResourceList.as_view()),
     url(r'^alarm/update/$', alarm_view.update),
     url(r'^alarm/meter/$', alarm_view.MeterList.as_view()),
+]
+
+# tenants
+urlpatterns += [
+    url(r'^tenants/$', tenants_view.TenantsList.as_view()),
+    url(r'^tenants/manageusers/(?P<tenant_id>[^/]+)/$', tenants_view.manageusers.as_view()),
+    url(r'^tenants/user-delete/$', tenants_view.delete_users),
+    url(r'^tenants/users/$', tenants_view.list_users.as_view()),
+    url(r'^tenants/add_tenant_users/$', tenants_view.add_tenant_users),
+    url(r'^tenants/create/$', tenants_view.create_tenants),
 ]
 
 # account

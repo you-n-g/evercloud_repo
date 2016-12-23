@@ -40,7 +40,10 @@ class InstancemanageList(generics.ListCreateAPIView):
 
     def list(self, request):
         try:
-            serializer = self.serializer_class(self.get_queryset(), many=True)
+	    # filter instances which assigned to users
+	    queryset = self.get_queryset().filter(user = request.user)
+            serializer = self.serializer_class(queryset, many=True)
+            #serializer = self.serializer_class(self.get_queryset(), many=True)
             LOG.info("********* serializer.data is ********" + str(serializer.data))
             return Response(serializer.data)
         except Exception as e:
@@ -91,8 +94,13 @@ def create_instancemanage(request):
 @api_view(["POST"])
 def delete_instancemanages(request):
     ids = request.data.getlist('ids[]')
-    Instancemanage.objects.filter(pk__in=ids).delete()
-    return Response({'success': True, "msg": _('Instancemanages have been deleted!')}, status=status.HTTP_201_CREATED)
+    ins_set = Instancemanage.objects.filter(pk__in=ids)
+    for ins in ins_set:
+	if Instance.objects.filter(uuid = ins.uuid).len > 1:
+	    return Response({'success': False, "msg": _('Instance is assigned, please unassigned first!')})
+	else:
+    	    Instancemanage.objects.filter(pk__in=ids).delete()
+    	    return Response({'success': True, "msg": _('Instancemanages have been deleted!')}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])

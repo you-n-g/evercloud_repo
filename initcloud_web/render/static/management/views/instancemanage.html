@@ -43,7 +43,7 @@
                                 <span data-ng-if="is_available(instancemanage) == false">{[{ instancemanage.name }]} </span>
                             </td>
                             <td data-title="'instance.flavor' | i18next">
-                                {[{ instancemanage.cpu }]}CPU/ {[{ instancemanage.memory }]}MB/ {[{ instancemanage.sys_disk }]}GB
+                                {[{ instancemanage.cpu }]}CPU/ {[{ instancemanage.memory }]}MB/ {[{ instancemanage.sys_disk }]}GB/ {[{ instancemanage.core }]}CORE/ {[{ instancemanage.thread }]}THREAD
                             </td>
                             <td data-title="'instance.network_detail' | i18next">
                                 <ul class="narrow-list">
@@ -136,6 +136,12 @@
                                             <a href="#" ng-click="snapshot(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.create_snap' | i18next }]}
+                                            </a>
+                                        </li>
+					<li >
+                                            <a href="#" ng-click="assign(instancemanage)">
+                                                <i class="fa fa-play"></i>
+                                                {[{ 'instancemanage.assign' | i18next }]}
                                             </a>
                                         </li>
                                         <li data-ng-if="instance.is_running">
@@ -481,6 +487,62 @@
                 </div>
             </div>
 
+            <div class="clear"></div>
+        </form>
+       </table>
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
+            {[{ 'cancel' | i18next }]}
+        </a>
+        <a class="btn btn-primary"
+           data-ng-click="submit(instancemanage)"
+           data-nap-after-click> {[{ 'submit' | i18next }]}</a>
+    </div>
+</script>
+
+
+<!-- BEGIN TEMPLATE ASSIGN -->
+<script type="text/ng-template" id="assign.html">
+    <div class="modal-header">
+       <div id="updateTitle" class="modal-title"> {[{ 'instancemanage.assign' | i18next }]}</div>
+    </div>
+    <div class="modal-body">
+       <table>
+        <form id="InstancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
+            <input type="hidden"  name="id" data-ng-model="instancemanage.id">
+	    <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'assign.select_user' | i18next }]}
+                </label>
+                <div class="col-md-5">
+		    <select class="form-control" ng-options="user.username for user in unassigned_users" ng-model="selected_users">
+                    </select>
+                </div>
+	    </div>
+	    <br></br>
+	    <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'assign.unselect_user' | i18next }]}
+                </label>
+                <div class="col-md-5">
+                    <select class="form-control" ng-options="user.username for user in assigned_users" ng-model="unselected_users">
+                    </select>
+                </div>
+            </div>
+
+	    <br></br>
+<!--
+		<button class="btn btn-default" type="button" ng-click="add(selected_users)"> =>
+	        </button>
+                <div class="col-md-5">
+-->
+	    <div class="form-group">
+		<p>{[{ 'assign.assigned' | i18next }]}</p>
+		<select class="form-control" multiple="true" ng-options="user.username for user in assigned_users" ng-model="unselected_users">
+                </select>
+                </div>
+            </div>
             <div class="clear"></div>
         </form>
        </table>
