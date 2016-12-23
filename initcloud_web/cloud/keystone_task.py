@@ -248,3 +248,168 @@ def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
     except:
         raise
     return True
+
+
+@app.task
+def keystone_list_users(request):
+
+
+    LOG.info("************* start to create a new role in keystone ***************")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("************* rc is ***************" + str(rc))
+    users = None
+    try:
+        users = keystone.user_list(rc)
+        LOG.info("*** users are ***" + str(users))
+    except:
+        return False
+    return users
+
+@app.task
+def add_user_role(keystone_user, role, user_tenant_id):
+
+    LOG.info("ddddddddd")
+    datacenter = DataCenter.get_default()
+    rc = create_rc_by_dc(datacenter)
+    LOG.info("********* keystone_user is *********" + str(keystone_user))
+    LOG.info("********* role is *********" + str(role))
+    LOG.info("********* user_tenant_id is *********" + str(user_tenant_id))
+    # get user_id
+    users = keystone.user_list(rc, project=user_tenant_id)
+    LOG.info("******* users are ******" + str(users))
+    user_id = None
+    for u in users:
+        if u.username == keystone_user:
+            user_id = u.id
+    LOG.info("****** user_id is *********" + str(user_id))
+
+    role_id = None
+    roles = keystone.role_list(rc)
+    for r in roles:
+        if r.name == role:
+            role_id = r.id
+    LOG.info("******** role_id is ********" + str(role_id))
+    try:
+        keystone.add_tenant_user_role(rc, project=user_tenant_id, user=user_id,
+                                      role=role_id)
+    except:
+        pass
+    return False
+
+@app.task
+def delete_keystone_user(tenant_id, username):
+    datacenter = DataCenter.get_default()
+    rc = create_rc_by_dc(datacenter)
+    users = keystone.user_list(rc, project=tenant_id)
+    LOG.info("******* users are ******" + str(users))
+    user_id = None
+    for u in users:
+        if u.username == username:
+            user_id = u.id
+    try:
+        keystone.user_delete(rc, user_id)
+    except:
+        pass
+    return True
+
+@app.task
+def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
+
+    datacenter = DataCenter.get_default()
+    rc = create_rc_by_dc(datacenter)
+    users = keystone.user_list(rc, project=tenant_id)
+    LOG.info("*** rc is ***" + str(rc))
+    LOG.info("******* users are ******" + str(users))
+    udc_user_id = user_id
+    LOG.info("*** udc_user_id is ***" + str(udc_user_id))
+    user_id = None
+    for u in users:
+        if u.username == username:
+            user_id = u.id
+    LOG.info("**** user_id is ****" + str(user_id))
+    try:
+        keystone.user_update_password(rc, user_id, new_passwd, admin=True)
+        LOG.info("**** user password updated ****")
+        udc = UserDataCenter.objects.get(user_id=udc_user_id)
+        LOG.info("**** user password updated ****")
+        udc.keystone_password = new_passwd
+        LOG.info("**** user password updated ****")
+        udc.save()
+        LOG.info("**** user password updated ****")
+
+    except:
+        raise
+    return True
+
+@app.task
+def add_user_tenants(request, tenant_id, ID):
+
+
+    datacenter = DataCenter.get_default()
+    rc = create_rc_by_dc(datacenter)
+    roles = keystone.role_list(rc)
+    LOG.info("------------------roles are----------------" + str(roles))
+    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
+
+    # Grant basic role to user
+    roles_id = []
+    for role in roles:
+        if role.name in ['SwiftOperator', '_member_', 'heat_stack_owner']:
+            roles_id.append(role)
+
+    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
+    #LOG.info("------------------ member role is ----------------" + str(member_role.id))
+    #LOG.info("------------------ user id is ----------------" + str(u.id))
+
+
+    for role in roles_id:
+
+        try:
+            keystone.add_tenant_user_role(rc, project=tenant_id, user=ID,
+                                         role=role.id)
+        except:
+            pass
+    return True
+
+
+@app.task
+def user_delete(request, tenant_id, ID):
+
+    datacenter = DataCenter.get_default()
+    rc = create_rc_by_dc(datacenter)
+    keystone.remove_tenant_user(rc, project=tenant_id, user=ID)
+    return True
+
+@app.task
+def project_create(request, tenant_name, tenant_description):
+
+
+    LOG.info("************* start to create a new role in keystone ***************")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("************* rc is ***************" + str(rc))
+    tenant_id = None
+    LOG.info("tenant name" + str(tenant_name))
+    LOG.info("tenant name" + str(tenant_description))
+    try:
+        project = keystone.tenant_create(rc, tenant_name)
+        LOG.info("*** project is ***" + str(project))
+        tenant_id = project.id
+        LOG.info(" tenant_id is" + str(tenant_id))
+    except:
+        return False
+    return tenant_id
+
+
+@app.task
+def project_delete(request, ID):
+
+
+    LOG.info("************* start to create a new role in keystone ***************")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("************* rc is ***************" + str(rc))
+    try:
+        role = keystone.tenant_delete(rc, ID)
+        LOG.info("*** create success ***")
+    except:
+        return False
+    return True

@@ -1,0 +1,45 @@
+<form action="#" class="form-horizontal" method="">
+    <div class="form-wizard">
+        <div class="form-body">
+            <div class="tab-content">
+                <div class="tab-pane active" id="">
+                    <h4>{[{ 'instance.config_info' | i18next }]} </h4>
+                    <table class="table table-hover table-striped table-bordered">
+                        <tr>
+                            <td>
+                                {[{ 'network.network_name' | i18next }]}
+                            </td>
+                            <td>
+                                {[{ networkmanager_config.network_name }]}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {[{ 'networkmanager.seg_id' | i18next }]}
+                            </td>
+                            <td>
+                                <span > {[{ networkmanager_config.seg_id }]}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {[{ 'network.cidr' | i18next }]}
+                            </td>
+                            <td>
+                                <span>{[{ networkmanager_config.cidr }]} </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {[{ 'network.allocation_polls' | i18next }]}
+                            </td>
+                            <td>
+                                {[{ networkmanager_config.allocation_polls }]}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

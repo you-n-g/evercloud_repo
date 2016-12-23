@@ -1,0 +1,80 @@
+<div class="row scroller" id="profile_div" style="height:300px;">
+    <div class="col-md-12">
+        <div class="list-group">
+
+
+            <div class="form-group">
+                 <label class="col-md-3 control-label" for="title">{[{'network.enable_dhcp' |i18next}]}<span
+                          class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-desktop"></i> </span>
+                            <select class="form-control" ng-model="networkmanager_config.enable_dhcp">
+                                <option selected="selected" value="">激活</option>
+                                <option value="down">禁用
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'network.allocation_polls' | i18next }]} <span class="required"> * </span>
+                </label>
+
+                <div class="col-md-7">
+                    <textarea type="text" class="form-control input-inline" name="allocation_polls" maxlength="100"  cols="40"
+                           ng-model="networkmanager_config.allocation_polls" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager_config.name_prompt' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'network.dns_server' | i18next }]} <span class="required"> * </span>
+                </label>
+
+                <div class="col-md-7">
+                    <textarea type="text" class="form-control input-inline" name="dns_server" maxlength="100" cols="40"
+                           ng-model="networkmanager_config.dns_server" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager_config.name_prompt' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'network.host_router' | i18next }]} <span class="required"> * </span>
+                </label>
+
+                <div class="col-md-7">
+                    <textarea type="text" class="form-control input-inline" name="host_router" maxlength="100" cols="40"
+                           ng-model="networkmanager_config.host_router" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager_config.name_prompt' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/ng-template" id="instance_num_tip.html">
+    <p data-ng-i18next="[html:i18next]({num: site_config.BATCH_INSTANCE_LIMIT})instance.batch_launch_prompt"></p>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#profile_div").slimScroll({});
+    });
+</script>

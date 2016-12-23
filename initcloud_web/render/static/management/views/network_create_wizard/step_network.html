@@ -1,0 +1,93 @@
+<div class="row scroller" id="profile_div" style="height:300px;">
+    <div class="col-md-12">
+        <div class="list-group">
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'networkmanager.network_name' | i18next }]} <span class="required"> * </span>
+                </label>
+
+                <div class="col-md-7">
+                    <input type="text" class="form-control input-inline" name="network_name" maxlength="24"
+                           ng-model="networkmanager_config.network_name" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager.name_prompt' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+            </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="title">{[{'networkmanager.tenant' |i18next}]}<span
+                            class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-desktop"></i> </span>
+                            <select class="form-control" ng-model="networkmanager_config.tenant">
+                                <option selected="selected" value="">请选择一个租户</option>
+                                <option ng-repeat="tenant in tenants" value="{[{tenant.id}]}">{[{tenant.name}]}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="form-group">
+                 <label class="col-md-3 control-label" for="title">{[{'networkmanager.physnet' |i18next}]}<span
+                          class="required">* </span></label>
+
+                <div class="col-md-7">
+                    <input type="text" class="form-control input-inline" name="physnet" maxlength="24"
+                           ng-model="networkmanager_config.physnet" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager.physnet' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'networkmanager.seg_id' | i18next }]} <span class="required"> * </span>
+                </label>
+
+                <div class="col-md-7">
+                    <input type="text" class="form-control input-inline" name="seg_id" maxlength="24"
+                           ng-model="networkmanager_config.seg_id" value=""
+                           onpaste="return false;" ondragenter="return false;"
+                           oncontextmenu="return false;" style="ime-mode:disabled"/>
+                    <eon-help data-tooltip="{[{ 'networkmanager.gateway' | i18next }]}"
+                              data-tooltip-placement="right"/>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                 <label class="col-md-3 control-label" for="title">{[{'networkmanager.status' |i18next}]}<span
+                          class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-desktop"></i> </span>
+                            <select class="form-control" ng-model="networkmanager_config.status">
+                                <option selected="selected" value="">激活</option>
+                                <option value="down">禁用
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="text/ng-template" id="instance_num_tip.html">
+    <p data-ng-i18next="[html:i18next]({num: site_config.BATCH_INSTANCE_LIMIT})instance.batch_launch_prompt"></p>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#profile_div").slimScroll({});
+    });
+</script>

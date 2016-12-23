@@ -21,6 +21,11 @@ angular.module('cloud.resources', [])
     return $resource("/api/instancemanage/:id", {id: '@id'});
 }])
 
+.factory('Networkmanager', ['$resource', function ($resource) {
+    return $resource("/api/networkmanager/:id", {id: '@id'});
+}])
+
+
 .factory('Instance', ['$resource', function ($resource) {
     return $resource("/api/instances/:id");
 }])

@@ -54,7 +54,12 @@
     "confirm_delete":"删除快照"
 
   },
+    "assign": {
+    "select_user":"指派给",
+    "unselect_user":"取消指派",
+    "assigned":"已指派用户"
 
+  },
   "instance": {
     "desc": "提供虚拟机服务",
     "name": "主机名称",
@@ -198,6 +203,27 @@
     "page_desc": " 隔离的网络。",
     "name": "名称",
     "router": "路由器",
+        "name": "网络",
+        "tenant_id": "租户id",
+        "admin_state_up": "状态",
+        "create_network_title": "创建网络",
+        "network": "网络基本信息",
+        "network_name": "网络名称",
+        "tenant": "租户",
+        "physnet": "物理网络",
+        "seg_id": "段ID",
+        "status": "状态",
+        "subnet_name": "子网名称",
+        "cidr": "网络地址",
+        "ip_version": "ip版本",
+        "gateway": "网关地址",
+        "enable_gateway": "激活网关",
+        "subnet": "子网",
+        "subnet_details":"子网详情",
+        "enable_dhcp":"激活dhcp",
+        "allocation_polls": "地址池",
+        "dns_server": "DNS服务器",
+        "host_router": "主机路由",
     "netAddress": "网络地址",
     "status": "状态",
     "create_time": "创建时间",
@@ -977,6 +1003,32 @@
        "confirm_power_off": "确认关机",
        "confirm_upload": "确认上传镜像",
        "confirm_template_delete": "确定删除模版"
+},
+
+   "networkmanager":{
+
+        "name": "网络",
+        "tenant_id": "租户id",
+        "admin_state_up": "状态",
+        "create_network_title": "创建网络",
+        "network": "网络基本信息",
+        "network_name": "网络名称",
+        "tenant": "租户",
+        "physnet": "物理网络",
+        "seg_id": "段ID",
+        "status": "状态",
+        "subnet_name": "子网名称",
+        "cidr": "网络地址",
+        "ip_version": "ip版本",
+        "gateway": "网关地址",
+        "enable_gateway": "激活网关",
+        "subnet": "子网",
+        "subnet_details":"子网详情",
+        "enable_dhcp":"激活dhcp",
+        "allocation_polls": "地址池",
+        "dns_server": "DNS服务器",
+        "host_router": "主机路由",
+        "confirm_delete": "确定删除吗？"
 }
 
 }
