@@ -56,7 +56,7 @@ class Instance(models.Model):
     firewall_group = models.ForeignKey("firewall.Firewall", null=True)
     
     core = models.IntegerField(_("Cores"), default=1)
-    thread = models.IntegerField(_("Threads"), default=1)
+    socket = models.IntegerField(_("Sockets"), default=1)
 
     class Meta:
         db_table = "instance"

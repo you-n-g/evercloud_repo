@@ -535,7 +535,7 @@ CloudApp.controller('InstancemanageController',
         });
 	
 	$scope.core_list = [1,2,4,8];
-	$scope.thread_list = [1,2,4,8];
+	$scope.socket_list = [1,2,4,8];
         Flavor.query(function (data) {
             $scope.flavors_list = data;
             if (data.length > 0) {
@@ -580,7 +580,7 @@ CloudApp.controller('InstancemanageController',
 
                 $scope.instance_config.vcpu = cpu_array[0];
                 $scope.instance_config.core = $scope.core_list[0];
-                $scope.instance_config.thread = $scope.thread_list[0];
+                $scope.instance_config.socket = $scope.socket_list[0];
                 $scope.instance_config.memory = cpu_memory_list["" + cpu_array[0]][0];
                 $scope.instance_config.cpu_memory = cpu_memory_list["" + cpu_array[0]];
 
@@ -590,29 +590,29 @@ CloudApp.controller('InstancemanageController',
                     $scope.instance_config.cpu_memory = $scope.cpu_memory_map[cpu];
                 };
 
-		// core & thread control
-		$scope.core_thread_map = [[1,2,4,8],[2,4,8,-1],[4,8,-1,-1],[8,-1,-1,-1]]
+		// core & socket control
+		$scope.core_socket_map = [[1,2,4,8],[2,4,8,-1],[4,8,-1,-1],[8,-1,-1,-1]]
 		$scope.core_click = function (core){
 		    $scope.cx = $scope.core_list.indexOf(core)
-		    $scope.cy = $scope.thread_list.indexOf($scope.instance_config.thread)
-           	    if ($scope.core_thread_map[$scope.cx][$scope.cy] == -1){
-                    $scope.instance_config.thread = $scope.thread_list[0];
-		    $scope.cy = $scope.thread_list.indexOf($scope.instance_config.thread)
+		    $scope.cy = $scope.socket_list.indexOf($scope.instance_config.socket)
+           	    if ($scope.core_socket_map[$scope.cx][$scope.cy] == -1){
+                    $scope.instance_config.socket = $scope.socket_list[0];
+		    $scope.cy = $scope.socket_list.indexOf($scope.instance_config.socket)
                     }
-                    $scope.instance_config.vcpu = $scope.core_thread_map[$scope.cx][$scope.cy]
+                    $scope.instance_config.vcpu = $scope.core_socket_map[$scope.cx][$scope.cy]
                     $scope.instance_config.core = core;
                     $scope.instance_config.memory = $scope.cpu_memory_map["" + $scope.instance_config.vcpu][0];
                     $scope.instance_config.cpu_memory = $scope.cpu_memory_map[$scope.instance_config.vcpu];
         	};
-		$scope.thread_click = function (thread){
+		$scope.socket_click = function (socket){
                     $scope.tx = $scope.core_list.indexOf($scope.instance_config.core)
-                    $scope.ty = $scope.thread_list.indexOf(thread)
-                    if ($scope.core_thread_map[$scope.tx][$scope.ty] == -1){
+                    $scope.ty = $scope.socket_list.indexOf(socket)
+                    if ($scope.core_socket_map[$scope.tx][$scope.ty] == -1){
                     $scope.instance_config.core = $scope.core_list[0];
                     $scope.tx = $scope.core_list.indexOf($scope.instance_config.core)
                     }                    
-		    $scope.instance_config.vcpu = $scope.core_thread_map[$scope.tx][$scope.ty]
-                    $scope.instance_config.thread = thread;
+		    $scope.instance_config.vcpu = $scope.core_socket_map[$scope.tx][$scope.ty]
+                    $scope.instance_config.socket = socket;
                     $scope.instance_config.memory = $scope.cpu_memory_map["" + $scope.instance_config.vcpu][0];
                     $scope.instance_config.cpu_memory = $scope.cpu_memory_map[$scope.instance_config.vcpu];
                 };
@@ -654,7 +654,7 @@ CloudApp.controller('InstancemanageController',
                 "name": instance_config.name,
                 "cpu": instance_config.vcpu,
                 "core": instance_config.core,
-                "thread": instance_config.thread,
+                "socket": instance_config.socket,
                 "memory": instance_config.memory,
                 "network_id": instance_config.network == null ? 0 : instance_config.network.id,
                 "image": instance_config.select_image.id,
