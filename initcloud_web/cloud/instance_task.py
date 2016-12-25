@@ -33,8 +33,8 @@ LOG = logging.getLogger(__name__)
 def flavor_create(instance):
     assert instance  
     def _generate_name(instance):
-        name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-thread-%s" % (settings.OS_NAME_PREFIX,
-                    instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.thread)
+        name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-socket-%s" % (settings.OS_NAME_PREFIX,
+                    instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.socket)
         return name
 
     def _get_flavor_by_name(instance, name):
@@ -59,7 +59,7 @@ def flavor_create(instance):
     rc = create_rc_by_instance(instance)
     name = _generate_name(instance)
     flavor = _get_flavor_by_name(instance, name)
-    metadata = {"hw:cpu_cores":instance.core,"hw:cpu_threads":instance.thread}
+    metadata = {"hw:cpu_cores":instance.core,"hw:cpu_sockets":instance.socket}
 
     if flavor is None:
         try:

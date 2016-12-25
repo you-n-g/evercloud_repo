@@ -558,6 +558,7 @@ def instance_action_vdi_view(request):
 
 @require_GET
 def monitor_settings(request):
+    LOG.info("------------ MONITOR FOR INSTANCE DETAIL! -------------------")
     monitor_config = settings.MONITOR_CONFIG.copy()
     monitor_config['intervals'] = MonitorInterval.\
         filter_options(monitor_config['intervals'])

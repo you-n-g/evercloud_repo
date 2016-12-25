@@ -30,11 +30,11 @@
             <label class="col-md-2 control-label">多路</label>
             <div class="col-md-10">
                 <div class="input-group">
-                    <button ng-repeat="thread in thread_list" class="btn btn-default" type="button"
-                            ng-class="{'btn-primary': instance_config.thread == thread}"
-                            ng-click="thread_click(thread)"
+                    <button ng-repeat="socket in socket_list" class="btn btn-default" type="button"
+                            ng-class="{'btn-primary': instance_config.socket == socket}"
+                            ng-click="socket_click(socket)"
                             style="margin: 5px;">
-                        {[{ thread }]} THREAD
+                        {[{ socket }]} SOCKET
                     </button>
                 </div>
             </div>
