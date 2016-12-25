@@ -37,6 +37,8 @@
                             </td>
                             <td width="100" data-title="'instancemanage.name' | i18next">
                                 <a class="btn default blue-stripe btn-xs"
+                                   data-ng-if="is_available(instancemanage)"
+                                   data-ng-click="go_detail(instancemanage)"
                                    data-tooltip="{[{ instancemanage.id }]}">
                                     <i class="fa fa-desktop"></i> {[{ instancemanage.name }]}
                                 </a>
@@ -97,7 +99,7 @@
                                     -->
                                 </span>
 
-                                <div data-ng-if="instance.isUnstable"
+                                <div data-ng-if="instancemanage.isUnstable"
                                      class="progress progress-striped active"
                                      style="width:140px; margin-bottom:0px;">
                                     <div class="progress-bar progress-bar-success"
@@ -120,18 +122,44 @@
                                             <i class="fa fa-angle-down"></i>
                                         </button>
                                         <ul instancemanage="menu" class="dropdown-menu">
-                                        <li data-ng-if="(instance.is_poweroff || instance.is_error) && is_available(instance)">
-                                            <a href="#" ng-click="instance_action(instance, 'power_on')">
+                                        <li data-ng-if="(instancemanage.is_poweroff || instancemanage.is_error) && is_available(instancemanage)">
+                                            <a href="#" ng-click="instance_action(instancemanage, 'power_on')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.power_on' | i18next }]}
                                             </a>
                                         </li>
                                         <li >
-                                            <a href="#" ng-click="instance_action(instance, 'power_on')">
+                                            <a href="#" ng-click="instance_action(instancemanage, 'reboot')">
                                                 <i class="fa fa-play"></i>
-                                                {[{ 'instance.assign' | i18next }]}
+                                                {[{ 'instance.reboot' | i18next }]}
                                             </a>
                                         </li>
+                                        <!--<li >
+                                            <a href="#/firewall/">
+                                                <i class="fa fa-edit"></i>
+                                                {[{ 'instance.add_sc' | i18next }]} </a>
+                                        </li>
+                                        <li >
+                                            <a data-ng-click="instance_action(instancemanage, 'add_qos')">
+                                                <i class="fa fa-ban"></i>
+                                                {[{ 'instance.add_qos' | i18next }]} </a>
+                                        </li>-->
+                                        <li data-ng-if-start="instancemanage.is_running">
+                                            <a href="#" data-ng-click="instance_action(instancemanage, 'vnc_console')">
+                                                <i class="fa fa-desktop"></i>
+                                                {[{ 'instance.vnc_console' | i18next }]} </a>
+                                        </li>
+                                        <li>
+                                            <a data-ng-click="instance_action(instancemanage, 'attach_volume')">
+                                                <i class="fa fa-hdd-o"></i>
+                                                {[{ 'instance.attach_volume' | i18next }]} </a>
+                                        </li>
+                                        <li data-ng-if-end >
+                                            <a data-ng-click="instance_action(instancemanage, 'detach_volume')">
+                                                <i class="fa fa-times"></i>
+                                                {[{ 'instance.detach_volume' | i18next }]} </a>
+                                        </li>
+
 					<li >
                                             <a href="#" ng-click="snapshot(instancemanage)">
                                                 <i class="fa fa-play"></i>
@@ -144,8 +172,8 @@
                                                 {[{ 'instancemanage.assign' | i18next }]}
                                             </a>
                                         </li>
-                                        <li data-ng-if="instance.is_running">
-                                            <a href="#" data-ng-click="instance_action(instance, 'power_off')">
+                                        <li data-ng-if="instancemanage.is_running">
+                                            <a href="#" data-ng-click="instance_action(instancemanage, 'power_off')">
                                                 <span class="text-danger">
                                                 <i class="fa fa-stop"></i>
                                                 {[{ 'instance.power_off' | i18next }]}
