@@ -584,3 +584,52 @@
            data-nap-after-click> {[{ 'submit' | i18next }]}</a>
     </div>
 </script>
+
+<!-- BEGIN TEMPLATE UPDATE -->
+<script type="text/ng-template" id="update.html">
+    <div class="modal-header">
+       <div id="updateTitle" class="modal-title"> {[{ 'instancemanage.update_instancemanage_title' | i18next }]}</div>
+    </div>
+    <div class="modal-body">
+       <table>
+        <form id="InstancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
+            <input type="hidden"  name="id" data-ng-model="instancemanage.id">
+            <div class="form-group">
+                <tr data-ng-repeat="role in roles">
+                <td width="30" header="'checkbox-header.html'">
+                    <input type="checkbox" data-ng-model="role.checked"/>
+                </td>
+                <td data-title="'user.policy_nova' | i18next">
+                    <span> {[{ role.name }]} </span>
+                </td>
+                </tr>
+            </div>
+           <p>
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {[{ 'tenants.name' | i18next }]}
+                    <span class="required" aria-required="true"> * </span>
+                </label>
+                <div class="col-md-5">
+                    <input class="form-control placeholder-no-fix" type="text"
+                           placeholder="{[{ 'role.device_id' | i18next }]}"
+                           name="device_id" data-ng-model="instancemanage.device_id"
+                           data-message-remote="test"/>
+                </div>
+            </div>
+          </p>
+            <div class="clear"></div>
+        </form>
+       </table>
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
+            {[{ 'cancel' | i18next }]}
+        </a>
+        <a class="btn btn-primary"
+           data-ng-click="submit(instancemanage)"
+           data-nap-after-click> {[{ 'submit' | i18next }]}</a>
+    </div>
+</script>
+<!-- END TEMPLATE UPDATE -->
+
