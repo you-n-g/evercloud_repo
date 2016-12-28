@@ -64,27 +64,6 @@ CloudApp.controller('SnapshotController',
             });
         };
 
-/*         $scope.boot_snap = function(ids){
-
-            $ngBootbox.confirm($i18next("snapshot.boot from snap")).then(function(){
-
-                if(typeof ids == 'function'){
-                    ids = ids();
-                }
-
-                CommonHttpService.post("/api/snapshot/boot_snapshot/", {ids: ids}).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-                        //$scope.snapshot_table.reload();
-                        checkboxGroup.uncheck()
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
-            });
-        };
-*/
-
         $scope.delete = function(snapshot){
             deleteSnapshots([snapshot.id]);
         };
@@ -106,15 +85,15 @@ CloudApp.controller('SnapshotController',
             });
         };
 
-        $scope.boot_snapshot = function(snapshot){
+        $scope.openNewSnapshotModal = function(){
             $modal.open({
-                templateUrl: 'boot_snapshot.html',
+                templateUrl: 'new-snapshot.html',
                 backdrop: "static",
                 controller: 'NewSnapshotController',
                 size: 'lg',
                 resolve: {
-                    snapshot: function(){
-                        return snapshot;
+                    dataCenters: function(){
+                        return DataCenter.query().$promise;
                     }
                 }
             }).result.then(function(){
@@ -125,21 +104,26 @@ CloudApp.controller('SnapshotController',
 
 
     .controller('NewSnapshotController',
-        function($scope, $modalInstance, $i18next, snapshot,
-                 CommonHttpService, ToastrService, SnapshotForm){
+        function($scope, $modalInstance, $i18next,
+                 CommonHttpService, ToastrService, SnapshotForm, dataCenters){
 
             var form = null;
-            //$modalInstance.rendered.then(function(){
-            //    form = SnapshotForm.init($scope.site_config.WORKFLOW_ENABLED);
-            //});
-	    $scope.snapshot = snapshot;
-            $scope.instance_name = $scope.snapshot.snapshotname;
-            //$scope.snapshot = {is_resource_user: false, is_approver: false};
+            $modalInstance.rendered.then(function(){
+                form = SnapshotForm.init($scope.site_config.WORKFLOW_ENABLED);
+            });
+
+            $scope.dataCenters = dataCenters;
+            $scope.snapshot = {is_resource_user: false, is_approver: false};
             $scope.is_submitting = false;
             $scope.cancel = $modalInstance.dismiss;
             $scope.create = function(){
+
+                if(form.valid() == false){
+                    return;
+                }
+
                 $scope.is_submitting = true;
-                CommonHttpService.post('/api/snapshot/boot_snapshot/', {'id':$scope.snapshot.id,'instance_name':$scope.instance_name}).then(function(result){
+                CommonHttpService.post('/api/snapshot/create/', $scope.snapshot).then(function(result){
                     if(result.success){
                         ToastrService.success(result.msg, $i18next("success"));
                         $modalInstance.close();

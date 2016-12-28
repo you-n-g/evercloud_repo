@@ -55,8 +55,12 @@ import traceback
 from django.contrib.auth.models import User
 from biz.account.serializer import UserSerializer
 from biz.account.models import UserProxy
+from biz.instance.utils import flavor_create, get_ins_status
+from cloud.cloud_utils import create_rc_by_instance
+from cloud.api import nova
+import time
+#from django.db.models import Q
 
-from django.db.models import Q
 
 LOG = logging.getLogger(__name__)
 OPERATION_SUCCESS = 1
@@ -262,6 +266,55 @@ def instance_create_view(request):
     else:
         return Response({"OPERATION_STATUS": OPERATION_SUCCESS,
                           "msg": msg}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+def instance_resize(request):
+    ins = Instance.objects.get(id = request.data['id'])
+    ins.cpu = 2
+    ins.memory = 1024
+    ins.save()
+    ins_ser = InstanceSerializer(ins)
+    #LOG.info(ins_ser.data)
+    rc = create_rc_by_instance(ins)
+    try:
+        new_flavor = flavor_create(ins)
+	instance = nova.server_get(rc, ins.uuid)
+	nova.server_resize(rc, ins.uuid, new_flavor)
+	ins.status = 14
+	ins.save()
+    except:
+	traceback.print_exc()
+    #return Response(serializer.data)
+    return Response({"success":True, "msg":"Please verify resize or revert"})
+
+@api_view(["POST"])
+def instance_verify_resize(request):
+    ins = Instance.objects.get(id = request.data['id'])
+    rc = create_rc_by_instance(ins)
+    LOG.info('xxxxxxxxxxxxxxxxxxxxxxxxxx')
+    try:
+	LOG.info(request.data['action'])
+	if request.data['action'] == 'confirm':
+	    nova.server_confirm_resize(rc, ins.uuid)	
+	elif request.data['action'] == 'revert':
+	    LOG.info('111111111111111111111111111111')
+	    nova.server_revert_resize(rc, ins.uuid)
+	else:
+	    return Response({"success":False, "msg":"Wrong action!!!"})
+	time.sleep(3)
+	instance = nova.server_get(rc, ins.uuid)
+	ins.status = get_ins_status(instance)
+	if ins.status == 99:
+	    LOG.info("--------------- WAIT --------------------")
+	    ins.status = 11
+	    return Response({"success":False, "msg":"Verify timeout!"})
+	ins.status = get_ins_status(instance)
+	ins.save()
+	return Response({"success":True, "msg":"Verify resize!"})
+    except:
+	traceback.print_exc()
+	return Response({"success":False, "msg":"Fail to verify resize!"})
+
 
 @api_view(["POST"])
 def instance_assignedusers(request):

@@ -16,10 +16,7 @@ CloudApp.controller('InstancemanageController',
         $scope.go_detail = function(ins){
             $state.go('instance_detail', {"instance_id": ins.id});
         };
-	$scope.is_resize = function(instance){
-	    if (instance.status == 14){return true}
-	    else {return false}
-	};
+
 	$scope.instancemanages = [];
         var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.instancemanages);
 
@@ -70,34 +67,6 @@ CloudApp.controller('InstancemanageController',
                         });
                     }]
                 }
-            });
-        };
-
-         $scope.confirm_resize = function(ins){
-
-            $ngBootbox.confirm($i18next("instancemanage.confirm_resize")).then(function(){
-                CommonHttpService.post("/api/instancemanage/verify_resize/", {"id": ins.id, "action":"confirm"}).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-                        $scope.instancemanage_table.reload();
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
-            });
-        };
-
-       $scope.revert_resize = function(ins){
-
-            $ngBootbox.confirm($i18next("instancemanage.revert_resize")).then(function(){
-                CommonHttpService.post("/api/instancemanage/verify_resize/", {"id": ins.id, "action":"revert"}).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-                        $scope.instancemanage_table.reload();
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
             });
         };
 
@@ -467,24 +436,6 @@ CloudApp.controller('InstancemanageController',
                     instancemanage_table: function () {
                         return $scope.instancemanage_table;
                     },
-                    instancemanage: function(){return instancemanage},
-                }
-            });
-        };
-        $scope.resize = function(instancemanage){
-
-            $modal.open({
-                templateUrl: 'resize.html',
-                controller: 'InstancemanageResizeController',
-                backdrop: "static",
-                size: 'lg',
-                resolve: {
-                    instancemanage_table: function () {
-                        return $scope.instancemanage_table;
-                    },
-                    //flavors: function (CommonHttpService) {
-                    //    return CommonHttpService.get("/api/instancemanage/resize/");
-                    //},
                     instancemanage: function(){return instancemanage},
                 }
             });
@@ -1070,74 +1021,7 @@ CloudApp.controller('InstancemanageController',
                     return ValidationTool.init('#InstancemanageForm', config);
                 }
             }
-        }]).controller('InstancemanageResizeController',
-        function($rootScope, $scope, $modalInstance, $i18next,
-                 instancemanage, instancemanage_table, CheckboxGroup, //flavors,
-                 Instancemanage, UserDataCenter, //instancemanageForm,
-                 CommonHttpService, ToastrService, ResourceTool){
-
-            $scope.instancemanage = instancemanage = angular.copy(instancemanage);
-            $scope.cancel = $modalInstance.dismiss;
-	    $scope.instancemanage_table = instancemanage_table;
-	    //$scope.flavors = flavors;
-	    //$scope.select_flavor = new Object;
-            $scope.cancel = function () {
-                $modalInstance.dismiss();
-            };
-
-            $scope.assigned_id = []
-            $scope.submit = function(instancemanage){
-                var params_data = {"id":instancemanage.id};
-                CommonHttpService.post("/api/instancemanage/resize/", params_data).then(function(data){
-                    if (data.success) {
-                        ToastrService.success(data.msg, $i18next("success"));
-			$scope.instancemanage_table.reload();
-                        $modalInstance.dismiss();
-                    } else {
-                        ToastrService.error(data.msg, $i18next("op_failed"));
-                    }
-                });
-            };
-        }
-   ).factory('instancemanageForm', ['ValidationTool', '$i18next',
-        function(ValidationTool, $i18next){
-            return {
-                init: function(){
-
-                    var config = {
-
-                        rules: {
-                            instancemanagename: {
-                                required: true,
-                                remote: {
-                                    url: "/api/instancemanage/is-name-unique/",
-                                    data: {
-                                        instancemanagename: $("#instancemanagename").val()
-                                    },
-                                    async: false
-                                }
-                            },
-                            user_type: 'required'
-                        },
-                        messages: {
-                            instancemanagename: {
-                                remote: $i18next('instancemanage.name_is_used')
-                            },
-                        },
-                        errorPlacement: function (error, element) {
-
-                            var name = angular.element(element).attr('name');
-                            if(name != 'user_type'){
-                                error.insertAfter(element);
-                            }
-                        }
-                    };
-
-                    return ValidationTool.init('#InstancemanageForm', config);
-                }
-            }
-        }])
-    .controller('InstancemanageAssignController',
+        }]).controller('InstancemanageAssignController',
         function($rootScope, $scope, $modalInstance, $i18next,
                  instancemanage, instancemanage_table, CheckboxGroup, 
 		 assigned_users, unassigned_users,

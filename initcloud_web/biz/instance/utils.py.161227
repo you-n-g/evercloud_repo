@@ -16,85 +16,11 @@ from cloud.tasks import (instance_status_synchronize_task,
                          instance_get_vnc_console, instance_get_spice_console, instance_get_realvnc_console)
 from cloud.api import nova
 
-from django.conf import settings
-import datetime
-from cloud.cloud_utils import get_nova_admin
-from biz.instance.settings import (INSTANCE_STATE_RUNNING,
-                                   INSTANCE_STATE_BOOTING, INSTANCE_STATE_ERROR,
-                                   INSTANCE_STATE_DELETE,
-                                   INSTANCE_STATE_POWEROFF)
-
 OPERATION_SUCCESS = 1
 OPERATION_FAILED = 0
 OPERATION_FORBID = 2
 
 LOG = logging.getLogger(__name__)
-
-def get_ins_status(ins):
-    if ins.status == u'ACTIVE':
-	return INSTANCE_STATE_RUNNING
-    elif ins.status == u"ERROR":
-	return INSTANCE_STATE_ERROR
-    elif ins.status == u"None":
-        return INSTANCE_STATE_ERROR
-    elif ins.status == u"SHUTOFF":
-        return INSTANCE_STATE_POWEROFF
-    elif ins.status == u"VERIFY_RESIZE":
-	return 99
-    else:
-	LOG.info("-------------- WRONG STATUS------------")
-	return 11
-
-def flavor_create(instance):
-    assert instance
-    def _generate_name(instance):
-        name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-socket-%s" % (settings.OS_NAME_PREFIX,
-                    instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.socket)
-        return name
-
-    def _get_flavor_by_name(instance, name):
-        rc = create_rc_by_instance(instance)
-        flavor = None
-        novaAdmin = get_nova_admin(instance)
-        try:
-            flavors = novaAdmin.flavors.list(rc)
-        except Exception:
-            flavors = []
-            raise
-
-        if flavors is not None:
-            for f in flavors:
-                if f.name == name:
-                    flavor = f
-                    break
-        return flavor
-
-    begin = datetime.datetime.now()
-    rc = create_rc_by_instance(instance)
-    name = _generate_name(instance)
-    flavor = _get_flavor_by_name(instance, name)
-    metadata = {"hw:cpu_cores":instance.core,"hw:cpu_sockets":instance.socket}
-    if flavor is None:
-        try:
-            LOG.info(u"Flavor not exist, create new, [%s][%s].", instance, name)
-
-            novaadmin = get_nova_admin(instance)
-            flavor = novaadmin.flavors.create(ram=instance.memory, name=name,
-                                  vcpus=instance.cpu, disk=instance.sys_disk,
-                                  is_public=True)
-            flavor.set_keys(metadata)
-            #LOG.info(flavor.get_keys(flavor))
-        except nova.nova_exceptions.Conflict:
-            LOG.info(u"Flavor name conflict, [%s][%s].", instance, name)
-            flavor = _get_flavor_by_name(instance, name)
-        except:
-            raise
-
-    end = datetime.datetime.now()
-    LOG.info(u"Flavor create end, [%s][%s], apply [%s] seconds.",
-                instance, name, (end-begin).seconds)
-    return flavor
-
 
 def get_instance_spice_console(instance):
     spice = instance_get_spice_console(instance)

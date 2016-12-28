@@ -30,6 +30,9 @@ from frontend.forms import CloudUserCreateFormWithoutCapatcha
 from cloud.api import nova
 from cloud.api import glance
 from cloud.cloud_utils import create_rc_by_dc
+from biz.image.serializer import ImageSerializer
+from biz.instance.models import Instance
+from biz.image.models import Image
 
 LOG = logging.getLogger(__name__)
 
@@ -57,10 +60,20 @@ def create_instance_snapshot(request):
 	datacenter = DataCenter.get_default()
 	rc = create_rc_by_dc(datacenter)
 	snapshot = nova.snapshot_create(rc, instance_id, snap_name)
-	LOG.info(snapshot)
-	serializer = SnapshotSerializer(data = {'snapshotname':snap_name,'snapshot_id':snapshot, 'snapshot_type':'instance'})
+	serializer = SnapshotSerializer(data = {'snapshotname':snap_name,'snapshot_id':snapshot, 'snapshot_type':'instance', 'instance_id':instance_id})
 	if serializer.is_valid():
             serializer.save()
+	ins = Instance.objects.all().get(id = request.data['id'])
+	snap_name = "snapshot_" + snap_name
+	ser = ImageSerializer(ins.image)
+	ser_data = ser.data
+	del ser_data['id']
+	image_ser = ImageSerializer(data = ser_data,  context = {"request":request})
+	if image_ser.is_valid():
+	    image = image_ser.save()
+	image.name = snap_name
+	image.uuid = snapshot
+	image.save()
         return Response({'success': True, "msg": _('Snapshot is created successfully!')},
                             status=status.HTTP_201_CREATED)
     except Exception as e:
@@ -68,6 +81,12 @@ def create_instance_snapshot(request):
         return Response({"success": False, "msg": _('Failed to create snapshot for unknown reason.')})
 
 
+
+@api_view(["POST"])
+def boot_snapshot(request):
+    LOG.info(request.data)
+    
+    return Response({'success': True, "msg": _('Snapshot is created successfully!')})
 
 @api_view(["POST"])
 def delete_snapshots(request):
@@ -83,6 +102,7 @@ def delete_snapshots(request):
 	    LOG.info(image_id)
 	    client.images.delete(image_id)
             Snapshot.objects.filter(pk__in=ids).delete()
+	    Image.objects.filter(uuid = image_id).delete()
 	return Response({'success': True, "msg": _('Snapshots have been deleted!')}, status=status.HTTP_201_CREATED)
     except:
 	traceback.print_exc()
