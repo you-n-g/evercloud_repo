@@ -291,13 +291,11 @@ def instance_resize(request):
 def instance_verify_resize(request):
     ins = Instance.objects.get(id = request.data['id'])
     rc = create_rc_by_instance(ins)
-    LOG.info('xxxxxxxxxxxxxxxxxxxxxxxxxx')
     try:
 	LOG.info(request.data['action'])
 	if request.data['action'] == 'confirm':
 	    nova.server_confirm_resize(rc, ins.uuid)	
 	elif request.data['action'] == 'revert':
-	    LOG.info('111111111111111111111111111111')
 	    nova.server_revert_resize(rc, ins.uuid)
 	else:
 	    return Response({"success":False, "msg":"Wrong action!!!"})
