@@ -112,21 +112,11 @@
                             <td class="create-time" data-title="'create_at' | i18next">{[{ instancemanage.create_date }]}</td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
-					<div data-ng-if="!is_resize(instancemanage)">
                                         <button class="btn btn-default"
                                                 type="button" ng-click="edit(instancemanage)">
                                             <i class="fa fa-edit"></i>
                                             {[{ 'instancemanage.edit' | i18next }]}
                                         </button>
-					</div>
-                                        <div data-ng-if="is_resize(instancemanage)">
-					<button class="btn btn-default"
-                                                type="button" ng-click="confirm_resize(instancemanage)">
-                                            <i class="fa fa-edit"></i>
-                                            {[{ 'instancemanage.confirm_resize' | i18next }]}
-                                        </button>
-                                        </div>
-
                                         <button data-toggle="dropdown" class="btn btn-default dropdown-toggle"
                                                 type="button" aria-expanded="false">
                                             <i class="fa fa-angle-down"></i>
@@ -138,7 +128,7 @@
                                                 {[{ 'instance.power_on' | i18next }]}
                                             </a>
                                         </li>
-                                        <li data-ng-if="(instancemanage.is_poweron || instancemanage.is_error) && is_available(instancemanage)">
+                                        <li >
                                             <a href="#" ng-click="instance_action(instancemanage, 'reboot')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.reboot' | i18next }]}
@@ -154,22 +144,7 @@
                                                 <i class="fa fa-ban"></i>
                                                 {[{ 'instance.add_qos' | i18next }]} </a>
                                         </li>-->
-                                        <li data-ng-if="!(is_resize(instancemanage))">
-                                            <a href="#" data-ng-click="resize(instancemanage)">
-                                                <i class="fa fa-desktop"></i>
-                                                {[{ 'instancemanage.resize' | i18next }]} </a>
-                                        </li>
-                                        <!--<li data-ng-if="is_resize(instancemanage)">
-                                            <a href="#" data-ng-click="confirm_resize(instancemanage)">
-                                                <i class="fa fa-desktop"></i>
-                                                {[{ 'instancemanage.confirm_resize' | i18next }]} </a>
-                                        </li>-->
-                                        <li data-ng-if="is_resize(instancemanage)">
-                                            <a href="#" data-ng-click="revert_resize(instancemanage)">
-                                                <i class="fa fa-desktop"></i>
-                                                {[{ 'instancemanage.revert_resize' | i18next }]} </a>
-                                        </li>
-                                        <li data-ng-if="!(is_resize(instancemanage))">
+                                        <li data-ng-if-start="instancemanage.is_running">
                                             <a href="#" data-ng-click="instance_action(instancemanage, 'vnc_console')">
                                                 <i class="fa fa-desktop"></i>
                                                 {[{ 'instance.vnc_console' | i18next }]} </a>
@@ -185,13 +160,13 @@
                                                 {[{ 'instance.detach_volume' | i18next }]} </a>
                                         </li>
 
-                                        <li data-ng-if="!(is_resize(instancemanage))">
+					<li >
                                             <a href="#" ng-click="snapshot(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.create_snap' | i18next }]}
                                             </a>
                                         </li>
-                                        <li data-ng-if="!(is_resize(instancemanage))">
+					<li >
                                             <a href="#" ng-click="assign(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instancemanage.assign' | i18next }]}
@@ -205,7 +180,7 @@
                                                 </span>
                                             </a>
                                         </li>
-                                            <li data-ng-if="!(is_resize(instancemanage))">
+                                            <li>
                                                 <a href="javascript:void(0);"  ng-click="delete(instancemanage)">
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.delete' | i18next }]} </a>
@@ -609,39 +584,6 @@
            data-nap-after-click> {[{ 'submit' | i18next }]}</a>
     </div>
 </script>
-
-<!-- BEGIN TEMPLATE RESIZE -->
-<script type="text/ng-template" id="resize.html">
-    <div class="modal-header">
-       <div id="updateTitle" class="modal-title"> {[{ 'instancemanage.resize' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-       <table>
-        <form id="InstancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
-            <input type="hidden"  name="id" data-ng-model="instancemanage.id">
-	    <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'instancemanage.select_size' | i18next }]}
-                </label>
-                <div class="col-md-5">
-		<!--    <select class="form-control" ng-options="flavor.name for flavor in flavors" ng-model="select_flavor">
-                    </select> -->
-                </div>
-	    </div>
-            <div class="clear"></div>
-        </form>
-       </table>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn btn-primary"
-           data-ng-click="submit(instancemanage)"
-           data-nap-after-click> {[{ 'submit' | i18next }]}</a>
-    </div>
-</script>
-
 
 <!-- BEGIN TEMPLATE UPDATE -->
 <script type="text/ng-template" id="update.html">

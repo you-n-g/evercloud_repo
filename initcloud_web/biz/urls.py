@@ -73,6 +73,7 @@ urlpatterns += [
 urlpatterns += [
     url(r'^snapshot/$', snapshot_view.SnapshotList.as_view()),
     url(r'^snapshot/create_instance_snapshot$', snapshot_view.create_instance_snapshot),
+    url(r'^snapshot/boot_snapshot/$', snapshot_view.boot_snapshot),
     url(r'^snapshot/batch-delete/$', snapshot_view.delete_snapshots),
 ]
 
@@ -115,6 +116,8 @@ urlpatterns += [
     url(r'^instancemanage/assignedusers/$', instance_view.instance_assignedusers),
     url(r'^instancemanage/unassignedusers/$', instance_view.instance_unassignedusers),
     url(r'^instancemanage/assignins/$', instance_view.instance_assign_instance),
+    url(r'^instancemanage/resize/$', instance_view.instance_resize),
+    url(r'^instancemanage/verify_resize/$', instance_view.instance_verify_resize),
     url(r'^instancemanage/devicepolicy/$', instancemanage_view.InstancemanageDevicePolicy.as_view()),
     url(r'^instancemanage/devicepolicy/update/$', instancemanage_view.devicepolicyupdate),
     url(r'^instancemanage/devicepolicy/undo/$', instancemanage_view.devicepolicyundo),
