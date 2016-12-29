@@ -327,6 +327,23 @@
             </ul>
         </li>
 
+        <li class="" data-ng-if="current_user.is_system_user">
+            <a href="javascript:;">
+                <i class="fa fa-flag fa-circle"></i>
+                <span class="title">{[{ 'sidebar.ceilometer' | i18next }]}</span>
+                <span class="arrow"></span>
+            </a>
+            <ul class="sub-menu">
+                <li>
+                    <a href="#/ceilometer/">
+                        <i class="fa fa-flag fa-circle"></i>
+                        <span class="title">
+                            {[{ 'sidebar.ceilometer' | i18next }]}
+                        </span>
+                    <span class="selected"></span></a>
+                </li>
+            </ul>
+        </li>
 
         <li data-ng-if-end class="heading" data-ng-if="site_config.WORKFLOW_ENABLED">
             <h3 class="uppercase">

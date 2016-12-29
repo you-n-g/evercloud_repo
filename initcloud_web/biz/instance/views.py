@@ -270,8 +270,13 @@ def instance_create_view(request):
 @api_view(["POST"])
 def instance_resize(request):
     ins = Instance.objects.get(id = request.data['id'])
-    ins.cpu = 2
-    ins.memory = 1024
+    LOG.info(request.data)
+    if int(request.data['vcpu']) == ins.cpu and int(request.data['core']) == ins.core and int(request.data['socket']) == ins.socket and int(request.data['memory']) == ins.memory:
+	return Response({"success":False, "msg": "No change!"})
+    ins.cpu = request.data['vcpu']
+    ins.core = request.data['core']
+    ins.socket = request.data['socket']
+    ins.memory = request.data['memory']
     ins.save()
     ins_ser = InstanceSerializer(ins)
     #LOG.info(ins_ser.data)
@@ -285,7 +290,7 @@ def instance_resize(request):
     except:
 	traceback.print_exc()
     #return Response(serializer.data)
-    return Response({"success":True, "msg":"Please verify resize or revert"})
+    return Response({"success":True})
 
 @api_view(["POST"])
 def instance_verify_resize(request):
@@ -306,6 +311,19 @@ def instance_verify_resize(request):
 	    LOG.info("--------------- WAIT --------------------")
 	    ins.status = 11
 	    return Response({"success":False, "msg":"Verify timeout!"})
+        flavor = nova.flavor_get(rc, instance.flavor['id'])
+        LOG.info(flavor.vcpus)
+        LOG.info(flavor.ram)
+        extra = nova.flavor_get_extras(rc, flavor.id, True)
+        core = extra['hw:cpu_cores']
+        socket = extra['hw:cpu_sockets']
+        LOG.info(core)
+        LOG.info(socket)
+
+	ins.cpu = flavor.vcpus
+	ins.memory = flavor.ram
+	ins.core = core
+	ins.socket = socket
 	ins.status = get_ins_status(instance)
 	ins.save()
 	return Response({"success":True, "msg":"Verify resize!"})

@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-md-8" style="padding-right:0px;">
+        <div class="portlet box blue-chambray" id="form_wizard_1"
+             style="border-left-style: none;border-bottom-style: none;margin-bottom: 0px;">
+            <div class="portlet-title">
+                <div class="caption">{[{ 'instancemanage.resize_instance_title' | i18next }]}</div>
+            </div>
+
+            <div class="portlet-body form">
+                <form action="/api/instances/" class="form-horizontal" id="submit_form" method="POST">
+                    <div class="form-wizard">
+                	<div data-ng-include="'/static/management/views/resize/step_flavor.html?t='+seed">
+                        </div>
+                        <div class="form-actions right">
+                                <a href="javascript:;" class="btn btn-danger button-cancel"
+                                   style="float:left;margin-left:10px;" ng-click="cancel()">
+                                    {[{ 'cancel' | i18next }]} </a>
+                                <a href="javascript:;" class="btn green button-submit"
+                                   ng-class="{'disabled': check_can_submit()}" nap-after-click>
+                                    {[{ 'submit' | i18next }]}
+                                </a>
+                                <a href="javascript:;" id="btnCreateInstance" ng-click="submit_click(instance_config)">
+                                </a>
+                        </div>
+		    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" style="padding-left:0px;">
+        <div class="portlet box blue-chambray"
+             style="border-left-style: none;border-bottom-style: none;border-right-style:none; margin-bottom: 0px;">
+            <div class="portlet-title">
+                <div class="caption">
+                </div>
+            </div>
+            <div class="portlet-body from">
+                <div data-ng-include="'/static/management/views/resize/info.html?t='+seed"></div>
+                <div data-ng-include="'/static/management/views/resize/quota.html?t='+seed"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- END PAGE CONTENT-->
+<script type="text/javascript">
+    $(document).ready(function(){
+        FormWizard.init();
+    });
+</script>
+
