@@ -572,7 +572,8 @@ def server_get(request, instance_id):
 
 
 def server_list(request, search_opts=None, all_tenants=False):
-    page_size = utils.get_page_size(request)
+    #page_size = utils.get_page_size(request)
+    page_size = 100
     c = novaclient(request)
     paginate = False
     if search_opts is None:

@@ -1033,7 +1033,11 @@
       "confirm_delete": "确定取消吗",
       "deleteinstance": "删除虚拟机",
       "create_snap": "创建快照",
-      "assignrole": "分配权限"
+      "assignrole": "分配权限",
+      "resize_instance_title": "修改虚拟机配置",
+      "confirm_resize": "确定修改",
+      "revert_resize": "回退修改",
+      "resize": "修改配置"
 
 },
   "heat":{

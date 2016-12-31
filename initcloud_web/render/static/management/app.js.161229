@@ -214,25 +214,6 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-	  //ceilometer
-          .state("ceilometer", {
-                url: "/ceilometer/",
-                templateUrl: "/static/management/views/ceilometer.html",
-                data: {pageTitle: 'Ceilometer'},
-                controller: "CeilometerController",
-                resolve: {
-                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-                        return $ocLazyLoad.load({
-                            name: 'CloudApp',
-                            insertBefore: '#ng_load_plugins_before',
-                            files: [
-                                '/static/management/controllers/ceilometer_ctrl.js'
-                            ]
-                        });
-                    }]
-                }
-            })
-
             // contract
             .state("contract", {
                 url: "/contract/",

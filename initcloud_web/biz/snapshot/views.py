@@ -19,7 +19,7 @@ from biz.account.settings import QUOTA_ITEM, NotificationLevel
 from biz.snapshot.models import Snapshot 
 from biz.snapshot.serializer import SnapshotSerializer
 from biz.snapshot.utils import * 
-from biz.idc.models import DataCenter
+from biz.idc.models import UserDataCenter
 from biz.common.pagination import PagePagination
 from biz.common.decorators import require_POST, require_GET
 from biz.common.utils import retrieve_params, fail
@@ -29,7 +29,7 @@ from cloud.tasks import (link_user_to_dc_task, send_notifications,
 from frontend.forms import CloudUserCreateFormWithoutCapatcha
 from cloud.api import nova
 from cloud.api import glance
-from cloud.cloud_utils import create_rc_by_dc
+from cloud.cloud_utils import create_rc_by_udc
 from biz.image.serializer import ImageSerializer
 from biz.instance.models import Instance
 from biz.image.models import Image
@@ -57,8 +57,10 @@ def create_instance_snapshot(request):
 	#id = request.data['id']
 	snap_name = request.data['snap_name']
 	instance_id = request.data['instance_id']
-	datacenter = DataCenter.get_default()
-	rc = create_rc_by_dc(datacenter)
+	#datacenter = DataCenter.get_default()
+	udc_id = request.session["UDC_ID"]
+	udc = UserDataCenter.objects.get(id = udc_id)
+	rc = create_rc_by_udc(udc)
 	snapshot = nova.snapshot_create(rc, instance_id, snap_name)
 	serializer = SnapshotSerializer(data = {'snapshotname':snap_name,'snapshot_id':snapshot, 'snapshot_type':'instance', 'instance_id':instance_id})
 	if serializer.is_valid():
