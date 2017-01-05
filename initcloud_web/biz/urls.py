@@ -40,7 +40,7 @@ from biz.heat import views as heat_view
 
 from biz.templatemanager import views as templatemanager_view
 from biz.snapshot import views as snapshot_view
-
+from biz.ceilometer import views as ceilometer_view
 
 
 
@@ -77,6 +77,10 @@ urlpatterns += [
     url(r'^snapshot/batch-delete/$', snapshot_view.delete_snapshots),
 ]
 
+#ceilometer
+urlpatterns += [
+    url(r'^ceilometer/$', ceilometer_view.CeilometerList.as_view()),
+]
 
 urlpatterns += [
     url(r'^networkmanager/$', networkmanager_view.NetworkmanagerList.as_view()),

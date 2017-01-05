@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'biz.heat',
     'biz.templatemanager',
     'biz.snapshot',
+    'biz.ceilometer',
 ]
 
 MIDDLEWARE_CLASSES = (

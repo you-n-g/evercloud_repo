@@ -5,6 +5,10 @@
 
 angular.module('cloud.resources', [])
 
+.factory('Ceilometer', ['$resource', function ($resource) {
+    return $resource("/api/ceilometer/:id", {id: '@id'});
+}])
+
 .factory('Snapshot', ['$resource', function ($resource) {
     return $resource("/api/snapshot/:id", {id: '@id'});
 }])
