@@ -217,7 +217,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
 	  //ceilometer
           .state("ceilometer", {
                 url: "/ceilometer/",
-                templateUrl: "/static/management/views/ceilometer.html",
+                //templateUrl: "/static/management/views/ceilometer.html",
+                templateUrl: "/static/management/views/monitor.html",
                 data: {pageTitle: 'Ceilometer'},
                 controller: "CeilometerController",
                 resolve: {
@@ -226,6 +227,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                             name: 'CloudApp',
                             insertBefore: '#ng_load_plugins_before',
                             files: [
+                               // '/static/management/controllers/monitor_test.js'
                                 '/static/management/controllers/ceilometer_ctrl.js'
                             ]
                         });

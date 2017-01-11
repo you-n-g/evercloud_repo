@@ -3,28 +3,15 @@
  * Date: 16-4-17
  **/
 CloudApp.controller('CeilometerController',
-    function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox, $sce, $http,
+    function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox,
              CommonHttpService, ToastrService, ngTableParams, ngTableHelper,
              Ceilometer, CheckboxGroup, DataCenter){
 
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
-	$scope.base_url = "http://192.168.1.51:5601/app/kibana#/visualize/";	
-	//$scope.monitorUrl = $sce.trustAsResourceUrl("/api/ceilometer_monitor");
-	//$scope.monitorUrl = $sce.trustAsResourceUrl("http://192.168.1.51:5601/app/kibana#/visualize/step/1?_g=()");
-        $scope.dashboard = "http://192.168.1.51:5601/app/kibana#/dashboard/CPU?_g=(filters:!(),refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2d,mode:relative,to:now))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:CPU_1,panelIndex:1,row:1,size_x:12,size_y:5,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:CPU,uiState:())";
-	var loadMonitor = function(){
-                $scope.monitorUrl = $sce.trustAsResourceUrl($scope.dashboard);
-            };
-	loadMonitor();
-	$scope.changeMeter = function(meter){
-	    if (meter == "CPU"){
-		$scope.dashboard = "http://192.168.1.51:5601/app/kibana#/visualize/edit/CPU_1?_g=(filters:!(),refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2d,mode:relative,to:now))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(spy:(mode:(fill:!f,name:!n)),vis:(legendOpen:!t)),vis:(aggs:!((enabled:!t,id:'1',params:(customLabel:CPU,field:counter_volume),schema:metric,type:max),(enabled:!t,id:'2',params:(field:counter_name.keyword,order:desc,orderBy:'1',row:!t,size:5),schema:split,type:terms),(enabled:!t,id:'3',params:(field:resource_metadata.display_name.keyword,order:desc,orderBy:'1',size:5),schema:group,type:terms),(enabled:!t,id:'4',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:auto,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,legendPosition:right,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),title:CPU_1,type:line))"}
-		loadMonitor();
-	};
- 
-	$scope.ceilometers = [];
+
+        $scope.ceilometers = [];
         var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.ceilometers);
 
         $scope.ceilometer_table = new ngTableParams({
