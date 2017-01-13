@@ -263,26 +263,26 @@ logging.config.dictConfig(LOG_CONFIG)
 
 # Added by arthur
 
-ADMIN_TOKEN = "02c24f6ad9bd4f1f8212efe08b382adb"
+ADMIN_TOKEN = "44949a0c6c5b437d95226df8ea919c8e"
 ADMIN_NAME = "admin"
 EDNPOINT = "http://192.168.1.51:35357/v2.0"
 HEAT_ENDPOINT = 'http://192.168.1.51:8004/v1/'
 ADMIN_TENANT_NAME = "admin"
-ADMIN_PASS = "admin"
+ADMIN_PASS = "123456"
 AUTH_URL = "http://192.168.1.51:5000/v2.0/"
 NOVA_VERSION = "2"
 TENANT_DEFAULT_NETWORK = "10.0.0.0/24"
 GATEWAY_IP = "10.0.0.1"
 TEST_TENANT_NAME = "testwork"
 TEST_TENANT_ID = "cde7d6ed392941c5b75a3079459690d4"
-ALARM_ACTIONS = "http://192.168.223.150:5998/wsgi_app.py"
+ALARM_ACTIONS = "http://192.168.1.51:5998/wsgi_app.py"
 RESULT = [{"meter_name": "cpu_util"},{'meter_name':"memory.usage"},{"meter_name": "disk.write.bytes"},{"meter_name": "network.incoming.bytes"}, {"meter_name": "network.outgoing.bytes"}]
 
 # Virtural Desktop
-MGR_HTTP_ADDR = "http://192.168.1.20:8893/v1/vdstatus"
-MGR_WS_ADDR = "ws://192.168.1.20:8893/ws"
+MGR_HTTP_ADDR = "http://192.168.1.51:8893/v1"
+MGR_WS_ADDR = "ws://192.168.1.51:8893/ws"
 
-COMPUTE_HOSTS = {'compute01': "192.168.1.51"}
+COMPUTE_HOSTS = {'vds-dev': "192.168.1.51"}
 
 DEVICEPOLICY = [{"name":"usb"}]
 VLAN_ENABLED = False
