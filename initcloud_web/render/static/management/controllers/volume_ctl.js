@@ -90,6 +90,9 @@ angular.module("CloudApp")
                         },
                         volume_types: function(){
                             return CommonHttpService.get("/api/volumes/typelist/"); 
+                        },
+                        users: function() {
+                            return CommonHttpService.get("/api/users/").results; // FIXME?
                         }
                     }
                 });
@@ -221,10 +224,11 @@ angular.module("CloudApp")
     .controller('VolumeCreateController',
         function ($rootScope, $scope, $modalInstance,
                   $i18next, PriceTool, CommonHttpService, ToastrService,CheckboxGroup,
-                  volume_table, prices, quota, volume_types){
+                  volume_table, prices, quota, volume_types, users){
 
 
             $scope.roles = volume_types;
+            $scope.users = users;
             var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.roles);
             $scope.quota = quota;
             $scope.volume = {
@@ -232,6 +236,7 @@ angular.module("CloudApp")
                 "size": 10,
                 "pay_type": "hour",
                 "selected_rule": "iscsi",
+                "user": "",
                 "pay_num": 1
             };
 
@@ -300,6 +305,7 @@ angular.module("CloudApp")
                     "name": volume.name,
                     "os_volume_type": volume.selected_rule,
                     "size": volume.size,
+                    "user_id": volume.user.id,
                     "pay_type": volume.pay_type,
                     "pay_num": volume.pay_num
                 };

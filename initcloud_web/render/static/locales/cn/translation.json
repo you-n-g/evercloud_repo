@@ -160,6 +160,7 @@
   "volume": {
     "name": "名称",
     "size": "容量(GB)",
+    "user": "用户",
     "resource": "资源",
     "status": "状态",
     "terminate": "删除",
