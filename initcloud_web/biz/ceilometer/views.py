@@ -56,6 +56,15 @@ class MonitorProxy(HttpProxy):
 
 monitor_proxy = login_required(csrf_exempt(MonitorProxy.as_view()))
 
+@require_POST
+def return_kibana(request):
+    if request.data['meter'] == 'CPU':
+        url = settings.MONITOR_CPU
+    elif request.data['meter'] == 'disk':
+        url = settings.MONITOR_DISK
+    else:
+        url = 'http://192.168.1.51:8081'
+    return Response({"url":url})
 
 class CeilometerList(generics.ListAPIView):
     LOG.info("--------- I am ceilometer list in CeilometerList ----------")
@@ -63,27 +72,8 @@ class CeilometerList(generics.ListAPIView):
     LOG.info("--------- Queryset is --------------" + str(queryset)) 
     serializer_class = CeilometerSerializer
     def list(self, request):
-	#udc_id = request.session['UDC_ID']
-	#udc = UserDataCenter.objects.get(id = udc_id)
-	#rc = create_rc_by_udc(udc)
-	dc = DataCenter.get_default()
-	rc = create_rc_by_dc(dc)
-	try:
-	    servers = nova.server_list(rc, all_tenants = True)[0]
-	    #LOG.info(servers)
-	    for each in servers:
-		LOG.info(each.id)
-	        disk_write = get_sample_data(rc, 'disk.write.bytes.rate', each.id)
-		for sample in disk_write:
-		    LOG.info(sample.counter_volume)
-	#	LOG.info(disk_write)
-	except:
-	    traceback.print_exc()
-	LOG.info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-	#disk_write = get_sample_data(rc, 'disk.write.bytes.rate', each.id)
-	#disk__read = get_sample_data(rc, 'disk.read.bytes.rate', each.id)
-	#cpu_util = get_sample_data(rc, 'cpu_util', each.id)
-	return Response()
+        url = "http://192.168.1.51:5601/app/kibana#/visualize/edit/CPU_1?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-7d,mode:relative,to:now))&_a=(filters:!(('$$hashKey':'object:494','$state':(store:appState),meta:(alias:!n,apply:!t,disabled:!f,index:'ceilometer*',key:counter_name.keyword,negate:!f,value:cpu),query:(match:(counter_name.keyword:(query:cpu,type:phrase))))),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(spy:(mode:(fill:!f,name:!n)),vis:(legendOpen:!t)),vis:(aggs:!((enabled:!t,id:'1',params:(customLabel:CPU,field:counter_volume),schema:metric,type:max),(enabled:!t,id:'2',params:(field:counter_name.keyword,order:desc,orderBy:'1',row:!t,size:5),schema:split,type:terms),(enabled:!t,id:'3',params:(field:resource_metadata.display_name.keyword,order:desc,orderBy:'1',size:5),schema:group,type:terms),(enabled:!t,id:'4',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:auto,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,legendPosition:right,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),title:CPU_1,type:line))"
+        return Response({"url":url})
 
 
 @require_POST

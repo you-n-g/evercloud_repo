@@ -7,14 +7,6 @@
                      <i class="fa fa-bar-chart-o"></i>{[{ title }]} 
                  </div>
 -->
-		 <div data-toggle="buttons" class="btn-group">
-                         <label class="btn grey-steel btn-sm active" data-ng-click="changeMeter('CPU')">
-                             <input type="radio" class="toggle" name="mode"> {[{ 'monitor.cpu' | i18next }]}
-                         </label>
-                         <label class="btn grey-steel btn-sm" data-ng-click="changeMeter('disk')">
-                             <input type="radio" class="toggle" name="mode"> {[{ 'monitor.disk' | i18next }]}
-                         </label>
-                     </div> 
              </div> 
              <div class="portlet-body">
                  <iframe frameBorder="0" data-ng-src="{[{ monitorUrl }]}" height="500" width="100%"></iframe>

@@ -79,7 +79,8 @@ urlpatterns += [
 
 #ceilometer
 urlpatterns += [
-    url(r'^ceilometer/$', ceilometer_view.CeilometerList.as_view()),
+    #url(r'^ceilometer/$', ceilometer_view.CeilometerList.as_view()),
+    url(r'^ceilometer/$', ceilometer_view.return_kibana),
     url(r'^ceilometer_monitor/$', ceilometer_view.monitor_proxy),
 ]
 

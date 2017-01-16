@@ -2,7 +2,7 @@
  * User: arthur 
  * Date: 16-4-17
  **/
-CloudApp.controller('CeilometerController',
+CloudApp.controller('InitcloudController',
     function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox, $sce, $http,
              CommonHttpService, ToastrService, ngTableParams, ngTableHelper,
              Ceilometer, CheckboxGroup, DataCenter){
@@ -10,19 +10,11 @@ CloudApp.controller('CeilometerController',
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
-        $scope.base_url = "http://192.168.1.51:5601/app/kibana#/visualize/";        
-        //$scope.monitorUrl = $sce.trustAsResourceUrl("/api/ceilometer_monitor");
-        $scope.dashboard = "http://192.168.1.51:5601/app/kibana#/dashboard/CPU?_g=(filters:!(),refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2d,mode:relative,to:now))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:CPU_1,panelIndex:1,row:1,size_x:12,size_y:5,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:CPU,uiState:())";
+        $scope.dashboard = "http://www.baidu.com";        
         var loadMonitor = function(){
                 $scope.monitorUrl = $sce.trustAsResourceUrl($scope.dashboard);
             };
         loadMonitor();
-        $scope.changeMeter = function(meter){
-                CommonHttpService.post("/api/ceilometer/", {"meter":meter}).then(function (data) {
-                $scope.dashboard = data['url'];
-                loadMonitor();})
-        };
- 
         $scope.ceilometers = [];
         var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.ceilometers);
 

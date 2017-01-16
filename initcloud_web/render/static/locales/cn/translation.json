@@ -376,7 +376,9 @@
     "policy_glance": "资源",
     "alarm": "监控报警",
     "snapshot": "快照管理",
-    "zabbix": "系统性能监控"
+    "zabbix": "系统性能监控",
+    "ceilometer":"云主机监控",
+    "initcloud_log":"日志监控"
   },
 
   "overview": {
@@ -941,6 +943,7 @@
   },
 
   "instancemanage": {
+    "sys_disk":"云硬盘",
     "desc": "提供虚拟机服务",
     "name": "虚拟机名称",
     "username": "用户名",
