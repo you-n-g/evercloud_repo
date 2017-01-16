@@ -34,9 +34,11 @@ def summary(request):
             dc = DataCenter.get_default()
             rc = create_rc_by_dc(dc)
 	    #LOG.info(dc)
-	    #LOG.info(rc)
+	    LOG.info(rc)
             if not UserDataCenter.objects.filter(data_center=dc, user=user).exists():
-		tenant = keystone.tenant_create(rc, name=user.username)
+		initcloud_tenant = "initcloud_" + user.username
+		LOG.info(initcloud_tenant)
+		tenant = keystone.tenant_create(rc, name=initcloud_tenant)
 		LOG.info("--------- create tenant for superuser ---------")
 		LOG.info(tenant)
 		users = keystone.user_list(rc)
