@@ -217,7 +217,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
 	  //ceilometer
           .state("ceilometer", {
                 url: "/ceilometer/",
-                templateUrl: "/static/management/views/ceilometer.html",
+                templateUrl: "/static/management/views/monitor.html",
                 data: {pageTitle: 'Ceilometer'},
                 controller: "CeilometerController",
                 resolve: {
@@ -227,6 +227,23 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                             insertBefore: '#ng_load_plugins_before',
                             files: [
                                 '/static/management/controllers/ceilometer_ctrl.js'
+                            ]
+                        });
+                    }]
+                }
+            })
+          .state("initcloud_log", {
+                url: "/initcloud_log/",
+                templateUrl: "/static/management/views/log_monitor.html",
+                data: {pageTitle: 'initcloud_log'},
+                controller: "InitcloudController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/initcloud_log_ctrl.js'
                             ]
                         });
                     }]

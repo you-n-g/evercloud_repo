@@ -94,7 +94,7 @@ BACKUP_DU_COMMAND = "python /opt/eontools/rbd_backup.py -p %(source_pool)s -i %(
 MONITOR_ENABLED = True
 MONITOR_CONFIG = {
     "enabled": MONITOR_ENABLED,
-    "base_url": "http://192.168.1.51:5601",
+    "base_url": "http://127.0.0.1:5601",
     'monitors': [
         {
             "title": u"CPU",

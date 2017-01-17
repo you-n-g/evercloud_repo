@@ -1,4 +1,4 @@
-#-*-coding-utf-8-*-
+# -*- coding:utf-8 -*-
 
 # Author Yang
 
@@ -24,7 +24,7 @@ from biz.idc.models import DataCenter
 from biz.common.pagination import PagePagination
 from biz.common.decorators import require_POST, require_GET
 from biz.common.utils import retrieve_params, fail
-from biz.common.views import IsSystemUser, IsSafetyUser, IsAuditUser
+from biz.common.views import IsSystemUser, IsSafetyUser, IsAuditUser,user_has_instance
 from biz.workflow.models import Step
 from cloud.tasks import (link_user_to_dc_task, send_notifications,
                          add_user_role,
@@ -190,8 +190,9 @@ class role_list_view(generics.ListAPIView):
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
         roles = []
         for role in keystone.role_list(rc):
- 	    roles.append({"role":role.name})
-        roles.append({"role":"admin_or_owner"})
+            if role.name in ["system","security","audit","_member_"]:
+      	        roles.append({"role":role.name})
+        #roles.append({"role":"admin_or_owner"})
         #keystone.role_list(rc)
         LOG.info(roles)
         return Response(roles)
@@ -267,6 +268,19 @@ def is_policy_novaname_unique(request):
 @api_view(['POST'])
 def assignrole(request):
     LOG.info("******** datat is **********" + str(request.data))
+
+    # Check user has instances or not.
+    user_id = request.data.get('id')
+    LOG.info("ccc")
+    user = User.objects.get(pk=user_id)
+    LOG.info("ccc")
+    has_instances = user_has_instance(request, user)
+    LOG.info("ccc")
+    if has_instances:
+        LOG.info("has instances")
+        return Response(
+            {'success': False, "msg": _('User has instances!')})
+    
     username = request.data.get('username')
     roles = request.data.get('roles') 
     roles_split = roles.split(",")
