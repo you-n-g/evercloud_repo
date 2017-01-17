@@ -10,6 +10,7 @@ from rest_framework import permissions
 from django.contrib.auth.decorators import login_required
 from rest_framework.authentication import SessionAuthentication 
 
+from biz.instance.models import Instance
 from biz.instance import settings as instance_settings
 from biz.floating import settings as floating_settings
 from biz.network import settings as network_settings
@@ -206,3 +207,13 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
 
+
+
+def user_has_instance(request,user):
+
+    has_instances = False
+    instances = Instance.objects.filter(user_id=user.id)
+    LOG.info("instances are" + str(instances))
+    if instances:
+        has_instances = True
+    return has_instances

@@ -33,9 +33,6 @@ def summary(request):
         if user.is_superuser:
             dc = DataCenter.get_default()
             rc = create_rc_by_dc(dc)
-	    #LOG.info(dc)
-	    #LOG.info(rc)
-	    users = keystone.user_list(rc)
             if not UserDataCenter.objects.filter(data_center=dc, user=user).exists():
 		initcloud_tenant = "initcloud_" + user.username
 		LOG.info(initcloud_tenant)

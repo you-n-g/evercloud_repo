@@ -568,7 +568,7 @@
     "resetpassword": "重置密码",
     "mobile": "手机号",
     "is_active": "活跃用户",
-    "assignrole": "分配用户角色",
+    "assignrole": "指派三员",
     "is_superuser": "超级用户",
     "system_user": "系统管理员",
     "safety_user": "安全管理员",
