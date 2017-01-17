@@ -376,7 +376,9 @@
     "policy_glance": "资源",
     "alarm": "监控报警",
     "snapshot": "快照管理",
-    "zabbix": "系统性能监控"
+    "zabbix": "系统性能监控",
+    "ceilometer":"云主机监控",
+    "initcloud_log":"日志监控"
   },
 
   "overview": {
@@ -566,7 +568,7 @@
     "resetpassword": "重置密码",
     "mobile": "手机号",
     "is_active": "活跃用户",
-    "assignrole": "分配用户角色",
+    "assignrole": "指派三员",
     "is_superuser": "超级用户",
     "system_user": "系统管理员",
     "safety_user": "安全管理员",
@@ -941,6 +943,7 @@
   },
 
   "instancemanage": {
+    "sys_disk":"云硬盘",
     "desc": "提供虚拟机服务",
     "name": "虚拟机名称",
     "username": "用户名",

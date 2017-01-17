@@ -26,6 +26,7 @@ class UserProfile(models.Model):
     user_type = models.IntegerField(_("User Type"), null=True, default=1, \
                                     choices=USER_TYPE_CHOICES)
     balance = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
+    role = models.CharField(_("Role"), max_length=26, null=False, default="member")
 
     def __unicode__(self):
         return u'<UserProfile ID:%s User:%s>' % (self.id, self.user.username)

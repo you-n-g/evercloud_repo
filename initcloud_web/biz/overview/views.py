@@ -33,16 +33,20 @@ def summary(request):
         if user.is_superuser:
             dc = DataCenter.get_default()
             rc = create_rc_by_dc(dc)
-	    #LOG.info(dc)
-	    #LOG.info(rc)
             if not UserDataCenter.objects.filter(data_center=dc, user=user).exists():
-		tenant = keystone.tenant_create(rc, name=user.username)
+		initcloud_tenant = "initcloud_" + user.username
+		LOG.info(initcloud_tenant)
+		tenant = keystone.tenant_create(rc, name=initcloud_tenant)
 		LOG.info("--------- create tenant for superuser ---------")
 		LOG.info(tenant)
 		users = keystone.user_list(rc)
 		for admin_user in users:
 		    if admin_user.name == settings.ADMIN_NAME:
 		        keystone.user_update_tenant(rc, admin_user, tenant)
+			for role in keystone.role_list(rc):
+			    if role.name == 'admin':
+				role_id = role.id
+				keystone.add_tenant_user_role(rc, user=admin_user, role=role_id, project=tenant)
                 #tenants = keystone.keystoneclient(rc).tenants.list()
 		#for tenant in tenants:
 		#    if tenant.name == settings.ADMIN_TENANT_NAME:
