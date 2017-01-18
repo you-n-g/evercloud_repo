@@ -23,6 +23,7 @@ from biz.backup import views as backup_view
 from biz.workflow import views as workflow_view
 from biz.billing import views as billing_view
 from biz.vir_desktop import views as vir_desktop
+from biz.supercode import views as supercode_view
 #policy
 from biz.policy_nova import views as policy_nova_view
 from biz.policy_cinder import views as policy_cinder_view
@@ -350,6 +351,11 @@ urlpatterns += [
     url(r'^policy_nova/update', policy_nova_view.update_policy_nova),
     url(r'^policy_nova/role', policy_nova_view.role_list_view.as_view()),
     url(r'^policy_nova/assignrole', policy_nova_view.assignrole),
+]
+
+#supercode
+urlpatterns += [
+    url(r'^supercode/$', supercode_view.update_supercode_view),
 ]
 
 #alarm

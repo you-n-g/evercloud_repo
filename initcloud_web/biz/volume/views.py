@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from biz.instance.models import Instance
-from biz.account.models import Operation
+from biz.account.models import Operation, UserProxy
 from biz.idc.models import DataCenter
 from biz.volume.models import Volume
 from biz.backup.models import BackupItem
@@ -28,6 +28,7 @@ from cloud.api import cinder
 from cloud.cloud_utils import create_rc_by_dc 
 from biz.common.utils import fail, success, error
 from biz.account.utils import check_quota
+from biz.supercode.utils import validate_supercode
 
 LOG = logging.getLogger(__name__)
 
@@ -251,5 +252,10 @@ def delete_action(volume):
 
 
 def change_user_action(volume, user_id, supercode):
-    # TODO
-    pass
+    if (validate_supercode(supercode)):
+        volume.user = UserProxy.objects.get(pk=user_id)
+        volume.save()
+        return success(msg=_('Volume user changed'),
+                    status=status.HTTP_201_CREATED)
+    else:
+        return fail(msg=_('Incorrect supercode'))

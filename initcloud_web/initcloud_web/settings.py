@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'biz.backup',
     'biz.billing',
     'biz.vir_desktop',
+    'biz.supercode',
     'biz.heat',
     'biz.templatemanager',
     'biz.snapshot',

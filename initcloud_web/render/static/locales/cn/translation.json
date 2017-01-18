@@ -379,6 +379,7 @@
     "policy_cinder": "存储",
     "policy_neutron": "网络",
     "policy_glance": "资源",
+    "supercode": "特权口令",
     "alarm": "监控报警",
     "snapshot": "快照管理",
     "zabbix": "系统性能监控",
@@ -875,6 +876,14 @@
     "setup_ok": "安装完成",
     "remove_ok": "卸载完成",
     "error": "错误"
+  },
+
+  "supercode": {
+    "desc": "设置特权口令",
+    "old": "原口令",
+    "new1": "新口令",
+    "new2": "确认新口令",
+    "old_incorrect": "特权口令错误"
   },
 
   "policy_cinder": {

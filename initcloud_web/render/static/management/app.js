@@ -553,6 +553,25 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
+          // supercode
+          .state("supercode", {
+              url: "/supercode/",
+              templateUrl: "/static/management/views/supercode.html",
+              data: { pageTitle: 'SuperCode' },
+              controller: "SuperCodeController",
+              resolve: {
+                  deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                      return $ocLazyLoad.load({
+                          name: 'CloudApp',
+                          insertBefore: '#ng_load_plugins_before',
+                          files: [
+                              '/static/management/controllers/supercode_ctrl.js'
+                          ]
+                      });
+                  }]
+              }
+          })
+
           //group
           .state("group", {
                 url: "/group/",
