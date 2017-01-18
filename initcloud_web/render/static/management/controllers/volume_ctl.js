@@ -118,7 +118,7 @@ angular.module("CloudApp")
             /*挂载云硬盘弹出窗口*/
             $scope.openAttachModal = function(volume){
 
-                CommonHttpService.get("/api/instances/search/").then(function (data) {
+                CommonHttpService.get("/api/instances/search?uid=".concat(volume.user)).then(function (data) {
                     $scope.instances = data;
                 });
 

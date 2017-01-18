@@ -428,11 +428,10 @@ def instance_status_view(request):
 
 @api_view(["GET"])
 def instance_search_view(request):
-
-    UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
-    project_id = UDC.tenant_uuid
-    instance_set = Instance.objects.filter(Q(deleted=False, user=request.user, status=INSTANCE_STATE_RUNNING,
-        user_data_center=request.session["UDC_ID"]) | Q(tenant_uuid=project_id))
+    user_id = request.query_params.get('uid', None)
+    #UDC = UserDataCenter.objects.get(user=request.user)
+    #project_id = UDC.tenant_uuid
+    instance_set = Instance.objects.filter(deleted=False, user=user_id)
     serializer = InstanceSerializer(instance_set, many=True)
     return Response(serializer.data)
 
