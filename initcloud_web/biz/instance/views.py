@@ -3,7 +3,7 @@
 import re
 import logging
 import os
-import bson
+from bson import json_util
 import subprocess
 import uuid
 from djproxy.views import HttpProxy
@@ -726,8 +726,7 @@ def new_vdi_test(request):
         vnc_port = 5900 + int(port_3)
         json_value[str(q.id)] = {"vm_uuid": q.uuid, "vm_private_ip": q.private_ip, "vm_public_ip": q.public_ip, "vm_host": host_ip, "vm_status": server_status, "policy_device": str(q.policy), "vnc_port": vnc_port, "vm_internalid": str(q.id), "vm_name": q.name}
     LOG.info("*** json_value ***" + str(json_value))
-    #return json_util.loads(json_value)
-    return bson.loads(json_value)
+    return json_util.loads(json_value)
 
 def user_is_not_active(request):
     return Response({"status": "-1", "message": "failed"})
