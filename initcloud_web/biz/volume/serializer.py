@@ -9,7 +9,7 @@ from biz.account.serializer import UserSerializer
 
 
 class VolumeSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True, default=None)
+    #user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), allow_null=False)
     user_info = UserSerializer(source="user", required=False, allow_null=True, default=None, read_only=True)
     user_data_center = serializers.PrimaryKeyRelatedField(queryset=UserDataCenter.objects.all(), required=False, allow_null=True, default=None)
     instance_info = InstanceSerializer(source="instance", required=False, allow_null=True, default=None, read_only=True)
