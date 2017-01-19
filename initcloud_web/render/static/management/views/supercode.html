@@ -3,12 +3,13 @@
         <div class="portlet">
             <div class="portlet-title">
                 <div class="caption font-green-sharp">
+                    <p ng-if="is_init">{[{ 'supercode.init' | i18next }]}</p>
                 </div>
             </div>
             <div class="portlet-body">
                 <form role="form" id="supercode_submit_form" class="form-horizontal">
                     <div class="form-body">
-                        <div class="form-group" ng-class="{'has-error': has_error}">
+                        <div class="form-group" ng-if="is_init === false" ng-class="{'has-error': has_error}">
                             <label class="col-md-2 control-label"> {[{ 'supercode.old' | i18next }]}
                                 <span class="required" aria-required="true">* </span>
                             </label>
@@ -22,9 +23,6 @@
                                         ng-model="code.old" value="" class="required"
                                         onpaste="return false;" ondragenter="return false;"
                                         oncontextmenu="return false;"
-                                        data-rule-minlength="8"
-                                        data-rule-complexPassword="true"
-                                        data-msg="{[{ 'user.invalid_password_tip' | i18next }]}"
                                         style="ime-mode:disabled"/>
                                 </div>
                                 <span ng-if="has_error" id="name-error" class="help-block help-block-error">
@@ -43,7 +41,7 @@
                                         <i class="fa fa-pencil"></i>
                                     </span>
 
-                                    <input id="new1" type="password" class="form-control" name="old"
+                                    <input id="new1" type="password" class="form-control" name="new1"
                                         ng-model="code.new1" value="" class="required"
                                         onpaste="return false;" ondragenter="return false;"
                                         oncontextmenu="return false;"
@@ -65,11 +63,11 @@
                                         <i class="fa fa-pencil"></i>
                                     </span>
 
-                                    <input id="new2" type="password" class="form-control" name="old"
+                                    <input id="new2" type="password" class="form-control" name="new2"
                                         ng-model="code.new2" value="" class="required"
                                         onpaste="return false;" ondragenter="return false;"
                                         oncontextmenu="return false;"
-                                        data-rule-equalTo="#new_password"
+                                        data-rule-equalTo="#new1"
                                         data-msg="{[{ 'user.same_password_tip' | i18next }]}"
                                         style="ime-mode:disabled"/>
                                 </div>

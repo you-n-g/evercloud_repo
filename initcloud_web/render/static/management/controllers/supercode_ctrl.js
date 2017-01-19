@@ -1,10 +1,16 @@
 CloudApp.controller('SuperCodeController',
     function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox,
-             CommonHttpService, ToastrService){
+             CommonHttpService, ValidationTool, ToastrService){
+
+        var form = null;
 
         $scope.$on('$viewContentLoaded', function(){
             Metronic.initAjax();
             Layout.setSidebarMenuActiveLink("match");
+            CommonHttpService.get("/api/supercode/").then(function (exists) {
+                $scope.is_init = !exists;
+            });
+            form = ValidationTool.init('#supercode_submit_form');
         });
 
         $scope.code = {
@@ -16,6 +22,9 @@ CloudApp.controller('SuperCodeController',
         $scope.has_error = false;
 
         $scope.submit = function() {
+            if(!form.valid()){
+                return;
+            }
             var post_data = {
                 "old": $scope.code.old,
                 "new1": $scope.code.new1,

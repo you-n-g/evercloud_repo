@@ -15,3 +15,6 @@ def update_supercode(newcode):
     code = h.hexdigest()
     c = SuperCode(code=code)
     c.save()
+
+def supercode_exists():
+    return SuperCode.objects.count() > 0

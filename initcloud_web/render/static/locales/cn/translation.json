@@ -883,7 +883,8 @@
     "old": "原口令",
     "new1": "新口令",
     "new2": "确认新口令",
-    "old_incorrect": "特权口令错误"
+    "old_incorrect": "特权口令错误",
+    "init": "首次设置口令"
   },
 
   "policy_cinder": {
