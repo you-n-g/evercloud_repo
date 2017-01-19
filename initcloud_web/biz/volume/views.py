@@ -252,7 +252,7 @@ def delete_action(volume):
 
 
 def change_user_action(volume, user_id, supercode):
-    if (validate_supercode(supercode)):
+    if validate_supercode(supercode):
         volume.user = UserProxy.objects.get(pk=user_id)
         volume.save()
         return success(msg=_('Volume user changed'),
