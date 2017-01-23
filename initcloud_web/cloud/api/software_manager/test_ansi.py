@@ -1,7 +1,8 @@
 import api
 
 # host = "192.168.1.202"
-host = "192.168.150.101"
+# host = "192.168.150.101"
+host = "192.168.1.225"
 
 def test_install():
     print api.get_installed_software(host)
@@ -57,6 +58,6 @@ def test_install_new_program():
 # change_defualt_user_reg()
 # hide_user()
 
-# set_wallpaper()
+set_wallpaper()
 
-test_install_new_program()
+# test_install_new_program()

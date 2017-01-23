@@ -123,6 +123,7 @@ ALLOWED_INSTANCE_ACTIONS = {
     "detach_volume": _("Instance Detach Volume"),
     "terminate": _("Instance Terminate"),
     "launch": _("Instance Launch"),
+    "set_jimi": _("Set jimi"),
 }
 
 

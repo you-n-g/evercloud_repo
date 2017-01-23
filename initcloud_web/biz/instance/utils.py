@@ -23,6 +23,7 @@ from biz.instance.settings import (INSTANCE_STATE_RUNNING,
                                    INSTANCE_STATE_BOOTING, INSTANCE_STATE_ERROR,
                                    INSTANCE_STATE_DELETE,
                                    INSTANCE_STATE_POWEROFF)
+import cloud.api.software_manager.api as software_api
 
 OPERATION_SUCCESS = 1
 OPERATION_FAILED = 0
@@ -129,6 +130,15 @@ def get_instance_novnc_console(instance):
         return {"OPERATION_STATUS": OPERATION_FAILED}
 
 
+def set_instance_jimi(instance):
+    # import rpdb; rpdb.set_trace()
+    if instance.is_running and instance.public_ip and software_api.set_wallpaper([instance.public_ip], "jimi"):
+        instance.security_cls = Instance.JIMI
+        instance.save()
+        return {"OPERATION_STATUS": OPERATION_SUCCESS, "status": instance.status}
+    return {"OPERATION_STATUS": OPERATION_FAILED, "status": instance.status}
+
+
 def _server_reboot(rc, instance):
     if instance.uuid:
         nova.server_reboot(rc, instance.uuid)
@@ -216,6 +226,8 @@ def instance_action(user, instance_id, action):
     if action == "novnc_console":
         return get_instance_novnc_console(instance)
 
+    if action == "set_jimi":
+        return set_instance_jimi(instance)
 
     Operation.log(instance, obj_name=instance.name, action=action)
     

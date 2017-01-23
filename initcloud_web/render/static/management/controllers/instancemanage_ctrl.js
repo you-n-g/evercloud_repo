@@ -361,6 +361,10 @@ CloudApp.controller('InstancemanageController',
             });
         };
 
+        var instance_set_jimi = function (ins) {
+            do_instance_action(ins, "set_jimi", need_confirm);
+        };
+
         var action_func = {
             "novnc_console": instance_novnc_console,
             "vnc_console": instance_vnc_console,
@@ -382,7 +386,8 @@ CloudApp.controller('InstancemanageController',
             "terminate": instance_terminate,
             "backup": instance_backup,
             "restore": instance_restore,
-            "add_qos": instance_add_qos
+            "add_qos": instance_add_qos,
+            "set_jimi": instance_set_jimi
         };
 
         $scope.instance_action = function (ins, action) {
