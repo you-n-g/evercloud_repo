@@ -263,9 +263,8 @@ def set_wallpaper(host_list, wallpaper):
         if 0 != execute_tasks(play_name="set_wallpaper", tasks=[
             {
                 "action": {
-                    "module": 'raw',
-                    #"module": 'win_command',
-                    #"module": 'win_shell',
+                    # "module": 'win_command',
+                    "module": 'win_shell',
                     "args": 'copy %s %s' % (Config.wallpaper_options[wallpaper], Config.wallpaper_path),
                 },
                 "name": "copy_file",

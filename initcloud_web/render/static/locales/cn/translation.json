@@ -143,7 +143,10 @@
     "batch_launch_prompt": "一次可批量创建__num__台云主机",
     "infinite": "无限",
     "create_snap": "创建快照",
-    "network_detail": "网络详情"
+    "network_detail": "网络详情",
+    "security_cls": "密级",
+    "set_jimi": "设置为机密",
+    "confirm_set_jimi": "请确认设置云主机为机密"
   },
 
   "flavor": {
@@ -1055,8 +1058,13 @@
       "resize_instance_title": "修改虚拟机配置",
       "confirm_resize": "确定修改",
       "revert_resize": "回退修改",
-      "resize": "修改配置"
+      "resize": "修改配置",
 
+      "security_level": "密级",
+      "all_security_level": {
+          "mimi": "秘密",
+          "jimi": "机密"
+      }
 },
   "heat":{
     "name": "租户名称",

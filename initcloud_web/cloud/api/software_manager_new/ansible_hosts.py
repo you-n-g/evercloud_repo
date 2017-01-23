@@ -36,7 +36,7 @@ VARS = {
     "ansible_ssh_port": 5985,
     # "ansible_ssh_port": 5986,
     "ansible_connection": "winrm",
-    "ansible_winrm_server_cert_validation": "ignore",
+    # "ansible_winrm_server_cert_validation": "ignore",
 }
 
 

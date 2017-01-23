@@ -1,0 +1,4 @@
+ansible_ssh_user: "username"
+ansible_ssh_pass: "password"
+hosts:
+    - "192.168.90.1"
