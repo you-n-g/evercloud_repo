@@ -691,3 +691,79 @@
 </script>
 <!-- END TEMPLATE UPDATE -->
 
+
+<script type="text/ng-template" id="vnc_console.html">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
+    </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.vnc_prompt' | i18next }]}
+        <a href="{[{ vnc_console.vnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.vnc_new_window' | i18next }]}
+        </a>
+    </p>
+
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a><a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
+      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="spice_console.html">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.spice_console' | i18next }]}</h4>
+    </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.spice_prompt' | i18next }]}
+        <a href="{[{ spice_console.spice_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.spice_new_window' | i18next }]}
+        </a>
+    </p>
+
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+      <p> 请下载并拷贝 <a href="/static/software/spicec.exe"> spicec.exe</a> <a href="/static/software/vncviewer.exe"> vncviewer.exe</a>  <a href="/static/software/spicevm.exe">spicevm.exe</a> <a href="/static/software/libcelt_0_5_1.dll"> libcelt_0_5_1.dll </a>文件到 C:\Windows 目录下。</p>
+      <p> 请下载并双击运行 <a href="/static/software/spicevm.reg">spicevm.reg</a> 文件，导入注册表。</p>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="checkbox-header.html">
+    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
+</script>
+
+<script type="text/ng-template" id="novnc_console.html">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
+            {[{ 'instance.vnc_window_close' |i18next }]}
+        </button>
+        <h4 class="modal-title">{[{ 'instance.vnc_console' | i18next }]}</h4>
+    </div>
+    <p class='alert alert-info'>
+        {[{ 'instance.vnc_prompt' | i18next }]}
+        <a href="{[{ novnc_console.novnc_url }]}" style="text-decoration: underline" class="alert-link" target="_blank">
+            {[{ 'instance.vnc_new_window' | i18next }]}
+        </a>
+    </p>
+    <div class="model-body">
+        <div class="row">
+            <div class="col-md-12">
+                <iframe ng-src="{[{ novnc_sce_url(novnc_console) }]}" style="width:898px;height:700px;" frameBorder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</script>

@@ -53,6 +53,22 @@ def glanceclient(request, url, version='1'):
                                 token=token['token']['id'],
                                 insecure=insecure, cacert=cacert)
 
+#@memoized
+def glanceclient_tm(request, url, version='1'):
+    insecure = True#getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', True)
+    cacert = None#getattr(settings, 'OPENSTACK_SSL_CACERT', None)
+    #LOG.debug('glanceclient connection created using token "%s" and url "%s"'
+    #          % (request.user.token.id, url))
+    # TODO: change token to RC
+    keystone = v2_0.client.Client(username = settings.ADMIN_NAME, password = settings.ADMIN_PASS, auth_url = settings.AUTH_URL, tenant_name = settings.ADMIN_TENANT_NAME)
+    token = keystone.auth_ref
+    LOG.info(url)
+    LOG.info(token)
+    return client.Client(url,
+                                token=token['token']['id'],
+                                insecure=insecure, cacert=cacert)
+
+
 
 def image_delete(request, image_id):
     return glanceclient(request).images.delete(image_id)

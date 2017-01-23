@@ -44,11 +44,6 @@ cd /var/www/initcloud_web/
 /var/www/initcloud_web/.venv/bin/python initcloud_web/manage.py createsuperuser
 popd
 
-#Username (leave blank to use 'root'): zhouxuhong
-#Email address: zhouxuhong@gmail.com
-#Password:
-#Password (again):
-#Superuser created successfully.
 
 # 9 init flavor
 pushd .

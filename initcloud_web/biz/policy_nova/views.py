@@ -269,18 +269,6 @@ def is_policy_novaname_unique(request):
 def assignrole(request):
     LOG.info("******** datat is **********" + str(request.data))
 
-    # Check user has instances or not.
-    user_id = request.data.get('id')
-    LOG.info("ccc")
-    user = User.objects.get(pk=user_id)
-    LOG.info("ccc")
-    has_instances = user_has_instance(request, user)
-    LOG.info("ccc")
-    if has_instances:
-        LOG.info("has instances")
-        return Response(
-            {'success': False, "msg": _('User has instances!')})
-    
     username = request.data.get('username')
     roles = request.data.get('roles') 
     roles_split = roles.split(",")
@@ -289,6 +277,20 @@ def assignrole(request):
         r_ = r.split(":")
         roles_name.append(r_[1])
     LOG.info("******** roles are ******" + str(roles_name))
+
+    # Check user has instances or not.
+    if "system" in roles or "security" in roles or "audit" in roles:
+        user_id = request.data.get('id')
+        LOG.info("ccc")
+        user = User.objects.get(pk=user_id)
+        LOG.info("ccc")
+        has_instances = user_has_instance(request, user)
+        LOG.info("ccc")
+        if has_instances:
+            LOG.info("has instances")
+            return Response(
+                {'success': False, "msg": _('User has instances!')})
+
     udc = UserDataCenter.objects.filter(keystone_user__contains=username)
     LOG.info("******** udc are ********" + str(udc))
     user_tenant_id = None

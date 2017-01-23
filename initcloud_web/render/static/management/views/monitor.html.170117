@@ -11,9 +11,9 @@
                          <label class="btn grey-steel btn-sm active" data-ng-click="changeMeter('CPU')">
                              <input type="radio" class="toggle" name="mode"> {[{ 'monitor.cpu' | i18next }]}
                          </label>
-<!--                         <label class="btn grey-steel btn-sm" data-ng-click="changeMeter('disk')">
+                         <label class="btn grey-steel btn-sm" data-ng-click="changeMeter('disk')">
                              <input type="radio" class="toggle" name="mode"> {[{ 'monitor.disk' | i18next }]}
-                         </label> -->
+                         </label>
                      </div> 
              </div> 
              <div class="portlet-body">

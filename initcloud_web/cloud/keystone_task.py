@@ -68,6 +68,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     u = keystone.user_create(rc, name=keystone_user, email=user.email,
                              password=pwd, project=project_id)
 
+    user_uuid = u.id
     LOG.info("User[%s] is registered as keystone user[uid:%s] in "
              "data center[%s]", user.username, u.id, datacenter.name)
 
@@ -114,6 +115,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
         tenant_uuid=project_id,
         keystone_user=keystone_user,
         keystone_password=pwd,
+        keystone_user_id=user_uuid
     )
 
     LOG.info("Register user[%s] to datacenter [udc:%s] successfully",

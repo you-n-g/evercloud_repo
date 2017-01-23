@@ -118,8 +118,8 @@ def instance_create(instance, password):
                                     image=instance.image.uuid,
                                     flavor=instance.flavor_id,
                                     key_name=None, user_data=None,
-                                    security_groups=[], nics=nics,
-                                    meta={"admin_pass": password})
+                                    security_groups=[], nics=nics)
+                                    #meta={"admin_pass": password})
     return server
 
 
