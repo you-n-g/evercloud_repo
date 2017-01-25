@@ -367,7 +367,7 @@ def delete_contracts(request):
 
 class UserList(generics.ListAPIView):
 
-    permission_classes = (IsSystemUser,)
+    #permission_classes = (IsSystemUser,)
 
     queryset = UserProxy.normal_users.all()
     serializer_class = UserSerializer

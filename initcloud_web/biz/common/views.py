@@ -119,6 +119,7 @@ def site_config(request):
     current_user = {'username': user.username, 'is_system_user': user_.is_system_user, 'is_safety_user': user_.is_safety_user, 'is_audit_user': user_.is_audit_user}
 
 
+    """
     if user_.is_system_user:
         return render(request, 'site_config.js',
                       {'current_user': json.dumps(current_user),
@@ -135,7 +136,7 @@ def site_config(request):
                       {'current_user': json.dumps(current_user),
                        'site_config': json.dumps(settings.SITE_CONFIG)},
                       content_type='application/javascript')
-
+    """
 
     if not user.is_superuser:
         LOG.info("99999999")
@@ -200,6 +201,11 @@ def site_config(request):
         current_user['security'] = security
         current_user['audit'] = audit
         current_user['member'] = member
+    if user.is_superuser:
+        current_user['system'] = True
+        current_user['security'] = True 
+        current_user['audit'] = True
+
         LOG.info("*** current_user is ***" + str(current_user))
         LOG.info("888888")
 

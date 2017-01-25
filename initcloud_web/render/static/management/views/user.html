@@ -56,11 +56,11 @@
                                 </td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group" data-ng-if="!user.isUpdating">
-                                        <button class="btn btn-default" data-ng-if="user.is_active" data-ng-if="current_user.system"
+                                        <button class="btn btn-default" data-ng-if="user.is_active && current_user.system"
                                                 type="button" data-ng-click="deactivate(user)">
                                             <i class="fa fa-lock"></i> {[{ 'user.deactivate' | i18next }]}
                                         </button>
-                                        <button class="btn btn-default" data-ng-if="!user.is_active" data-ng-if="current_user.system"
+                                        <button class="btn btn-default" data-ng-if="!user.is_active && current_user.system"
                                                 type="button" data-ng-click="activate(user)">
                                             <i class="fa fa-unlock"></i> {[{ 'user.activate' | i18next }]}
                                         </button>
@@ -89,12 +89,12 @@
                                             </li>
                                             -->
                                            <li>
-                                                <a href="javascript: void(0)" data-ng-click="delete(user);">
+                                                <a href="javascript: void(0)" data-ng-click="delete(user);" data-ng-if="current_user.system">
                                                     <i class="fa fa-magic"></i> {[{ 'user.delete' | i18next }]}
                                                 </a>
                                             </li>
                                            <li>
-                                                <a href="javascript: void(0)" data-ng-click="resetpassword(user);">
+                                                <a href="javascript: void(0)" data-ng-click="resetpassword(user);" data-ng-if="current_user.security">
                                                     <i class="fa fa-magic"></i> {[{ 'user.resetpassword' | i18next }]}
                                                 </a>
                                             </li>
