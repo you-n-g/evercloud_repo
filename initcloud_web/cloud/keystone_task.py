@@ -417,21 +417,29 @@ def project_delete(request, ID):
     return True
 
 @app.task
-def user_role(request,user):
-    datacenter = DataCenter.get_default()
-    LOG.info("****** signup get method ********")
-    rc = create_rc_by_dc(datacenter)
-    user_roles = keystone.roles_for_user(rc, user)
-    LOG.info("**** user_roles are ****" + user_roles)
-    response = "member"
-    for key,value in user_roles.items():
-        for v in value:
-            if v['name'] == "system":
-                response = "system"
-            elif v['name'] == "audit":
-                response = "audit"
-            elif['name'] == "security":
-                response = "security" 
-            else:
-                response = "member"
+def user_role(request,udc_id):
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    LOG.info(UDC)
+    LOG.info("4")
+    keystone_user_id = UDC.keystone_user_id
+    LOG.info("4")
+    tenant_uuid = UDC.tenant_uuid
+    LOG.info("4")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("4")
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    LOG.info("4")
+    for user_role in user_roles:
+        if user_role.name == "system":
+            response = "system" 
+            break
+        if user_role.name == "security":
+            response = "security"
+            break
+        if user_role.name == "audit":
+            response = "audit"
+            break
+        if user_role.name == "_member_":
+            response = "member"
+            break
     return response
