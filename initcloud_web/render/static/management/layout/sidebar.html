@@ -17,14 +17,15 @@
                 </span>
             <span class="selected"></span></a>
         </li>
-        <li class="">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.cloud_management' | i18next }]}</span>
                 <span class="arrow"></span>
             </a>
             <ul class="sub-menu">
-                <li id="sddc">
+                <li id="sddc"
+                    data-ng-if="current_user.system">
                     <a href="#/data-center/">
                         <i class="fa fa-building"></i>
                         <span class="title">
@@ -32,7 +33,8 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li id="contract">
+                <li id="contract" 
+                     data-ng-if="current_user.system">
                     <a href="#/contract/">
                         <i class="fa fa-file-word-o"></i>
                         <span class="title">
@@ -41,7 +43,7 @@
                     <span class="selected"></span></a>
                 </li>
                 <li id="flavor"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/flavor/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -50,7 +52,7 @@
                     <span class="selected"></span></a>
                 </li>
                 <li id="image"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/image/">
                         <i class="fa fa-circle-o-notch"></i>
                         <span class="title">
@@ -59,7 +61,7 @@
                     <span class="selected"></span></a>
                 </li>
                 <li id="op_log"
-                    data-ng-if="current_user.is_audit_user">
+                    data-ng-if="current_user.audit">
                     <a href="#/operation/">
                         <i class="fa fa-pencil-square-o"></i>
                         <span class="title">
@@ -70,7 +72,7 @@
             </ul>
         </li>
         <!-- 虚拟机管理 -->
-        <li class="">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.instancemanage' | i18next }]}</span>
@@ -79,7 +81,7 @@
          <ul class="sub-menu">
           <!-- 虚拟机管理 云主机 -->
                 <li id="instancemanage"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/instancemanage/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -90,7 +92,7 @@
          </ul>
        </li>
 	<!-- 快照管理 -->
-        <li class="">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.snapshot' | i18next }]}</span>
@@ -99,7 +101,7 @@
          <ul class="sub-menu">
           <!-- 快照管理 快照 -->
                 <li id="snapshot"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/snapshot/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -111,7 +113,7 @@
        </li>
 
         <!-- 云磁盘管理 -->
-        <li class="">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.volumemanage' | i18next }]}</span>
@@ -120,7 +122,7 @@
          <ul class="sub-menu">
           <!-- 云磁盘管理 云磁盘 -->
                 <li id="volume"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/volume/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -132,7 +134,7 @@
        </li>
 
         <!-- 网络管理 -->
-        <li class="">
+        <li data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.networkmanage' | i18next }]}</span>
@@ -141,7 +143,7 @@
          <ul class="sub-menu">
           <!-- 网络管理 公网ip -->
                 <li id="instancemanage"
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/floating/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -151,7 +153,7 @@
                 </li>
 
           <li id="networkmanager"
-            data-ng-if="current_user.is_system_user">
+            data-ng-if="current_user.system">
             <a href="#/networkmanager/">
                 <i class="fa fa-circle-o-notch"></i>
                 <span class="title">
@@ -164,7 +166,7 @@
 
 
         <!-- 模板管理 -->
-        <li class="">
+        <li data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.templatemanager' | i18next }]}</span>
@@ -173,7 +175,7 @@
           <!-- 后台管理 模板管理 -->
          <ul class="sub-menu">
           <li id="templatemanager"
-            data-ng-if="current_user.is_system_user">
+            data-ng-if="current_user.system">
             <a href="#/templatemanager/">
                 <i class="fa fa-circle-o-notch"></i>
                 <span class="title">
@@ -184,7 +186,7 @@
           </ul>
          </li>
         
-        <li class="" data-ng-if="current_user.is_system_user">
+        <li class="">
             <a href="javascript:;">
                 <i class="fa fa-file-text-o"></i>
                 <span class="title">{[{ 'sidebar.market_management' | i18next }]}</span>
@@ -200,8 +202,7 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li
-                    data-ng-if="current_user.is_system_user">
+                <li>
                     <a href="#/users/">
                         <i class="fa fa-users"></i>
                         <span class="title">
@@ -209,7 +210,7 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li data-ng-if="current_user.is_system_user">
+                <li data-ng-if="current_user.system">
                     <a href="#/UserGrouper/">
                         <i class="fa fa-pencil-square-o"></i>
                         <span class="title">
@@ -218,7 +219,7 @@
                     <span class="selected"></span></a>
                 </li>
                 <li
-                    data-ng-if="current_user.is_system_user">
+                    data-ng-if="current_user.system">
                     <a href="#/notifications/">
                         <i class="fa fa-bullhorn"></i>
                         <span class="title">
@@ -291,7 +292,7 @@
             </ul>
         </li>
         -->
-        <li class="" data-ng-if="current_user.is_system_user">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-signal"></i>
                 <span class="title">{[{ 'sidebar.vd' | i18next }]}</span>
@@ -309,25 +310,7 @@
             </ul>
         </li>
         
-        <li class="" data-ng-if="current_user.is_system_user">
-            <a href="javascript:;">
-                <i class="fa fa-flag fa-circle"></i>
-                <span class="title">{[{ 'sidebar.zabbix' | i18next }]}</span>
-                <span class="arrow"></span>
-            </a>
-            <ul class="sub-menu">
-                <li>
-                    <a href="http://192.168.1.20/zabbix">
-                        <i class="fa fa-flag fa-circle"></i>
-                        <span class="title">
-                            {[{ 'sidebar.zabbix' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="" data-ng-if="current_user.is_system_user">
+        <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-flag fa-circle"></i>
                 <span class="title">{[{ 'sidebar.ceilometer' | i18next }]}</span>

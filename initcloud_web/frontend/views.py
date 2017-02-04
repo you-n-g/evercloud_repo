@@ -1,4 +1,4 @@
-#-*- coding=utf-8 -*-
+# -*- coding:utf8 -*-
 
 import logging
 
@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.template import Context
 
-from cloud.tasks import link_user_to_dc_task, send_mail
+from cloud.tasks import link_user_to_dc_task, send_mail, user_role
 from cloud.api import keystone
 from biz.idc.models import UserDataCenter, DataCenter
 from cloud.cloud_utils import create_rc_by_dc
@@ -54,7 +54,12 @@ def cloud(request):
 
 #@superuser_required
 def management(request):
-    if request.user.is_superuser or request.user.has_perm("workflow.system_user") or request.user.has_perm("workflow.safety_user") or request.user.has_perm("workflow.audit_user"):
+
+    role = ''
+    if not request.user.is_superuser:
+        udc_id = request.session["UDC_ID"]
+        role = user_role(request, udc_id)
+    if request.user.is_superuser or role in ["system", "audit", "security"]:
         return render(request, 'management.html',
                       {
                         'inited': DataCenter.objects.exists(),
@@ -99,13 +104,30 @@ class LoginView(View):
 
         # Retrieve user to use some methods of UserProxy
         user = UserProxy.objects.get(pk=user.pk)
-        if user.is_superuser or user.is_system_user or user.is_audit_user or user.is_safety_user:
+        role = ""
+        if not user.is_superuser:
+            udc_id = 0
+            udc_set = UDC.objects.filter(user=user)
+
+            if udc_set.exists():
+                request.session["UDC_ID"] = udc_set[0].id
+                udc_id = udc_set[0].id
+            elif user.is_approver:
+                request.session["UDC_ID"] = -1
+            else:
+                return redirect('no_udc')
+            role = user_role(request, udc_id)
+        if user.is_superuser or role in ["system", "audit", "security"]:
 	#add session["UDC_ID"] for surperuser
 	
             if UDC.objects.filter(user=user).exists():
         	udc_set = UDC.objects.filter(user=user)
                 request.session["UDC_ID"] = udc_set[0].id
             return redirect('management')
+
+        else:
+            return HttpResponseForbidden()
+
 
         udc_set = UDC.objects.filter(user=user)
 
