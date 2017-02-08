@@ -570,6 +570,8 @@ def vdi_view(request):
         server_dict = server.to_dict()
         LOG.info("******")
         server_host = server_dict['OS-EXT-SRV-ATTR:host']
+        LOG.info("servier_dict" + str(server_dict))
+        LOG.info("******* server_status is *******" + str(server_host))
         server_status = server_dict['status']
         LOG.info("******* server_status is *******" + str(server_status))
         if server_status == "ERROR":
@@ -597,11 +599,13 @@ def vdi_view(request):
         vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "vm_name": q.name})
         LOG.info("*** count is ***" + str(count))
         count = count + 1
-
+    LOG.info("count done")
     json_value = {"method": method, "retvalue": retvalue, "vmnum": count, "vminfo": vminfo}
+    LOG.info(str(json_value))
     if not json_value:
+        LOG.info("auth")
         json_value = {"retval": 1, "message": "auth success"}
-    
+    LOG.info(" before return") 
     return Response(json_value)
 
 @api_view(["POST"])

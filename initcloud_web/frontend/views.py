@@ -96,6 +96,7 @@ class LoginView(View):
     def post(self, request):
         form = AuthenticationForm(data=request.POST)
 
+        login_type = request.POST.get('type') or None
         if not form.is_valid():
             return self.response(request, form)
 
@@ -125,6 +126,9 @@ class LoginView(View):
                 request.session["UDC_ID"] = udc_set[0].id
             return redirect('management')
 
+        elif login_type == "vdi_client":
+
+            return HttpResponseRedirect(reverse("cloud"))
         else:
             return HttpResponseForbidden()
 
