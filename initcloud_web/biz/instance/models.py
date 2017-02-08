@@ -35,6 +35,7 @@ class Instance(models.Model):
     terminate_date = models.DateTimeField(_("Terminate Date"), auto_now_add=True)
     cpu = models.IntegerField(_("Cpu Cores"))
     policy = models.IntegerField(_("Policy"), null=False, default=0)
+    device_id = models.TextField(_("Enabled Devices"), null=True, blank=True)
     memory = models.IntegerField(_("Memory"))
     sys_disk = models.FloatField(_("System Disk"), null=False, blank=True)
     

@@ -57,6 +57,7 @@
                                     <i class="fa fa-desktop"></i> {[{ volume.instance_info.name }]} </a>
                             </td>
                             <td data-title="'volume.size' | i18next">{[{ volume.size }]}GB</td>
+                            <td data-title="'volume.user' | i18next">{[{ volume.user_info.username }]}</td>
                             <td data-title="'create_at' | i18next">{[{ volume.create_date }]}</td>
                             <td data-title="'actions' | i18next">
                                 <div class="btn-group">
@@ -85,6 +86,13 @@
                                                data-ng-click="openAttachModal(volume)">
                                                 <i class="fa fa-hdd-o"></i>
                                                 {[{ 'volume.attach_to_instance' | i18next }]}
+                                            </a>
+                                        </li>
+                                        <li data-ng-if="volume.is_available">
+                                            <a href="javascript:void(0);"
+                                               data-ng-click="openChangeUserModal(volume)">
+                                                <i class="fa fa-user"></i>
+                                                {[{ 'volume.change_user' | i18next }]}
                                             </a>
                                         </li>
                                         <li data-ng-if="volume.is_in_use">
@@ -139,14 +147,13 @@
             <div class="form-body">
                 <div class="form-group" ng-class="{'has-error': has_error}">
                     <label class="col-md-3 control-label"> {[{ 'volume.name' | i18next }]}
-                        <span class="required" aria-required="true"> * </span>
+                        <span class="required" aria-required="true">* </span>
                     </label>
 
-                    <div class="col-md-9">
-                        <div class="input-inline input-large">
+                    <div class="col-md-8">
                             <div class="input-group">
                                 <span class="input-group-addon">
-                                    <i class="fa fa-openid"></i>
+                                    <i class="fa fa-pencil"></i>
                                 </span>
 
                                 <input type="text" class="form-control" name="name"
@@ -158,16 +165,15 @@
                             <span ng-if="has_error" id="name-error" class="help-block help-block-error">
                                {[{ 'volume.name_prompt' | i18next }]}
                             </span>
-                        </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label" for="title">{[{'volume.type' |i18next}]}<span
-                            class="required">* </span></label>
+                    <label class="col-md-3 control-label" for="title">{[{'volume.type' |i18next}]}
+                        <span class="required">* </span></label>
 
                     <div class="col-md-8">
                         <div class="input-group">
-                            <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
+                            <span class="input-group-addon"> <i class="fa fa-sitemap"></i> </span>
                             <select class="form-control" ng-model="volume.selected_rule">
                                 <option ng-repeat="rule in roles" value="{[{rule}]}">{[{rule.name}]}
                                 </option>
@@ -175,15 +181,29 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="title">{[{'volume.user' |i18next}]}
+                        <span class="required">* </span></label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-user"></i> </span>
+                            <select class="form-control" ng-model="volume.user">
+                                <option ng-repeat="u in users" value="{[{u.id}]}">{[{u.username}]}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="col-md-3 control-label"> {[{ 'volume.size' | i18next }]}
-                        <span class="required" aria-required="true"> *</span>
+                        <span class="required" aria-required="true">* </span>
                     </label>
 
-                    <div class="col-md-9">
-                        <div class="input-inline input-large">
+                    <div class="col-md-8">
                             <slider data="volume" class="bg-yellow"></slider>
-                        </div>
                     </div>
                 </div>
                 <div class="form-group" data-ng-if="quota.volume > 0 || quota.volume_size > 0">
@@ -308,6 +328,61 @@
                 data-ng-class="{'disabled': !target_instance}"
                 data-ng-click="attach()">
             {[{ 'volume.attach' | i18next }]}
+        </button>
+    </div>
+</script>
+
+<!-- 更改所属用户 -->
+<script type="text/ng-template" id="change_user.html">
+    <div class="modal-header">
+        <button type="button" class="close" aria-hidden="true" data-ng-click="cancel()"></button>
+        <h4 class="modal-title">{[{ 'volume.change_user' | i18next }]}</h4>
+    </div>
+    <div class="modal-body">
+        <form role="form" class="form-horizontal">
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label"> {[{ 'volume.user' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-user"></i> </span>
+                            <select class="form-control" data-ng-model="target_user">
+                                <option ng-repeat="u in users" value="{[{u.id}]}">{[{u.username}]}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" data-ng-class="{'has-error': has_error}">
+                    <label class="col-md-3 control-label"> {[{ 'volume.supercode' | i18next }]}
+                        <span class="required" aria-required="true"> * </span>
+                    </label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"> <i class="fa fa-key"></i> </span>
+                            <input type="password" class="form-control" name="supercode"
+                                   ng-model="supercode" value="" class="required"
+                                   onpaste="return false;" ondragenter="return false;"
+                                   oncontextmenu="return false;"
+                                   style="ime-mode:disabled"/>
+                        </div>
+                        <span data-ng-if="has_error" class="help-block help-block-error">
+                            {[{ 'volume.supercode_error' | i18next }]}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-ng-click="cancel()">{[{ 'cancel' | i18next }]}</button>
+        <button type="button" class="btn btn-primary"
+                data-ng-class="{'disabled': !target_user || volume.user == target_user}"
+                data-ng-click="change_user()">
+            {[{ 'volume.change' | i18next }]}
         </button>
     </div>
 </script>

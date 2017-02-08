@@ -90,6 +90,9 @@ angular.module("CloudApp")
                         },
                         volume_types: function(){
                             return CommonHttpService.get("/api/volumes/typelist/"); 
+                        },
+                        users: function() {
+                            return CommonHttpService.get("/api/users/");
                         }
                     }
                 });
@@ -115,7 +118,7 @@ angular.module("CloudApp")
             /*挂载云硬盘弹出窗口*/
             $scope.openAttachModal = function(volume){
 
-                CommonHttpService.get("/api/instances/search/").then(function (data) {
+                CommonHttpService.get("/api/instances/search?uid=".concat(volume.user)).then(function (data) {
                     $scope.instances = data;
                 });
 
@@ -133,6 +136,26 @@ angular.module("CloudApp")
                     $scope.volume_table.reload();
                 });
             };
+
+            /* 更改所属用户弹出窗口 */
+            $scope.openChangeUserModal = function(volume) {
+                $modal.open({
+                    templateUrl: 'change_user.html',
+                    controller: 'VolumeChangeUserController',
+                    backdrop: "static",
+                    scope: $scope,
+                    resolve: {
+                        volume: function(){
+                            return volume;
+                        },
+                        users: function() {
+                            return CommonHttpService.get("/api/users/");
+                        }
+                    }
+                }).result.then(function(){
+                    $scope.volume_table.reload();
+                });
+            }
 
             $scope.detach = function (volume) {
 
@@ -221,10 +244,11 @@ angular.module("CloudApp")
     .controller('VolumeCreateController',
         function ($rootScope, $scope, $modalInstance,
                   $i18next, PriceTool, CommonHttpService, ToastrService,CheckboxGroup,
-                  volume_table, prices, quota, volume_types){
+                  volume_table, prices, quota, volume_types, users){
 
 
             $scope.roles = volume_types;
+            $scope.users = users.results;
             var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.roles);
             $scope.quota = quota;
             $scope.volume = {
@@ -232,6 +256,7 @@ angular.module("CloudApp")
                 "size": 10,
                 "pay_type": "hour",
                 "selected_rule": "iscsi",
+                "user": null,
                 "pay_num": 1
             };
 
@@ -300,6 +325,7 @@ angular.module("CloudApp")
                     "name": volume.name,
                     "os_volume_type": volume.selected_rule,
                     "size": volume.size,
+                    "user": volume.user,
                     "pay_type": volume.pay_type,
                     "pay_num": volume.pay_num
                 };
@@ -396,6 +422,43 @@ angular.module("CloudApp")
                     "volume_id": volume.id,
                     "instance_id": $scope.target_instance.id,
                     "action": 'attach'
+                };
+
+                CommonHttpService.post("/api/volumes/action/", post_data).then(function (data) {
+                    if (data.success) {
+                        ToastrService.success(data.msg, $i18next("success"));
+                        $modalInstance.close();
+                    } else {
+                        ToastrService.error(data.msg, $i18next("op_failed"));
+                    }
+                });
+            }
+        }
+    )
+
+    .controller('VolumeChangeUserController',
+        function ($rootScope, $scope, $modalInstance,  $i18next,
+                  CommonHttpService, ToastrService, volume, users) {
+
+            $scope.volume = volume;
+            $scope.users = users.results;
+            $scope.target_user = null;
+            $scope.supercode = null;
+            $scope.cancel =  $modalInstance.dismiss;
+            $scope.has_error = false;
+
+            $scope.change_user = function() {
+                $scope.has_error = $scope.target_user == null;
+
+                if($scope.has_error) {
+                    return;
+                }
+
+                var post_data = {
+                    "volume_id": volume.id,
+                    "user_id": $scope.target_user,
+                    "supercode": $scope.supercode,
+                    "action": "change_user"
                 };
 
                 CommonHttpService.post("/api/volumes/action/", post_data).then(function (data) {
