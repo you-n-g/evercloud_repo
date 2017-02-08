@@ -17,7 +17,7 @@
                 </span>
             <span class="selected"></span></a>
         </li>
-        <li class="" data-ng-if="current_user.system">
+        <li class="" >
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.cloud_management' | i18next }]}</span>
@@ -60,8 +60,8 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li id="op_log"
-                    data-ng-if="current_user.audit">
+                <li id="op_log" data-ng-if="current_user.audit || current_user.security"
+                    >
                     <a href="#/operation/">
                         <i class="fa fa-pencil-square-o"></i>
                         <span class="title">
@@ -267,6 +267,14 @@
                         <i class="fa fa-list"></i>
                         <span class="title">
                             {[{ 'sidebar.policy_cinder' | i18next }]}
+                        </span>
+                    <span class="selected"></span></a>
+                </li>
+                <li>
+                    <a href="#/supercode/">
+                        <i class="fa fa-key"></i>
+                        <span class="title">
+                            {[{ 'sidebar.supercode' | i18next }]}
                         </span>
                     <span class="selected"></span></a>
                 </li>

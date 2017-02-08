@@ -30,7 +30,7 @@ class VDStatusList(generics.ListAPIView):
         LOG.info("---vir_desktop.views---")
         ret = []
         try:
-            r = requests.get(settings.MGR_HTTP_ADDR)
+            r = requests.get('{}/vdstatus'.format(settings.MGR_HTTP_ADDR))
             if r.status_code == 200:
               ret = r.json()
               LOG.info(ret)

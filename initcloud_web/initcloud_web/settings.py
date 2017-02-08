@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'biz.backup',
     'biz.billing',
     'biz.vir_desktop',
+    'biz.supercode',
     'biz.heat',
     'biz.templatemanager',
     'biz.snapshot',
@@ -264,6 +265,7 @@ logging.config.dictConfig(LOG_CONFIG)
 # Added by arthur
 
 ADMIN_TOKEN = "957766a040c54d33b053aec435d1961d"
+
 ADMIN_NAME = "admin"
 EDNPOINT = "http://192.168.1.64:35357/v2.0"
 HEAT_ENDPOINT = 'http://192.168.1.64:8004/v1/'
@@ -275,12 +277,13 @@ TENANT_DEFAULT_NETWORK = "10.0.0.0/24"
 GATEWAY_IP = "10.0.0.1"
 TEST_TENANT_NAME = "testwork"
 TEST_TENANT_ID = "cde7d6ed392941c5b75a3079459690d4"
-ALARM_ACTIONS = "http://192.168.223.150:5998/wsgi_app.py"
+ALARM_ACTIONS = "http://192.168.1.64:5998/wsgi_app.py"
 RESULT = [{"meter_name": "cpu_util"},{'meter_name':"memory.usage"},{"meter_name": "disk.write.bytes"},{"meter_name": "network.incoming.bytes"}, {"meter_name": "network.outgoing.bytes"}]
 
 # Virtural Desktop
-MGR_HTTP_ADDR = "http://192.168.223.150:8893/v1/vdstatus"
-MGR_WS_ADDR = "ws://192.168.223.150:8893/ws"
+
+MGR_HTTP_ADDR = "http://192.168.1.64:8893/v1/vdstatus"
+MGR_WS_ADDR = "ws://192.168.1.64:8893/ws"
 
 COMPUTE_HOSTS = {'localhost.localdomain': "192.168.1.64"}
 

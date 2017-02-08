@@ -185,7 +185,10 @@ def site_config(request):
         user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
         LOG.info("4")
         for user_role in user_roles:
+            LOG.info("5")
+            LOG.info(user_role.name)
             if user_role.name == "system":
+                LOG.info("5")
                 system = True
                 break
             if user_role.name == "security":
@@ -194,9 +197,9 @@ def site_config(request):
             if user_role.name == "audit":
                 audit = True
                 break
-            if user_role.name == "_member_":
-                member = True
-                break
+        
+        if not system and not security and not audit:
+            member = True
         current_user['system'] = system
         current_user['security'] = security
         current_user['audit'] = audit

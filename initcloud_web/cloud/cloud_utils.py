@@ -5,6 +5,7 @@ from keystoneclient.auth.identity import v2
 from keystoneclient import session
 from novaclient.client import Client
 from django.conf import settings
+from biz.idc.models import UserDataCenter
 
 
 
@@ -61,7 +62,11 @@ def create_rc_by_router(router=None):
 
 
 def create_rc_by_volume(volume=None):
-    return _create_rc(volume)
+    rc = _create_rc(volume)
+    udc = UserDataCenter.objects.get(user=volume.user)
+    rc["tenant_name"] = udc.tenant_name
+    rc["tenant_uuid"] = udc.tenant_uuid
+    return rc
 
 
 def create_rc_by_floating(floating=None):

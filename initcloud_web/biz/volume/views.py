@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from biz.instance.models import Instance
-from biz.account.models import Operation
+from biz.account.models import Operation, UserProxy
 from biz.idc.models import DataCenter
 from biz.volume.models import Volume
 from biz.backup.models import BackupItem
@@ -28,6 +28,7 @@ from cloud.api import cinder
 from cloud.cloud_utils import create_rc_by_dc 
 from biz.common.utils import fail, success, error
 from biz.account.utils import check_quota
+from biz.supercode.utils import validate_supercode
 
 LOG = logging.getLogger(__name__)
 
@@ -58,9 +59,10 @@ def volume_typelist_view(request):
 @api_view(['GET', 'POST'])
 def volume_list_view(request):
     try:
-        volume_set = Volume.objects.filter(
-            deleted=False, user=request.user,
-            user_data_center=request.session["UDC_ID"])
+        #volume_set = Volume.objects.filter(
+        #    deleted=False, user=request.user,
+        #    user_data_center=request.session["UDC_ID"])
+        volume_set = Volume.objects.filter(deleted=False)
 
         return Response(VolumeSerializer(volume_set, many=True).data)
 
@@ -97,7 +99,8 @@ def volume_create_view(request):
         serializer = VolumeSerializer(data=request.data,
                                       context={"request": request})
         if not serializer.is_valid():
-            return fail(msg=_('Data is not valid.'),
+            #return fail(msg=_('Data is not valid.'),
+            return fail(msg='{}'.format(serializer.errors),
                         status=status.HTTP_400_BAD_REQUEST)
 
         pay_type = request.data['pay_type']
@@ -117,7 +120,7 @@ def volume_create_view(request):
             volume.status = VOLUME_STATE_APPLYING
             volume.save()
 
-            FlowInstance.create(volume, request.user, workflow, None)
+            FlowInstance.create(volume, request.data.user, workflow, None) # TODO test this
             msg = _("Your application for %(size)d GB volume is successful, "
                     "please waiting for approval result!") \
                 % {'size': volume.size}
@@ -172,6 +175,10 @@ def volume_action_view(request):
             return volume_attach_or_detach(data, volume, action)
         elif 'delete' == action:
             return delete_action(volume)
+        elif 'change_user' == action:
+            user_id = data.get("user_id")
+            supercode = data.get("supercode")
+            return change_user_action(volume, user_id, supercode)
         return fail(msg=_('Unknown volume action'))
     except Exception as e:
         LOG.exception("Volume action[%s] error, msg:[%s]", action, e)
@@ -242,3 +249,13 @@ def delete_action(volume):
     else:
         volume.fake_delete()
         return success(msg=_('Volume is deleted.'))
+
+
+def change_user_action(volume, user_id, supercode):
+    if validate_supercode(supercode):
+        volume.user = UserProxy.objects.get(pk=user_id)
+        volume.save()
+        return success(msg=_('Volume user changed'),
+                    status=status.HTTP_201_CREATED)
+    else:
+        return fail(msg=_('Incorrect supercode'))

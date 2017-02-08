@@ -23,6 +23,7 @@ from biz.backup import views as backup_view
 from biz.workflow import views as workflow_view
 from biz.billing import views as billing_view
 from biz.vir_desktop import views as vir_desktop
+from biz.supercode import views as supercode_view
 #policy
 from biz.policy_nova import views as policy_nova_view
 from biz.policy_cinder import views as policy_cinder_view
@@ -247,6 +248,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^account/is-mobile-unique/$', account_view.is_mobile_unique),
     url(r'^operation/$', account_view.OperationList.as_view()),
     url(r'^operation/filters$', account_view.operation_filters),
+    url(r'^operation/push/$', account_view.push_operation),
     url(r'^group/$', group_view.GroupList.as_view()),
     url(r'^users/active/$', account_view.active_users),
     url(r'^users/(?P<pk>[0-9]+)/$', account_view.UserDetail.as_view()),
@@ -350,6 +352,11 @@ urlpatterns += [
     url(r'^policy_nova/update', policy_nova_view.update_policy_nova),
     url(r'^policy_nova/role', policy_nova_view.role_list_view.as_view()),
     url(r'^policy_nova/assignrole', policy_nova_view.assignrole),
+]
+
+#supercode
+urlpatterns += [
+    url(r'^supercode/$', supercode_view.update_supercode_view),
 ]
 
 #alarm

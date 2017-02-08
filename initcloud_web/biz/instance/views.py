@@ -428,11 +428,15 @@ def instance_status_view(request):
 
 @api_view(["GET"])
 def instance_search_view(request):
+    user_id = request.query_params.get('uid', None)
+    if not user_id:
+        UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
+        project_id = UDC.tenant_uuid
+        instance_set = Instance.objects.filter(Q(deleted=False, user=request.user, status=INSTANCE_STATE_RUNNING,
+            user_data_center=request.session["UDC_ID"]) | Q(tenant_uuid=project_id))
+    else:
+        instance_set = Instance.objects.filter(deleted=False, user=user_id)
 
-    UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
-    project_id = UDC.tenant_uuid
-    instance_set = Instance.objects.filter(Q(deleted=False, user=request.user, status=INSTANCE_STATE_RUNNING,
-        user_data_center=request.session["UDC_ID"]) | Q(tenant_uuid=project_id))
     serializer = InstanceSerializer(instance_set, many=True)
     return Response(serializer.data)
 
@@ -588,7 +592,7 @@ def vdi_view(request):
         LOG.info("host_ip=" + host_ip)
         LOG.info("port=" + str(port))
         if "error" in str(port):
-            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "vm_name": q.name})
+            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
             count = count + 1
             continue
         split_port = port.split(":")
@@ -596,7 +600,7 @@ def vdi_view(request):
         port_2 = port_1.split("\\")
         port_3 = port_2[0]
         vnc_port = 5900 + int(port_3)
-        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "vm_name": q.name})
+        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
         LOG.info("*** count is ***" + str(count))
         count = count + 1
     LOG.info("count done")
@@ -731,7 +735,6 @@ def new_vdi_test(request):
         vnc_port = 5900 + int(port_3)
         json_value[str(q.id)] = {"vm_uuid": q.uuid, "vm_private_ip": q.private_ip, "vm_public_ip": q.public_ip, "vm_host": host_ip, "vm_status": server_status, "policy_device": str(q.policy), "vnc_port": vnc_port, "vm_internalid": str(q.id), "vm_name": q.name}
     LOG.info("*** json_value ***" + str(json_value))
-    #return json_util.loads(json_value)
     return json_util.loads(json_value)
 
 def user_is_not_active(request):
