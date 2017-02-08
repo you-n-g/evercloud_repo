@@ -24,15 +24,11 @@ print "*********** auth status *********"
 print login_return.status_code
 
 
-# instance action 
-"""
-supported action = ["reboot", "power_on", "power_off", "vnc_console", "bind_floating", "unbind_floating", "terminate", "attach_volume", "detach_volume", "launch"]
-"""
 #params: instance internal id, action choose from the above supported action.
 payload = {"instance":22, "action":"terminate"}
 # request ulr with get method
-URL_ = "http://192.168.1.48:8081/api/instances/vdi_action/"
-instances_return = client.get(URL_, params=payload)
+URL_ = "http://192.168.1.48:8081/api/operation/push/"
+instances_return = client.post(URL_, params=payload, headers=dict(csrfmiddlewaretoken=csrftoken))
 
 print "***************** start to get instances *********"
 print "*********** return status is " + str(instances_return.status_code)

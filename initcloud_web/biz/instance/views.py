@@ -59,7 +59,7 @@ from biz.instance.utils import flavor_create, get_ins_status
 from cloud.cloud_utils import create_rc_by_instance
 from cloud.api import nova
 import time
-#from django.db.models import Q
+from django.db.models import Q
 
 
 LOG = logging.getLogger(__name__)

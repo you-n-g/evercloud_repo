@@ -35,7 +35,7 @@ from cloud.tasks import (link_user_to_dc_task, send_notifications,
                          send_notifications_by_data_center)
 from frontend.forms import CloudUserCreateFormWithoutCapatcha
 from keystoneclient import v2_0
-from cloud.api.glance import glanceclient
+from cloud.api.glance import glanceclient_tm
 
 LOG = logging.getLogger(__name__)
 
@@ -330,7 +330,9 @@ def template_action(request, template_id):
             sockobj.close( )
             LOG.info("response data is" + str(data))
             if str(data) == "OK":
-                images = glanceclient(request).images.list()
+                url = settings.GLANCE_ENDPOINT
+                LOG.info(url)
+                images = glanceclient_tm(request,url).images.list()
                 LOG.info("start to get images")
                 LOG.info(images)
                 for img in images:

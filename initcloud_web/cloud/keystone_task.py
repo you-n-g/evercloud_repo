@@ -68,6 +68,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     u = keystone.user_create(rc, name=keystone_user, email=user.email,
                              password=pwd, project=project_id)
 
+    user_uuid = u.id
     LOG.info("User[%s] is registered as keystone user[uid:%s] in "
              "data center[%s]", user.username, u.id, datacenter.name)
 
@@ -114,6 +115,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
         tenant_uuid=project_id,
         keystone_user=keystone_user,
         keystone_password=pwd,
+        keystone_user_id=user_uuid
     )
 
     LOG.info("Register user[%s] to datacenter [udc:%s] successfully",
@@ -415,21 +417,58 @@ def project_delete(request, ID):
     return True
 
 @app.task
-def user_role(request,user):
-    datacenter = DataCenter.get_default()
-    LOG.info("****** signup get method ********")
-    rc = create_rc_by_dc(datacenter)
-    user_roles = keystone.roles_for_user(rc, user)
-    LOG.info("**** user_roles are ****" + user_roles)
-    response = "member"
-    for key,value in user_roles.items():
-        for v in value:
-            if v['name'] == "system":
-                response = "system"
-            elif v['name'] == "audit":
-                response = "audit"
-            elif['name'] == "security":
-                response = "security" 
-            else:
-                response = "member"
+def user_role_member(request,udc_id):
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    LOG.info(UDC)
+    LOG.info("4")
+    keystone_user_id = UDC.keystone_user_id
+    LOG.info("4")
+    tenant_uuid = UDC.tenant_uuid
+    LOG.info("4")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("4")
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    LOG.info("4")
+    tri = False
+    for user_role in user_roles:
+        if user_role.name == "system":
+            response = "system" 
+            tri = True
+            break
+        if user_role.name == "security":
+            response = "security"
+            tri = True
+            break
+        if user_role.name == "audit":
+            response = "audit"
+            tri = True
+            break
+    return tri
+
+@app.task
+def user_role(request,udc_id):
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    LOG.info(UDC)
+    LOG.info("4")
+    keystone_user_id = UDC.keystone_user_id
+    LOG.info("4")
+    tenant_uuid = UDC.tenant_uuid
+    LOG.info("4")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("4")
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    LOG.info("4")
+    for user_role in user_roles:
+        if user_role.name == "system":
+            response = "system" 
+            break
+        if user_role.name == "security":
+            response = "security"
+            break
+        if user_role.name == "audit":
+            response = "audit"
+            break
+        if user_role.name == "_member_":
+            response = "member"
+            break
     return response

@@ -322,6 +322,7 @@
     "cloud": "云平台",
     "servers": "云主机",
     "volumemanage": "云磁盘管理",
+    "networkmanager": "网络管理",
     "networkmanage": "网络管理",
     "floatingips": "公网ip",
     "volumes": "云磁盘",
