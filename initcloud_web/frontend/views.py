@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.template import Context
 
-from cloud.tasks import link_user_to_dc_task, send_mail, user_role
+from cloud.tasks import link_user_to_dc_task, send_mail, user_role, user_role_member
 from cloud.api import keystone
 from biz.idc.models import UserDataCenter, DataCenter
 from cloud.cloud_utils import create_rc_by_dc
@@ -58,8 +58,8 @@ def management(request):
     role = ''
     if not request.user.is_superuser:
         udc_id = request.session["UDC_ID"]
-        role = user_role(request, udc_id)
-    if request.user.is_superuser or role in ["system", "audit", "security"]:
+        role = user_role_member(request, udc_id)
+    if request.user.is_superuser or role:
         return render(request, 'management.html',
                       {
                         'inited': DataCenter.objects.exists(),
@@ -116,16 +116,40 @@ class LoginView(View):
                 request.session["UDC_ID"] = -1
             else:
                 return redirect('no_udc')
-            role = user_role(request, udc_id)
-        if user.is_superuser or role in ["system", "audit", "security"]:
+            role = user_role_member(request, udc_id)
+        if user.is_superuser or role:
 	#add session["UDC_ID"] for surperuser
 	
             if UDC.objects.filter(user=user).exists():
         	udc_set = UDC.objects.filter(user=user)
                 request.session["UDC_ID"] = udc_set[0].id
+            try:
+                Operation.objects.create(
+                    user=user,
+                    udc=udc_set[0],
+                    resource="登录",
+                    resource_id=1,
+                    resource_name="登录",
+                    action="login",
+                    result=0
+                )
+            except Exception as e:
+                pass
             return redirect('management')
 
         else:
+            try:
+                Operation.objects.create(
+                    user=user,
+                    udc='-1',
+                    resource="登录",
+                    resource_id=1,
+                    resource_name="登录",
+                    action="login",
+                    result=0
+                )
+            except Exception as e:
+                pass
             return HttpResponseForbidden()
 
 

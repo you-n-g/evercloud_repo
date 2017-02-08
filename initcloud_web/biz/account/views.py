@@ -1,4 +1,4 @@
-#-*-coding-utf-8-*-
+# -*- coding:utf8 -*-
 
 
 from datetime import datetime
@@ -11,8 +11,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.contrib.auth.models import check_password
+from django.db.models import Q
 
 from biz.account.settings import QUOTA_ITEM, NotificationLevel
 from biz.account.models import (Contract, Operation, Quota,
@@ -63,7 +65,7 @@ class OperationList(generics.ListAPIView):
     pagination_class = PagePagination
 
     def get_queryset(self):
-
+ 
         request = self.request
         resource = request.query_params.get('resource')
         resource_name = request.query_params.get('resource_name')
@@ -89,6 +91,7 @@ class OperationList(generics.ListAPIView):
 
         if request.user.is_superuser or user.is_audit_user :
 
+            LOG.info("superuser")
             data_center_pk = request.query_params.get('data_center', '')
             operator_pk = request.query_params.get('operator', '')
 
@@ -97,12 +100,95 @@ class OperationList(generics.ListAPIView):
 
             if operator_pk:
                 queryset = queryset.filter(user__pk=operator_pk)
+            return queryset.order_by('-create_date')
         else:
-            queryset = queryset.filter(user=request.user,
-                                       udc__id=request.session["UDC_ID"])
+            udc_id = request.session["UDC_ID"]
+            LOG.info("4")
+            system = False
+            security = False
+            audit = False
+            member = False
+            UDC = UserDataCenter.objects.get(pk=udc_id)
+            LOG.info(UDC)
+            LOG.info("4")
+            keystone_user_id = UDC.keystone_user_id
+            LOG.info("4")
+            tenant_uuid = UDC.tenant_uuid
+            LOG.info("4")
+            rc = create_rc_by_dc(DataCenter.objects.all()[0])
+            LOG.info("4")
+            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+            LOG.info("4")
+            for user_role in user_roles:
+           
+                if user_role.name == "system":
+                    system = True
+                    break
+                if user_role.name == "security":
+                    security = True
+                    break
+                if user_role.name == "audit":
+                    audit = True
+                    break
+            if not system and not security and not audit:
+                member = True
+ 
+            LOG.info("cccc")
+            querys = Operation.objects.all()
+            LOG.info("aaa")
+            sec_avail_userids = []
+            audit_avail_userids = []
+            for q in querys:
+                q_system = False
+                q_security = False
+                q_audit = False
+                q_member = False
+                LOG.info("aaa")
+                LOG.info(q.user_id)
+                ud = UserDataCenter.objects.filter(user_id=q.user_id)[0] 
+                LOG.info(str(ud))
+                keystone_user_id = ud.keystone_user_id
+                LOG.info(str(keystone_user_id))
+                tenant_uuid = ud.tenant_uuid
+                LOG.info("ccc")
+                user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+                LOG.info("aaa")
+                for user_role in user_roles:
+                    if user_role.name == "system":
+                        q_system = True
+                        break
+                    if user_role.name == "security":
+                        q_security = True
+                        break
+                    if user_role.name == "audit":
+                        q_audit = True
+                        break
 
-        return queryset.order_by('-create_date')
+                if not q_system and not q_security and not q_audit:
+                      q_member = True
+                if q_audit or q_member:
+                    LOG.info("2221111")
+                    if q.user_id not in sec_avail_userids:
+                        sec_avail_userids.append(q.user_id) 
+                if q_system or q_security:
+                    LOG.info("00000")
+                    if q.user_id not in audit_avail_userids:
+                        audit_avail_userids.append(q.user_id)
+  
 
+            if security:
+                LOG.info("aaa")
+                LOG.info(str(request.session["UDC_ID"]))
+                LOG.info(str(sec_avail_userids))
+                queryset = Operation.objects.exclude(user_id__in=sec_avail_userids)
+
+                LOG.info("*** process done with queryset")
+                return queryset.order_by('-create_date')
+            if audit:
+                LOG.info("audit_can_log")
+                queryset = Operation.objects.exclude(user_id__in=audit_avail_userids)
+
+                return queryset.order_by('-create_date')
 
 @api_view()
 def operation_filters(request):
@@ -718,6 +804,27 @@ def feed_status(request):
 def mark_read(request, pk):
     Feed.living.get(pk=pk).mark_read()
     return Response(status=status.HTTP_200_OK)
+
+@require_POST
+@csrf_exempt
+def push_operation(request):
+
+    LOG.info('cccccccccccccccc')
+    LOG.info(" post data is " + str(request.data))
+    try:
+        Operation.objects.create(
+                user=user,
+                udc=udc_set[0],
+                resource="登录",
+                resource_id=1,
+                resource_name="登录",
+                action="login",
+                result=0
+             )
+    except Exception as e:
+           pass
+    return Response(status=status.HTTP_200_OK)
+
 
 
 @require_POST

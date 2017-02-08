@@ -417,6 +417,35 @@ def project_delete(request, ID):
     return True
 
 @app.task
+def user_role_member(request,udc_id):
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    LOG.info(UDC)
+    LOG.info("4")
+    keystone_user_id = UDC.keystone_user_id
+    LOG.info("4")
+    tenant_uuid = UDC.tenant_uuid
+    LOG.info("4")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("4")
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    LOG.info("4")
+    tri = False
+    for user_role in user_roles:
+        if user_role.name == "system":
+            response = "system" 
+            tri = True
+            break
+        if user_role.name == "security":
+            response = "security"
+            tri = True
+            break
+        if user_role.name == "audit":
+            response = "audit"
+            tri = True
+            break
+    return tri
+
+@app.task
 def user_role(request,udc_id):
     UDC = UserDataCenter.objects.get(pk=udc_id)
     LOG.info(UDC)
