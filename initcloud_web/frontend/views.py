@@ -96,6 +96,7 @@ class LoginView(View):
     def post(self, request):
         form = AuthenticationForm(data=request.POST)
 
+        login_type = request.POST.get('type') or None
         if not form.is_valid():
             return self.response(request, form)
 
@@ -137,6 +138,9 @@ class LoginView(View):
                 pass
             return redirect('management')
 
+        elif login_type == "vdi_client":
+
+            return HttpResponseRedirect(reverse("cloud"))
         else:
             try:
                 Operation.objects.create(

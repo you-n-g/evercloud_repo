@@ -34,33 +34,33 @@ def summary(request):
             dc = DataCenter.get_default()
             rc = create_rc_by_dc(dc)
             if not UserDataCenter.objects.filter(data_center=dc, user=user).exists():
-		initcloud_tenant = "initcloud_" + user.username
-		LOG.info(initcloud_tenant)
-		tenant = keystone.tenant_create(rc, name=initcloud_tenant)
-		LOG.info("--------- create tenant for superuser ---------")
-		LOG.info(tenant)
-		users = keystone.user_list(rc)
-		for admin_user in users:
-		    if admin_user.name == settings.ADMIN_NAME:
-		        keystone.user_update_tenant(rc, admin_user, tenant)
-			for role in keystone.role_list(rc):
-			    if role.name == 'admin':
-				role_id = role.id
-				keystone.add_tenant_user_role(rc, user=admin_user, role=role_id, project=tenant)
+                initcloud_tenant = "initcloud_" + user.username
+                LOG.info(initcloud_tenant)
+                tenant = keystone.tenant_create(rc, name=initcloud_tenant)
+                LOG.info("--------- create tenant for superuser ---------")
+                LOG.info(tenant)
+                users = keystone.user_list(rc)
+                for admin_user in users:
+                    if admin_user.name == settings.ADMIN_NAME:
+                        keystone.user_update_tenant(rc, admin_user, tenant)
+                        for role in keystone.role_list(rc):
+                            if role.name == 'admin':
+                                role_id = role.id
+                                keystone.add_tenant_user_role(rc, user=admin_user, role=role_id, project=tenant)
                 #tenants = keystone.keystoneclient(rc).tenants.list()
-		#for tenant in tenants:
-		#    if tenant.name == settings.ADMIN_TENANT_NAME:
-		#	admin_tenant_id = tenant.id
-		#	admin_tenant_name = tenant.name
-		#	LOG.info(tenant.name)
-		#	LOG.info(tenant.id)
-		admin_UDC = UserDataCenter.objects.create(data_center=dc,user=user,tenant_name=tenant.name,tenant_uuid = tenant.id,keystone_user=settings.ADMIN_NAME,keystone_password=settings.ADMIN_PASS)
-		Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
+                #for tenant in tenants:
+                #    if tenant.name == settings.ADMIN_TENANT_NAME:
+                #	admin_tenant_id = tenant.id
+                #	admin_tenant_name = tenant.name
+                #	LOG.info(tenant.name)
+                #	LOG.info(tenant.id)
+                admin_UDC = UserDataCenter.objects.create(data_center=dc,user=user,tenant_name=tenant.name,tenant_uuid = tenant.id,keystone_user=settings.ADMIN_NAME,keystone_password=settings.ADMIN_PASS)
+                Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
             #if not Contract.objects.filter(user=user).exists():
-		#admin_UDC = UserDataCenter.objects.filter(data_center=dc, user=user)[0]
-		#Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
+                #admin_UDC = UserDataCenter.objects.filter(data_center=dc, user=user)[0]
+                #Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
     except:
-	traceback.print_exc()
+        traceback.print_exc()
     return Response({"user_num": User.objects.filter(is_superuser=False).count(),
                      "instance_num": Instance.objects.filter(deleted=False).count(),
                      "flavor_num": Flavor.objects.count(),
