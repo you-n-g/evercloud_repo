@@ -185,6 +185,21 @@ class LoginView(View):
 
 
 def logout(request):
+    user = request.user
+    udc_set = UDC.objects.filter(user=user)
+    try:
+        Operation.objects.create(
+                  user=user,
+                  udc=udc_set[0],
+                  resource="注销",
+                  resource_id=1,
+                  resource_name="注销",
+                  action="logout",
+                  result=0
+             )
+    except Exception as e:
+        pass
+  
     auth_logout(request)
     return HttpResponseRedirect(reverse("index"))
 
