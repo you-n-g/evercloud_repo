@@ -4,6 +4,7 @@
 
 from datetime import datetime
 import logging
+import requests
 
 from rest_framework import generics
 from rest_framework import status
@@ -146,16 +147,26 @@ def devicepolicyupdate(request):
     instance_id = request.data['id']
     role_str = str(role)
     role_list = role_str.split(",")
+    device_id = request.data['device_id']
     LOG.info("********** role_list is **********" + str(role_list))
     LOG.info("********** instance_id  is **********" + str(instance_id))
     instance = Instance.objects.get(pk=instance_id)
+    instance_uuid = instance.uuid
+    refered_instance = Instance.objects.filter(uuid=instance_uuid)
     for role in policies:
         LOG.info("*** role is ****" + str(role))
-        if role in role_list:
-            instance.policy |= 1 << policies[role] 
-        else:
-            instance.policy &= 0 << policies[role]
-    instance.save()
+        for ins in refered_instance:
+            if role in role_list:
+                ins.policy |= 1 << policies[role] 
+            else:
+                ins.policy &= 0 << policies[role]
+    for ins in refered_instance:
+        ins.device_id = device_id
+        ins.save()
+    d = { 'vm_id': instance.uuid, 'storage': instance.policy, 'devices': device_id }
+    LOG.info(">>>>>>> request update policy: {}".format(d)) 
+    res = requests.post('{}/policy'.format(settings.MGR_HTTP_ADDR), json=d, timeout=5)
+    LOG.info(">>>>>>> response: {}".format(res))
     return Response({"success": True, "msg": _(
            'Sucess.')})
 

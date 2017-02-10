@@ -960,6 +960,7 @@
 
   "instancemanage": {
     "sys_disk":"云硬盘",
+    "device_id": "设备id",
     "desc": "提供虚拟机服务",
     "name": "虚拟机名称",
     "username": "用户名",
