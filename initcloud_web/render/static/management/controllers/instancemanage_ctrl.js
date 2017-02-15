@@ -670,7 +670,7 @@ CloudApp.controller('InstancemanageController',
             });
             $scope.submit = function(instancemanage){
 
-                var params_data = {"id": instancemanage.id}
+                var params_data = {"id": instancemanage.id, 'device_id': instancemanage.device_id}
                 if(!$("#InstancemanageForm").validate().form()){
                     return;
                 }

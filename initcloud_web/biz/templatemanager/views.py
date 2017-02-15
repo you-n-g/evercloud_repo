@@ -343,10 +343,19 @@ def template_action(request, template_id):
                         LOG.info("image_id is" + str(image_id)) 
                         LOG.info("image_id is" + str(template_name))
                         LOG.info("image_id is" + str(template.template_disksize))
+                        image_size = None
+                        if "G" in str(template.template_disksize):
+                            image_size = str(template.template_disksize).replace('G', '')
+                        if "g" in str(template.template_disksize):
+                            image_size = str(template.template_disksize).replace('g', '')   
+
                         data_center = DataCenter.objects.all()[0]
                         LOG.info("data center" + str(data_center))
                         try:
-                            glance_obj = Image(name=template_name, disk_size=template.template_disksize, login_name="linux", os_type=2, uuid=image_id, data_center=data_center, create_at=timezone.now())
+                            glance_obj = Image(name=template_name, disk_size=image_size, login_name="linux", os_type=2, uuid=image_id, data_center=data_center, create_at=timezone.now())
+                            LOG.info("dd")
+                            glance_obj.save()
+                            LOG.info("dd")
                         except Exception as e:
                             LOG.exception(e)
                         LOG.info("ccccccc")

@@ -558,6 +558,7 @@ def vdi_view(request):
     LOG.info("****** i am vdi view with method get ********")
 
     queryset = Instance.objects.all().filter(deleted=False, user_id=request.user.id)
+    LOG.info("queryset is" + str(queryset))
     json_value = {}
     count = 0 
     method = "responseUserCheck"
