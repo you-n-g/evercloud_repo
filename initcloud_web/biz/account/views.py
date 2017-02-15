@@ -190,6 +190,12 @@ class OperationList(generics.ListAPIView):
 
                 return queryset.order_by('-create_date')
 
+            if system:
+                LOG.info("audit_can_log")
+                queryset = Operation.objects.filter(user_id=request.user.id)
+
+                return queryset.order_by('-create_date')
+
 @api_view()
 def operation_filters(request):
     resources = Operation.objects.values('resource').distinct()
