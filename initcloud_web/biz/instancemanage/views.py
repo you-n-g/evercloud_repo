@@ -23,11 +23,13 @@ from biz.instance.utils import instance_action
 from biz.instance.settings import (INSTANCE_STATES_DICT, INSTANCE_STATE_RUNNING,
                                    INSTANCE_STATE_APPLYING, MonitorInterval)
 from biz.instancemanage.utils import * 
-from biz.idc.models import DataCenter
+from biz.idc.models import DataCenter, UserDataCenter
 from biz.common.pagination import PagePagination
 from biz.common.decorators import require_POST, require_GET
 from biz.common.utils import retrieve_params, fail
 from biz.workflow.models import Step
+from cloud.api import keystone
+from cloud.cloud_utils import create_rc_by_dc
 from cloud.tasks import (link_user_to_dc_task, send_notifications, delete_user_instance_network, 
                          send_notifications_by_data_center)
 from frontend.forms import CloudUserCreateFormWithoutCapatcha
@@ -42,6 +44,46 @@ class InstancemanageList(generics.ListCreateAPIView):
     def list(self, request):
         try:
 	    # filter instances which assigned to users
+            udc_id = request.session["UDC_ID"]
+            if request.user.is_superuser:
+                serializer = InstanceSerializer(self.queryset, many=True)
+                return Response(serializer.data)
+
+            system = False
+            security = False
+            audit = False
+            member = False
+            UDC = UserDataCenter.objects.get(pk=udc_id)
+            LOG.info(UDC)
+            LOG.info("4")
+            keystone_user_id = UDC.keystone_user_id
+            LOG.info("4")
+            tenant_uuid = UDC.tenant_uuid
+            LOG.info("4")
+            rc = create_rc_by_dc(DataCenter.objects.all()[0])
+            LOG.info("4")
+            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+            LOG.info("4")
+            for user_role in user_roles:
+                LOG.info("5")
+                LOG.info(user_role.name)
+                if user_role.name == "system":
+                    LOG.info("5")
+                    system = True
+                    break
+                if user_role.name == "security":
+                    security = True
+                    break
+                if user_role.name == "audit":
+                    audit = True
+                    break
+
+                if not system and not security and not audit:
+                    member = True
+            if system:
+                LOG.info("*** system user ***" + str(system))
+                serializer = InstanceSerializer(self.queryset, many=True)
+                return Response(serializer.data)
 	    queryset = self.get_queryset().filter(user = request.user)
             serializer = self.serializer_class(queryset, many=True)
             #serializer = self.serializer_class(self.get_queryset(), many=True)

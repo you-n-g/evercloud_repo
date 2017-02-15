@@ -146,7 +146,7 @@ class LoginView(View):
                 Operation.objects.create(
                     user=user,
                     udc='-1',
-                    resource="登录",
+                    resource="普通用户登录web",
                     resource_id=1,
                     resource_name="登录",
                     action="login",
@@ -154,6 +154,7 @@ class LoginView(View):
                 )
             except Exception as e:
                 pass
+            auth_logout(request)
             return HttpResponseForbidden()
 
 

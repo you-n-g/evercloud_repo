@@ -75,10 +75,10 @@ def volume_list_view(request):
 def volume_list_view_by_instance(request):
 
     data = request.data
+    LOG.info("**** data is ****" + str(data))
     if data.get('instance_id') is not None:
         volume_set = Volume.objects.filter(
-            deleted=False, user=request.user,
-            user_data_center=request.session["UDC_ID"],
+            deleted=False,
             instance=data.get('instance_id'))
 
         serializer = VolumeSerializer(volume_set, many=True)

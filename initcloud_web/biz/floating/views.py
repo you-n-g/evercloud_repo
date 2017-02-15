@@ -1,5 +1,6 @@
 #coding=utf-8
 
+import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -7,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from biz.account.models import Operation
-from biz.idc.models import UserDataCenter
+from biz.idc.models import DataCenter, UserDataCenter
 from biz.floating.models import Floating
 from biz.floating.serializer import FloatingSerializer
 from biz.floating.settings import FLOATING_STATUS_DICT, FLOATING_ALLOCATE, FLOATING_APPLYING
@@ -16,14 +17,55 @@ from biz.account.utils import check_quota
 from biz.billing.models import Order
 from biz.workflow.settings import ResourceType
 from biz.workflow.models import Workflow, FlowInstance
+from cloud.cloud_utils import create_rc_by_dc
 from cloud.tasks import allocate_floating_task
+from cloud.api import keystone
 
 from biz.instance.models import Instance
 from biz.lbaas.models import BalancerPool
 
+LOG = logging.getLogger(__name__)
 
 @api_view(["GET"])
 def list_view(request):
+
+    udc_id = request.session["UDC_ID"]
+    system = False
+    security = False
+    audit = False
+    member = False
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    LOG.info(UDC)
+    LOG.info("4")
+    keystone_user_id = UDC.keystone_user_id
+    LOG.info("4")
+    tenant_uuid = UDC.tenant_uuid
+    LOG.info("4")
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    LOG.info("4")
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    LOG.info("4")
+    for user_role in user_roles:
+        LOG.info("5")
+        LOG.info(user_role.name)
+        if user_role.name == "system":
+            LOG.info("5")
+            system = True
+            break
+        if user_role.name == "security":
+            security = True
+            break
+        if user_role.name == "audit":
+            audit = True
+            break
+
+        if not system and not security and not audit:
+            member = True
+    if system:
+        floatings = Floating.objects.filter(deleted=False)
+        serializer = FloatingSerializer(floatings, many=True)
+        return Response(serializer.data)
+
     floatings = Floating.objects.filter(user=request.user,
                                         user_data_center=request.session["UDC_ID"],
                                         deleted=False)
