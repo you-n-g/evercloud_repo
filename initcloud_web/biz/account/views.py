@@ -211,7 +211,6 @@ def operation_filters(request):
 
 
 class ContractList(generics.ListCreateAPIView):
-    permission_classes = (IsSystemUser,)
     queryset = Contract.living.filter(deleted=False)
     serializer_class = ContractSerializer
     pagination_class = PagePagination
