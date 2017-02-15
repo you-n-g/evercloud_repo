@@ -4,6 +4,7 @@
 
 from datetime import datetime
 import logging
+import sys
 
 from rest_framework import generics
 from rest_framework import status
@@ -189,12 +190,20 @@ class role_list_view(generics.ListAPIView):
         LOG.info("************* role_list_view ***********")
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
         roles = []
-        for role in keystone.role_list(rc):
-            if role.name in ["system","security","audit","_member_"]:
-      	        roles.append({"role":role.name})
-        #roles.append({"role":"admin_or_owner"})
-        #keystone.role_list(rc)
-        LOG.info(roles)
+        #for role in keystone.role_list(rc):
+        for role in ["system","security","audit","_member_"]:
+            if role in ["system","security","audit","_member_"]:
+                name = ''
+                if role == "system":
+                    name = "系统管理员"
+                elif role == "security":
+                    name = "安全保密员"
+                elif role == "audit":
+                    name = "安全审计员"
+                else:
+                    name = "普通用户"
+      	        roles.append({"role":role, "name": name})
+        LOG.info("*** roles are ***" + str(roles))
         return Response(roles)
 
 

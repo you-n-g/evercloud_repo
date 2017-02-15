@@ -58,6 +58,15 @@ class Instance(models.Model):
     
     core = models.IntegerField(_("Cores"), default=1)
     socket = models.IntegerField(_("Sockets"), default=1)
+    
+    MIMI = 0
+    JIMI = 1
+    SECURITY_CLS = (
+        (MIMI, u"秘密"),
+        (JIMI, u"机密"),
+    )
+    security_cls = models.IntegerField(u"密级",  choices=SECURITY_CLS, 
+                                default=MIMI)
 
     class Meta:
         db_table = "instance"

@@ -110,6 +110,10 @@
                                 </div>
                             </td>
                             <td class="create-time" data-title="'create_at' | i18next">{[{ instancemanage.create_date }]}</td>
+                            <td data-title="'instance.security_cls' | i18next">
+                                <span data-ng-if="instancemanage.security_cls == 0">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
+                                <span data-ng-if="instancemanage.security_cls == 1">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
+                            </td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
 					<div data-ng-if="!is_resize(instancemanage)">
@@ -214,6 +218,12 @@
                                                 <a href="javascript:void(0);"  ng-click="delete_instance(instancemanage)">
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.deleteinstance' | i18next }]} </a>
+                                            </li>
+                                            <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && instancemanage.security_cls==0">
+                                                <a href="#" ng-click="instance_action(instancemanage, 'set_jimi')">
+                                                    <i class="fa fa-play"></i>
+                                                    {[{ 'instance.set_jimi' | i18next }]}
+                                                </a>
                                             </li>
                                         </ul>
                                     </div>
