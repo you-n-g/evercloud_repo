@@ -493,6 +493,12 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 def deactivate_user(request):
     pk = request.data['id']
 
+    LOG.info(str(pk))
+    LOG.info(str(request.user.id))
+    if str(pk) == str(request.user.id):
+        LOG.info("*** aaaaa ****")
+        return Response({"success": False, "msg": _('不能禁止已登陆用户!')},
+                    status=status.HTTP_400_BAD_REQUEST)
     user = User.objects.get(pk=pk)
     user.is_active = False
     user.save()

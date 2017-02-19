@@ -186,23 +186,67 @@ class role_list_view(generics.ListAPIView):
 	else:
 	    roles.append({"role":role.name,"check":0})
     """
-    def list(self, request):
+    def list(self, request, user_id):
         LOG.info("************* role_list_view ***********")
+        LOG.info(str(user_id))
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
         roles = []
+        udc = UserDataCenter.objects.filter(user_id=int(user_id))[0]
+        keystone_user_id = udc.keystone_user_id
+        user_tenant_id = udc.tenant_uuid
+        current_user_roles = keystone.roles_for_user(rc, keystone_user_id, user_tenant_id)
         #for role in keystone.role_list(rc):
-        for role in ["system","security","audit","_member_"]:
-            if role in ["system","security","audit","_member_"]:
-                name = ''
-                if role == "system":
-                    name = "系统管理员"
-                elif role == "security":
-                    name = "安全保密员"
-                elif role == "audit":
-                    name = "安全审计员"
+        tri_checked = False
+        user_roles = []
+        for role in current_user_roles:
+            user_roles.append(role.name)
+            checked = False
+        s = ["system","security","audit","_member_"]
+        tri_list = sorted(s, reverse=True)
+        system = False
+        audit = False
+        security = False
+        member = False
+        for role in user_roles:
+            if role == "system":
+                system = True
+            elif role == "security":
+                security = True
+            elif role == "audit":
+                audit = True
+            else:
+                member = True
+        if system or audit or security:
+            member = False
+        for all_role in tri_list:
+            checked = False
+            name = ''
+            if all_role == "system":
+                if system:
+                    checked = True
                 else:
-                    name = "普通用户"
-      	        roles.append({"role":role, "name": name})
+                    checked = False
+                name = "系统管理员"
+            if all_role == "security":
+                if security:
+                    checked = True
+                else:
+                    checked = False
+                name = "安全保密员"
+            if all_role == "audit":
+                if audit:
+                    checked = True
+                else:
+                    checked = False
+                name = "安全审计员"
+            if all_role == "_member_":
+                if member:
+                    checked = True
+                else:
+                    checked = False
+                name = "普通用户"
+
+      	    roles.append({"role":all_role, "name": name, "checked": checked})
         LOG.info("*** roles are ***" + str(roles))
         return Response(roles)
 
@@ -280,6 +324,10 @@ def assignrole(request):
 
     username = request.data.get('username')
     roles = request.data.get('roles') 
+    if not roles:
+        return Response(
+             {'success': False, "msg": _('请选择')})
+
     roles_split = roles.split(",")
     roles_name = []
     for r in roles_split:
@@ -304,14 +352,32 @@ def assignrole(request):
     LOG.info("******** udc are ********" + str(udc))
     user_tenant_id = None
     keystone_user = None
+    keystone_user_id = None
     for u in udc:
         user_tenant_id = u.tenant_uuid
         LOG.info("******* user_tenant_id is *********" + str(user_tenant_id))
         keystone_user = u.keystone_user
+        keystone_user_id = u.keystone_user_id
         LOG.info("******* keystone_user is *********" + str(keystone_user))
+
+    # Before assign role remove the current roles first.
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    current_user_roles = keystone.roles_for_user(rc, keystone_user_id, user_tenant_id)
+    current_user_roles_list = []
+    for c_role in current_user_roles:
+        # Do not remove member role and SwiftOperator
+        current_user_roles_list.append(c_role.name)
+        LOG.info("*** c_role is ***" + str(c_role.name))
+        LOG.info("*** c_role id is ***" + str(c_role.id))
+        if c_role.name != "_member_" and c_role.name != "SwiftOperator":
+            LOG.info("member swift no")
+            keystone.remove_tenant_user_role(rc, project=user_tenant_id, user=keystone_user_id, role=c_role.id)
+
+
     for role in roles_name:
         LOG.info("******** role is *********" + str(role))
-        add_user_role(keystone_user, role, user_tenant_id) 
+        if role not in current_user_roles_list:
+            add_user_role(keystone_user, role, user_tenant_id) 
     
     return Response(
             {'success': True, "msg": _('Policy_Nova is updated successfully!')}) 

@@ -23,6 +23,7 @@ from biz.instance.utils import instance_action
 from biz.instance.settings import (INSTANCE_STATES_DICT, INSTANCE_STATE_RUNNING,
                                    INSTANCE_STATE_APPLYING, MonitorInterval)
 from biz.instancemanage.utils import * 
+from biz.floating.models import Floating
 from biz.idc.models import DataCenter, UserDataCenter
 from biz.common.pagination import PagePagination
 from biz.common.decorators import require_POST, require_GET
@@ -136,6 +137,7 @@ def create_instancemanage(request):
 
 @api_view(["POST"])
 def delete_instancemanages(request):
+    LOG.info(" **** I am delete_instancemanages ****")
     ids = request.data.getlist('ids[]')
     ins_set = Instancemanage.objects.filter(pk__in=ids)
     for ins in ins_set:
@@ -239,6 +241,13 @@ def delete_instance(request):
         delete_user_instance_network(request, instance_id)
     except:
         pass
+    try:
+        floating = Floating.objects.filter(resource=instance.id)[0]
+        floating.resource = None
+        floating.save()
+    except:
+        return Response({"success": False, "msg": _(
+              'failed.')})
     instance.deleted = True
     instance.save()
     return Response({"success": True, "msg": _(

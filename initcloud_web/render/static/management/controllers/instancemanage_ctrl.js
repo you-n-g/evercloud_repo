@@ -36,6 +36,29 @@ CloudApp.controller('InstancemanageController',
                     });
                 }
             });
+
+        var previous_refresh = false;
+        $rootScope.setInterval(function () {
+            var list = $scope.instancemanages;
+            var need_refresh = false;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].is_unstable) {
+                    need_refresh = true;
+                    break;
+                }
+            }
+            if (need_refresh) {
+                $scope.instancemanage_table.reload();
+                previous_refresh = true;
+            }
+            else {
+                if (previous_refresh) {
+                    $scope.instancemanage_table.reload();
+                }
+                previous_refresh = false;
+            }
+
+        }, 5000);
         
         var need_confirm = true;
         var no_confirm = false;
@@ -601,7 +624,7 @@ CloudApp.controller('InstancemanageController',
                 CommonHttpService.post('/api/instancemanage/create/', $scope.instancemanage).then(function(result){
                     if(result.success){
                         ToastrService.success(result.msg, $i18next("success"));
-                        instancemanage_table.reload();
+                        $scope.instancemanage_table.reload();
                         $modalInstance.close();
                     } else {
                         ToastrService.error(result.msg, $i18next("op_failed"));
@@ -1042,7 +1065,7 @@ CloudApp.controller('InstancemanageController',
             //});
             $scope.submit = function(instancemanage){
 
-                var params_data = {"id": instancemanage.id, "instance_id":instancemanage.uuid, "snap_name": $scope.snapshot.snapshotname}
+                var params_data = {"id": instancemanage.id, "instance_id":instancemanage.uuid, "snap_name": $scope.snapshot.snapshotname, "instance_name": instancemanage.name}
                 if(!$("#InstancemanageForm").validate().form()){
                     return;
                 }

@@ -83,14 +83,14 @@
                                 </div>
                             </td>
                             <td width="160" data-title="'instance.status' | i18next">
-                                <span>
-                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
+                                <span data-ng-if="instancemanage.isStable">
+                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
                                     <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/vnc-black.png">
 
-                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'spice_console')"><img src="/static/assets/global/img/spice.png"></a>
+                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'spice_console')"><img src="/static/assets/global/img/spice.png"></a>
                                     <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/spice-black.png">
 
-                                    <a href="#" data-ng-if="instancemanage.status== 1" ng-click="instance_action(instancemanage, 'novnc_console')"><img src="/static/assets/global/img/novnc.png"></a>
+                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'novnc_console')"><img src="/static/assets/global/img/novnc.png"></a>
                                     <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/novnc-black.png">
 
                                     <!--
@@ -114,35 +114,31 @@
                                 <span data-ng-if="instancemanage.security_cls == 0">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 1">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
                             </td>
-                                <td data-title="'actions' | i18next">
+                                <td class="action-group" data-title="'actions' | i18next">
                                     <div class="btn-group">
-					<div data-ng-if="!is_resize(instancemanage)">
                                         <button class="btn btn-default"
                                                 type="button" ng-click="edit(instancemanage)">
                                             <i class="fa fa-edit"></i>
                                             {[{ 'instancemanage.edit' | i18next }]}
                                         </button>
-					</div>
-                                        <div data-ng-if="is_resize(instancemanage)">
-					<button class="btn btn-default"
-                                                type="button" ng-click="confirm_resize(instancemanage)">
-                                            <i class="fa fa-edit"></i>
-                                            {[{ 'instancemanage.confirm_resize' | i18next }]}
-                                        </button>
-                                        </div>
-
                                         <button data-toggle="dropdown" class="btn btn-default dropdown-toggle"
                                                 type="button" aria-expanded="false">
                                             <i class="fa fa-angle-down"></i>
                                         </button>
-                                        <ul instancemanage="menu" class="dropdown-menu">
+                                        <ul role="menu" class="dropdown-menu">
                                         <li data-ng-if="(instancemanage.is_poweroff || instancemanage.is_error) && is_available(instancemanage)">
                                             <a href="#" ng-click="instance_action(instancemanage, 'power_on')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.power_on' | i18next }]}
                                             </a>
                                         </li>
-                                        <li data-ng-if="(instancemanage.is_poweron || instancemanage.is_error) && is_available(instancemanage)">
+                                        <li data-ng-if="is_resize(instancemanage)">
+                                            <a href="#" ng-click="confirm_resize(instancemanage)">
+                                                <i class="fa fa-play"></i>
+                                                {[{ 'instancemanage.confirm_resize' | i18next }]}
+                                            </a>
+                                        </li>
+                                        <li data-ng-class="{disabled: !instancemanage.is_running}">
                                             <a href="#" ng-click="instance_action(instancemanage, 'reboot')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.reboot' | i18next }]}
@@ -209,11 +205,13 @@
                                                 </span>
                                             </a>
                                         </li>
+                                            <!--
                                             <li data-ng-if="!(is_resize(instancemanage))">
                                                 <a href="javascript:void(0);"  ng-click="delete(instancemanage)">
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.delete' | i18next }]} </a>
                                             </li>
+                                            -->
                                             <li>
                                                 <a href="javascript:void(0);"  ng-click="delete_instance(instancemanage)">
                                                     <i class="fa fa-trash"></i>

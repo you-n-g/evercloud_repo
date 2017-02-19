@@ -49,6 +49,7 @@
     "snapshot": {
     "name":"快照名称",
     "id":"快照ID",
+    "snapshot_name": "主机名称",
     "type":"快照类型",
     "update_snapshot_title":"编辑快照",
     "confirm_delete":"删除快照"
@@ -500,7 +501,7 @@
     "title_create": "创建openstack集群",
     "title_update": "更新openstack集群",
     "confirm_delete": "确认删除openstack集群?",
-    "host_is_used": "该地址已被使用！",
+    "host_is_used": "该地址已被使用或者主机不可用",
     "switch": "切换",
     "activate": "已激活",
     "deactivate": "未激活"
