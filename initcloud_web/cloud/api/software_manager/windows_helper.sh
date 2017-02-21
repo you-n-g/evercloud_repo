@@ -29,7 +29,9 @@ fi
 # wget -P $DIR 'https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi'
 
 for url in `python -c "import api; api.Config.print_package_urls()"` ; do
-    wget -P $DIR "$url"
+    if [ ! -e $DIR/`basename "$url"` ] ; then 
+	wget -P $DIR "$url"
+    fi
 done
 
 cat <<EOF > $DIR/enable-http-5985
