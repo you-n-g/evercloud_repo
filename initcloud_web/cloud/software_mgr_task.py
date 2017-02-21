@@ -5,8 +5,8 @@ from celery import app
 
 from biz.vir_desktop.models import VirDesktopAction
 
-#import cloud.api.software_manager.api as mgr
-import cloud.api as mgr
+import cloud.api.software_manager.api as mgr
+# import cloud.api as mgr
 
 
 LOG = logging.getLogger(__name__)
