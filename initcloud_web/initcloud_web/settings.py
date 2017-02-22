@@ -264,39 +264,39 @@ logging.config.dictConfig(LOG_CONFIG)
 
 # Added by arthur
 
-ADMIN_TOKEN = "b3b157b3e7cd44a090744fbe6ebb0d53"
+ADMIN_TOKEN = "957766a040c54d33b053aec435d1961d"
 
 ADMIN_NAME = "admin"
-EDNPOINT = "http://192.168.1.48:35357/v2.0"
-HEAT_ENDPOINT = 'http://192.168.1.48:8004/v1/'
+EDNPOINT = "http://192.168.1.64:35357/v2.0"
+HEAT_ENDPOINT = 'http://192.168.1.64:8004/v1/'
 ADMIN_TENANT_NAME = "admin"
 ADMIN_PASS = "admin"
-AUTH_URL = "http://192.168.1.48:5000/v2.0/"
+AUTH_URL = "http://192.168.1.64:5000/v2.0/"
 NOVA_VERSION = "2"
 TENANT_DEFAULT_NETWORK = "10.0.0.0/24"
 GATEWAY_IP = "10.0.0.1"
 TEST_TENANT_NAME = "testwork"
 TEST_TENANT_ID = "cde7d6ed392941c5b75a3079459690d4"
-ALARM_ACTIONS = "http://192.168.1.48:5998/wsgi_app.py"
+ALARM_ACTIONS = "http://192.168.1.64:5998/wsgi_app.py"
 RESULT = [{"meter_name": "cpu_util"},{'meter_name':"memory.usage"},{"meter_name": "disk.write.bytes"},{"meter_name": "network.incoming.bytes"}, {"meter_name": "network.outgoing.bytes"}]
 
 # Virtural Desktop
 
-MGR_HTTP_ADDR = "http://192.168.1.48:8893/v1/vdstatus"
-MGR_WS_ADDR = "ws://192.168.1.48:8893/ws"
+MGR_HTTP_ADDR = "http://192.168.1.64:8893/v1/vdstatus"
+MGR_WS_ADDR = "ws://192.168.1.64:8893/ws"
 
-COMPUTE_HOSTS = {'localhost.localdomain': "192.168.1.48"}
+COMPUTE_HOSTS = {'localhost.localdomain': "192.168.1.64"}
 
 DEVICEPOLICY = [{"name":"usb"}]
 VLAN_ENABLED = False
 
-CONSOLE_IP = "192.168.1.48"
+CONSOLE_IP = "192.168.1.64"
 CONSOLE_PORT = "6081"
 
 #glance endpoint
-GLANCE_ENDPOINT = "http://192.168.1.48:9292"
+GLANCE_ENDPOINT = "http://192.168.1.64:9292"
 
-MONITOR_CPU = "http://192.168.1.48:5601/app/kibana#/visualize/edit/UDP?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(field:counter_volume),schema:metric,type:max),(enabled:!t,id:'2',params:(field:counter_name.keyword,order:desc,orderBy:'1',row:!t,size:5),schema:split,type:terms),(enabled:!t,id:'3',params:(field:resource_id.keyword,order:desc,orderBy:'1',size:5),schema:group,type:terms),(enabled:!t,id:'4',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:auto,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,legendPosition:right,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),title:UDP,type:line))"
+MONITOR_CPU = "http://192.168.1.64:5601/app/kibana#/visualize/edit/UDP?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(field:counter_volume),schema:metric,type:max),(enabled:!t,id:'2',params:(field:counter_name.keyword,order:desc,orderBy:'1',row:!t,size:5),schema:split,type:terms),(enabled:!t,id:'3',params:(field:resource_id.keyword,order:desc,orderBy:'1',size:5),schema:group,type:terms),(enabled:!t,id:'4',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:auto,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,legendPosition:right,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),title:UDP,type:line))"
 
 MONITOR_DISK = "http://www.baidu.com"
 MONITOR_NETWORK = ""

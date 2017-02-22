@@ -81,20 +81,32 @@ class Config(object):
             "UninstallArguments": "/uninstall /passive /norestart",
             "url": 'http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe',
         },
+        #{
+        #    "name": "Notepad++(x86)",
+        #    "filename": r'npp.7.3.Installer.exe',
+        #    "Product_Id": "Notepad++",
+        #    "InstallArguments": "/S",
+        #    "UninstallArguments": "/S",
+        #    "UninstallFile": r"C:\Program Files\Notepad++\uninstall.exe",
+        #    "url": 'https://notepad-plus-plus.org/repository/7.x/7.3/npp.7.3.Installer.exe',
+        #},
         {
-            "name": "Notepad++(x86)",
-            "filename": r'npp.7.3.Installer.exe',
-            "Product_Id": "Notepad++",
-            "InstallArguments": "/S",
-            "UninstallArguments": "/S",
-            "UninstallFile": r"C:\Program Files\Notepad++\uninstall.exe",
-            "url": 'https://notepad-plus-plus.org/repository/7.x/7.3/npp.7.3.Installer.exe',
-        },
-        {
-            "name": "python2.7.13",
+            "name": "python2.7.13(x86)",
             "filename": r'python-2.7.13.msi',
             "Product_Id": "{4A656C6C-D24A-473F-9747-3A8D00907A03}",
             "url": 'https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi',
+        },
+        {
+            "name": "python2.7.13(x64)",
+            "filename": r'python-2.7.13.amd64.msi',
+            "Product_Id": "{4A656C6C-D24A-473F-9747-3A8D00907A04}",
+            "url": 'https://www.python.org/ftp/python/2.7.13/python-2.7.13.amd64.msi',
+        },
+        {
+            "name": "7zip(x64)",
+            "filename": r'7z920-x64.msi',
+            "Product_Id": "{23170F69-40C1-2702-0920-000001000000}",
+            "url": 'http://www.7-zip.org/a/7z920-x64.msi',
         },
     ]
 
@@ -125,6 +137,16 @@ def get_available_software():
 
 # 2. 获取某个虚拟机已安装软件的列表
 LIST_SCRIPT = '''$UninstallKey="SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
+#Create an instance of the Registry Object and open the HKLM base key
+$reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey(‘LocalMachine’,$computername)
+#Drill down into the Uninstall key using the OpenSubKey Method
+$regkey=$reg.OpenSubKey($UninstallKey)
+#Retrieve an array of string that contain all the subkey names
+echo $regkey.GetSubKeyNames()
+
+
+# get Wow6432Node!!!
+$UninstallKey="SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
 #Create an instance of the Registry Object and open the HKLM base key
 $reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey(‘LocalMachine’,$computername)
 #Drill down into the Uninstall key using the OpenSubKey Method
