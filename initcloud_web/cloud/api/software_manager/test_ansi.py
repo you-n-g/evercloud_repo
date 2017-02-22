@@ -6,9 +6,9 @@ host = "192.168.1.224"
 
 def test_install():
     print api.get_installed_software(host)
-    api.install_software([api.Config.package_list[1]["Product_Id"]], [host])
+    api.install_software([api.Config.package_list[3]["Product_Id"]], [host])
     print api.get_installed_software(host)
-    api.uninstall_software([api.Config.package_list[1]["Product_Id"]], [host])
+    api.uninstall_software([api.Config.package_list[3]["Product_Id"]], [host])
     print api.get_installed_software(host)
 
 
@@ -51,13 +51,13 @@ def test_install_new_program():
     print api.get_installed_software(host)
 
 # test_reg()
-# test_install()
+test_install()
 # test_global_reg()
 # test_global_reg2()
 
 # change_defualt_user_reg()
 # hide_user()
 
-set_wallpaper()
+# set_wallpaper()
 
 # test_install_new_program()
