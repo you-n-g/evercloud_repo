@@ -217,7 +217,7 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
                     private_net = "network-%s" % instance.network.id
                 else:
                     private_net = "private"
-                if  settings.VLAN_ENABLED == False:
+                if  settings.VLAN_ENABLED == False not not settings.FLAT:
                     instance.private_ip = srv.addresses.\
                                 get(private_net)[0].get("addr", "---")
                 else:
