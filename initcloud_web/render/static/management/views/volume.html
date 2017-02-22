@@ -102,6 +102,7 @@
                                                 {[{ 'volume.detach_from_instance' | i18next }]}
                                             </a>
                                         </li>
+                                        <!--
                                         <li data-ng-if="site_config.BACKUP_ENABLED && volume.is_in_use">
                                             <a href="javascript:void(0);"
                                                data-ng-click="openBackupModal(volume)">
@@ -109,7 +110,6 @@
                                                 {[{ 'volume.backup' | i18next }]}
                                             </a>
                                         </li>
-                                        <!--
                                         <li >
                                             <a href="javascript:void(0);"  ng-class="{'disabled-link': volume.status==0
                                             || volume.status==4 || volume.status==6

@@ -96,7 +96,7 @@ CloudApp.controller('UserController',
                         return user;
                     },
                     AssignRoles: function(){
-                        return CommonHttpService.get('/api/policy_nova/role/');
+                        return CommonHttpService.get('/api/policy_nova/role/' + user.id);
                     }
                 }
             }).result.then(function(){

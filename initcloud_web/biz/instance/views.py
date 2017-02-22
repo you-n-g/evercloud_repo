@@ -224,13 +224,7 @@ def update_flavor(request):
 @api_view(["POST"])
 def delete_flavors(request):
     ids = request.data.getlist('ids[]')
-    flavorid = Flavor.objects.get(pk__in=ids).flavorid
-    novaadmin = get_nova_admin(request)
-    #novaadmin.flavors.delete(flavorid)
-    try:
-	novaadmin.flavors.delete(flavorid)
-    except:
-	traceback.print_exc()
+    LOG.info("*** ids are ***" + str(ids))
     Flavor.objects.filter(pk__in=ids).delete()
     return Response({'success': True, "msg": _('Flavors have been deleted!')}, status=status.HTTP_201_CREATED)
 

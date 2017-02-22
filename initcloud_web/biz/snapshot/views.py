@@ -1,4 +1,4 @@
-#-*-coding-utf-8-*-
+# -*- coding:utf8 -*-
 
 # Author Yang
 
@@ -19,7 +19,7 @@ from biz.account.settings import QUOTA_ITEM, NotificationLevel
 from biz.snapshot.models import Snapshot 
 from biz.snapshot.serializer import SnapshotSerializer
 from biz.snapshot.utils import * 
-from biz.idc.models import UserDataCenter
+from biz.idc.models import UserDataCenter, DataCenter
 from biz.common.pagination import PagePagination
 from biz.common.decorators import require_POST, require_GET
 from biz.common.utils import retrieve_params, fail
@@ -29,7 +29,8 @@ from cloud.tasks import (link_user_to_dc_task, send_notifications,
 from frontend.forms import CloudUserCreateFormWithoutCapatcha
 from cloud.api import nova
 from cloud.api import glance
-from cloud.cloud_utils import create_rc_by_udc
+from cloud.api.glance import glanceclient
+from cloud.cloud_utils import create_rc_by_udc, create_rc_by_dc
 from biz.image.serializer import ImageSerializer
 from biz.instance.models import Instance
 from biz.image.models import Image
@@ -56,13 +57,14 @@ def create_instance_snapshot(request):
 	LOG.info(request.data)
 	#id = request.data['id']
 	snap_name = request.data['snap_name']
+        instance_name = request.data['instance_name']
 	instance_id = request.data['instance_id']
 	#datacenter = DataCenter.get_default()
 	udc_id = request.session["UDC_ID"]
 	udc = UserDataCenter.objects.get(id = udc_id)
 	rc = create_rc_by_udc(udc)
 	snapshot = nova.snapshot_create(rc, instance_id, snap_name)
-	serializer = SnapshotSerializer(data = {'snapshotname':snap_name,'snapshot_id':snapshot, 'snapshot_type':'instance', 'instance_id':instance_id})
+	serializer = SnapshotSerializer(data = {'snapshotname':snap_name,'snapshot_id':snapshot, 'snapshot_type':'instance', 'instance_id':instance_id, 'snapshot_name': instance_name})
 	if serializer.is_valid():
             serializer.save()
 	ins = Instance.objects.all().get(id = request.data['id'])
@@ -92,6 +94,7 @@ def boot_snapshot(request):
 
 @api_view(["POST"])
 def delete_snapshots(request):
+    LOG.info("request data is ids")
     ids = request.data.getlist('ids[]')
     datacenter = DataCenter.get_default()
     rc = create_rc_by_dc(datacenter)
@@ -103,8 +106,11 @@ def delete_snapshots(request):
 	    image_id = snapshot.snapshot_id
 	    LOG.info(image_id)
 	    client.images.delete(image_id)
+            LOG.info("dddd")
             Snapshot.objects.filter(pk__in=ids).delete()
+            LOG.info("dddd")
 	    Image.objects.filter(uuid = image_id).delete()
+            LOG.info("dddd")
 	return Response({'success': True, "msg": _('Snapshots have been deleted!')}, status=status.HTTP_201_CREATED)
     except:
 	traceback.print_exc()
@@ -115,8 +121,35 @@ def delete_snapshots(request):
 def update_snapshot(request):
     try:
 
-        pk = request.data['id']
+        LOG.info(" **** requesta data is ***" + str(request.data))
+        image_id = request.data.get('snapshot_id')
+        name = request.data.get("snapshotname")
+        pk = request.data.get("id")
         LOG.info("---- snapshot pk is --------" + str(pk))
+        
+        try:
+            meta = {"name": name}
+            LOG.info("1")
+            udc_id = request.session["UDC_ID"]
+            LOG.info("1")
+            udc = UserDataCenter.objects.get(id = udc_id)
+            LOG.info("1")
+            rc = create_rc_by_udc(udc)
+            LOG.info("1")
+            url = settings.GLANCE_ENDPOINT
+            glanceclient(rc, url).images.update(image_id, **meta)
+            LOG.info("1")
+        except Exception as e:
+            LOG.info("**** error is ***" + str(e)) 
+            if "Forbidden" in str(e):
+                return Response(
+                {'success': False, "msg": _('无权限修改此镜像!')},
+            status=status.HTTP_201_CREATED)
+            return Response(
+            {'success': False, "msg": _('Snapshot updated failed!')},
+            status=status.HTTP_201_CREATED)
+
+        
 
         snapshot = Snapshot.objects.get(pk=pk)
         LOG.info("ddddddddddddd")
@@ -128,6 +161,7 @@ def update_snapshot(request):
         #Operation.log(snapshot, snapshot.name, 'update', udc=snapshot.udc,
         #              user=request.user)
 
+       
         return Response(
             {'success': True, "msg": _('Snapshot is updated successfully!')},
             status=status.HTTP_201_CREATED)

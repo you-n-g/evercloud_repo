@@ -158,6 +158,10 @@ def delete_data_centers(request):
 @api_view(['GET'])
 def is_host_unique(request):
     host = request.query_params['host']
+    response = os.system("ping -c 1 " + str(host))
+    active = False
+    if response == 0:
+        active = True
     pk = request.query_params.get('id', None)
     queryset = DataCenter.objects.filter(host=host)
 
@@ -166,7 +170,11 @@ def is_host_unique(request):
     if pk:
         queryset = queryset.exclude(pk=pk)
 
-    return Response(not queryset.exists())
+    if not queryset.exists() and active:
+        return Response(True) 
+    else:
+        return Response(False)
+    #return Response(not queryset.exists())
 
 
 @api_view(["GET"])

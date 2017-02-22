@@ -172,11 +172,11 @@ CloudApp.controller('TemplatemanagerController',
 
     .controller('NewTemplatemanagerController',
         function($scope, $modalInstance, $i18next,
-                 CommonHttpService, ToastrService, TemplatemanagerForm, dataCenters, isos_list, templates_list){
+                 CommonHttpService, ToastrService, templatemanagerForm, dataCenters, isos_list, templates_list){
 
             var form = null;
             $modalInstance.rendered.then(function(){
-                form = TemplatemanagerForm.init($scope.site_config.WORKFLOW_ENABLED);
+                form = templatemanagerForm.init($scope.site_config.WORKFLOW_ENABLED);
             });
 
             $scope.dataCenters = dataCenters;
@@ -206,7 +206,7 @@ CloudApp.controller('TemplatemanagerController',
             };
         }
 
-   ).factory('TemplatemanagerForm', ['ValidationTool', '$i18next',
+   ).factory('templatemanagerForm', ['ValidationTool', '$i18next',
         function(ValidationTool, $i18next){
             return {
                 init: function(){
@@ -214,7 +214,7 @@ CloudApp.controller('TemplatemanagerController',
                     var config = {
 
                         rules: {
-                            templatemanagername: {
+                            template: {
                                 required: true,
                                 remote: {
                                     url: "/api/templatemanager/is-name-unique/",
@@ -224,7 +224,11 @@ CloudApp.controller('TemplatemanagerController',
                                     async: false
                                 }
                             },
-                            user_type: 'required'
+                            template: 'required',
+                            name: 'required',
+                            software: 'required',
+                            disk: 'required',
+                            iso: 'required'
                         },
                         messages: {
                             templatemanagername: {

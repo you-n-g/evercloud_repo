@@ -75,6 +75,7 @@ urlpatterns += [
     url(r'^snapshot/$', snapshot_view.SnapshotList.as_view()),
     url(r'^snapshot/create_instance_snapshot$', snapshot_view.create_instance_snapshot),
     url(r'^snapshot/boot_snapshot/$', snapshot_view.boot_snapshot),
+    url(r'^snapshot/update_snapshot/$', snapshot_view.update_snapshot),
     url(r'^snapshot/batch-delete/$', snapshot_view.delete_snapshots),
 ]
 
@@ -328,7 +329,7 @@ urlpatterns += [
     url(r'^policy_neutron/$', policy_neutron_view.Policy_NeutronList.as_view()),
 #    url(r'^policy_nova/$', policy_nova_view.role_list_view.as_view()),
     url(r'^policy_neutron/update', policy_neutron_view.update_policy_neutron),
-    url(r'^policy_neutron/role', policy_neutron_view.role_list_view.as_view()),
+    url(r'^policy_neutron/role/$', policy_neutron_view.role_list_view.as_view()),
 ]
 
 
@@ -350,7 +351,7 @@ urlpatterns += [
     url(r'^policy_nova/$', policy_nova_view.Policy_NovaList.as_view()),
 #    url(r'^policy_nova/$', policy_nova_view.role_list_view.as_view()),
     url(r'^policy_nova/update', policy_nova_view.update_policy_nova),
-    url(r'^policy_nova/role', policy_nova_view.role_list_view.as_view()),
+    url(r'^policy_nova/role/(?P<user_id>[0-9]+)/', policy_nova_view.role_list_view.as_view()),
     url(r'^policy_nova/assignrole', policy_nova_view.assignrole),
 ]
 
