@@ -242,9 +242,15 @@ def delete_instance(request):
     except:
         pass
     try:
-        floating = Floating.objects.filter(resource=instance.id)[0]
-        floating.resource = None
-        floating.save()
+        LOG.info("resource is" + str(instance.id))
+        #floating = Floating.objects.filter(resource=instance.id)[0]
+        floating = Floating.objects.filter(resource=instance.id)
+        if floating:
+            LOG.info("********")
+            floating.resource = None
+            LOG.info("********")
+            floating.save()
+            LOG.info("********")
     except:
         return Response({"success": False, "msg": _(
               'failed.')})

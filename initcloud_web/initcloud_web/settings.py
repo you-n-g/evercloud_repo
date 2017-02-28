@@ -300,4 +300,4 @@ MONITOR_CPU = "http://192.168.1.64:5601/app/kibana#/visualize/edit/UDP?_g=(refre
 
 MONITOR_DISK = "http://www.baidu.com"
 MONITOR_NETWORK = ""
-FLAT = True
+FLAT = False 

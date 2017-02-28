@@ -43,6 +43,8 @@ def list_view(request):
     LOG.info("4")
     rc = create_rc_by_dc(DataCenter.objects.all()[0])
     LOG.info("4")
+    LOG.info(str(keystone_user_id))
+    LOG.info(str(tenant_uuid))
     user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
     LOG.info("4")
     for user_role in user_roles:
