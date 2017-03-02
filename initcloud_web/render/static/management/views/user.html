@@ -12,11 +12,11 @@
                     <a class="btn btn-primary" ng-click="batchHeat()" ng-class="{disabled: checkboxGroup.noneChecked()}">
                         <i class="fa fa-plus"></i>{[{ 'action.heat' | i18next }]}
                     </a>
+                    <!--
                     <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
                         <i class="fa fa-trash"></i>
                         {[{ 'action.batch_delete' | i18next }]}
                     </a>
-                    <!--
                     <a class="btn btn-info" href="#" ng-click="openBroadcastModal()">
                         <i class="fa  fa-bullhorn"></i> {[{ 'notification.broadcast' | i18next }]}
                     </a>
@@ -87,12 +87,12 @@
                                                     <i class="fa fa-magic"></i> {[{ 'user.assign_data_center' | i18next }]}
                                                 </a>
                                             </li>
-                                            -->
                                            <li>
                                                 <a href="javascript: void(0)" data-ng-click="delete(user);" data-ng-if="current_user.system">
                                                     <i class="fa fa-magic"></i> {[{ 'user.delete' | i18next }]}
                                                 </a>
                                             </li>
+                                           -->
                                            <li>
                                                 <a href="javascript: void(0)" data-ng-click="resetpassword(user);" data-ng-if="current_user.security">
                                                     <i class="fa fa-magic"></i> {[{ 'user.resetpassword' | i18next }]}
@@ -242,7 +242,7 @@
             <div class="form-group">
                 <tr data-ng-repeat="role in roles">
                 <td width="30" header="'checkbox-header.html'">
-                    <input type="radio" name="role" value="{[{role.role}]}" data-ng-model="role.checked"/>
+                    <input type="radio" name="role" value="{[{role.role}]}" data-ng-model="role.checked" ng-checked="{[{role.checked}]}"/>
                 </td>
                 <td data-title="'user.policy_nova' | i18next">
                     <span> {[{ role.name}]} </span>

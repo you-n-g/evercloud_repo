@@ -218,7 +218,7 @@ CloudApp.controller('SnapshotController',
                 snapshot = ResourceTool.copy_only_data(snapshot);
 
 
-                CommonHttpService.post("/api/snapshot/update/", snapshot).then(function(data){
+                CommonHttpService.post("/api/snapshot/update_snapshot/", snapshot).then(function(data){
                     if (data.success) {
                         ToastrService.success(data.msg, $i18next("success"));
                         snapshot_table.reload();

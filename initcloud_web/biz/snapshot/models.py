@@ -13,6 +13,7 @@ class Snapshot(models.Model):
     deleted = models.BooleanField(_("Deleted"), default=False)
     create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
     snapshot_id = models.CharField(_("Snap_id"), max_length=255, null=False, default='')
+    snapshot_name = models.CharField(_("Snap_name"), max_length=255, null=False, default='')
     snapshot_type = models.CharField(_("Type"), max_length=255, null=False, default='')
     volume_id = models.CharField(_("Volume"), max_length=255, null=False, default='')
 

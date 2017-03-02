@@ -179,7 +179,7 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
-                            <select class="form-control" ng-model="templatemanager.pro">
+                            <select name="pro" class="form-control" ng-model="templatemanager.pro">
                                 <option value="vnc">VNC
                                 </option>
                                 <option value="spice">Spice
@@ -196,7 +196,7 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-addon"> <i class="fa fa-link"></i> </span>
-                            <select class="form-control" ng-model="templatemanager.iso">
+                            <select class="form-control" ng-model="templatemanager.iso" name="iso">
                                 <option ng-repeat="iso in isos" value="{[{iso}]}">{[{iso.name}]} </option>
                             </select>
                         </div>

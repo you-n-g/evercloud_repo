@@ -3,7 +3,7 @@
 angular.module("CloudApp")
     .controller('FloatingController',
         function ($rootScope, $scope, $filter, $timeout,
-            $interval, $modal, $i18next, ngTableParams, //FloatingState
+            $interval, $modal, $i18next, ngTableParams, FloatingState,
             CommonHttpService, ToastrService, ngTableHelper, PriceRule) {
 
             $scope.$on('$viewContentLoaded', function () {
@@ -21,7 +21,7 @@ angular.module("CloudApp")
                 getData: function ($defer, params) {
                     CommonHttpService.get("/api/floatings/").then(function (data) {
                         $scope.current_floating_data = ngTableHelper.paginate(data, $defer, params);
-                        //FloatingState.processList($scope.current_floating_data);
+                        FloatingState.processList($scope.current_floating_data);
                     });
                 }
             });
