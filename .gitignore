@@ -5,3 +5,5 @@
 docs/*
 ansible/
 initcloud_web/cloud/api/software_manager/config.yml
+initcloud_web/initcloud_web/settings.py
+

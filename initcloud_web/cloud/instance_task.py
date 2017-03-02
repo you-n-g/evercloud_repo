@@ -57,9 +57,10 @@ def flavor_create(instance):
     LOG.info(u"Flavor create start, [%s].", instance)
     begin = datetime.datetime.now()
     rc = create_rc_by_instance(instance)
+    LOG.info("*** rc is ***" + str(rc))
     name = _generate_name(instance)
     flavor = _get_flavor_by_name(instance, name)
-    metadata = {"hw:cpu_cores":instance.core,"hw:cpu_sockets":instance.socket}
+    metadata = {"hw:cpu_cores":int(instance.core),"hw:cpu_sockets":int(instance.socket)}
 
     if flavor is None:
         try:
@@ -99,6 +100,7 @@ def instance_create(instance, password):
     if neutron.is_neutron_enabled(rc):
         nics = [{"net-id": instance.network.network_id, "v4-fixed-ip": ""}]
 
+    LOG.info("**** flavor is ****" + str(instance.flavor_id))
     if instance.image.os_type == LINUX:
         server = nova.server_create(rc, name=instance.name,
                                     image=instance.image.uuid,
@@ -217,7 +219,7 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
                     private_net = "network-%s" % instance.network.id
                 else:
                     private_net = "private"
-                if  settings.VLAN_ENABLED == False:
+                if  settings.VLAN_ENABLED == False and not settings.FLAT:
                     instance.private_ip = srv.addresses.\
                                 get(private_net)[0].get("addr", "---")
                 else:

@@ -640,7 +640,12 @@ def vdi_view(request):
         LOG.info("host_ip=" + host_ip)
         LOG.info("port=" + str(port))
         if "error" in str(port):
-            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
+            public_ip = ''
+            if settings.FLAT:
+                public_ip = q.private_ip
+            else:
+                public_ip = q.public_ip
+            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
             count = count + 1
             continue
         split_port = port.split(":")
@@ -648,7 +653,13 @@ def vdi_view(request):
         port_2 = port_1.split("\\")
         port_3 = port_2[0]
         vnc_port = 5900 + int(port_3)
-        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
+        public_ip = ''
+        if settings.FLAT:
+            public_ip = q.private_ip
+        else:
+            public_ip = q.public_ip
+        LOG.info("*** public_ip is ****" + str(public_ip))
+        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
         LOG.info("*** count is ***" + str(count))
         count = count + 1
     LOG.info("count done")
