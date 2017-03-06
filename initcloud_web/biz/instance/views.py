@@ -817,3 +817,16 @@ def new_vdi(request):
     return json_value
 
 monitor_proxy = login_required(csrf_exempt(MonitorProxy.as_view()))
+
+
+# get instance security class changing status
+@require_GET
+def instance_sec_status(request):
+    ins_id = request.query_params.get("vm")
+    try:
+        ins = Instance.objects.get(id=ins_id)
+        return Response({'status': ins.security_cls})
+    except Exception, e:
+        LOG.info("Instance sec status error: %s" % e)
+        return Response({'success': False})
+

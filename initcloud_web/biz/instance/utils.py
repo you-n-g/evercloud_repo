@@ -23,7 +23,7 @@ from biz.instance.settings import (INSTANCE_STATE_RUNNING,
                                    INSTANCE_STATE_BOOTING, INSTANCE_STATE_ERROR,
                                    INSTANCE_STATE_DELETE,
                                    INSTANCE_STATE_POWEROFF)
-import cloud.api.software_manager.api as software_api
+from cloud.software_mgr_task import set_wallpaper
 
 OPERATION_SUCCESS = 1
 OPERATION_FAILED = 0
@@ -132,8 +132,8 @@ def get_instance_novnc_console(instance):
 
 def set_instance_jimi(instance):
     # import rpdb; rpdb.set_trace()
-    if instance.is_running and instance.public_ip and software_api.set_wallpaper([instance.public_ip], "jimi"):
-        instance.security_cls = Instance.JIMI
+    if instance.is_running and instance.public_ip and set_wallpaper.delay(instance, [instance.public_ip], "jimi"):
+        instance.security_cls = Instance.SETTING
         instance.save()
         return {"OPERATION_STATUS": OPERATION_SUCCESS, "status": instance.status}
     return {"OPERATION_STATUS": OPERATION_FAILED, "status": instance.status}
