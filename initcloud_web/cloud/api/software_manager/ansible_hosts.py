@@ -8,10 +8,15 @@ from optparse import OptionParser
 import json
 import copy
 import yaml
+import logging
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
+LOG = logging.getLogger(__name__)
 
 
-''' Here is an example of config.yml
+'''
+Here is an example of config.yml. Hosts is not necessary if you are not
+debugging software mangement module alone.
+--
 ansible_ssh_user: "username"
 ansible_ssh_pass: "password"
 hosts:
@@ -23,11 +28,7 @@ with open(os.path.join(DIRNAME, "config.yml")) as f:
     config = yaml.load(f)
 
 
-hosts = {
-    'all': {
-        'hosts': config["hosts"],
-    }
-}
+
 
 VARS = {
     "ansible_ssh_host": None,
@@ -41,7 +42,22 @@ VARS = {
 
 
 def get_hosts():
+    global hosts
+    try:
+        from biz.floating.models import Floating
+        LOG.info("Getting floating ips from models.")
+        fips = [ip.ip for ip in Floating.objects.all()]
+    except ImportError:
+        fips = config["hosts"]
+        LOG.warning("Getting floating ips from config.yml")
+    hosts = {
+        'all': {
+            'hosts': fips,
+        }
+    }
     return hosts
+
+hosts = get_hosts()
 
 
 def pick_host(name):
