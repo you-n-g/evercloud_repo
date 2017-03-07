@@ -5,7 +5,7 @@
 CloudApp.controller('InstancemanageController',
     function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox,
              CommonHttpService, ToastrService, ngTableParams, ngTableHelper, InstanceState, $state,
-             Instancemanage, CheckboxGroup, DataCenter,PriceRule){
+             Instancemanage, CheckboxGroup, DataCenter,PriceRule, $interval){
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
@@ -131,6 +131,7 @@ CloudApp.controller('InstancemanageController',
             };
 
             CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data).then(function (data) {
+                console.log(data);
                 if (data.OPERATION_STATUS == 1) {
                     //$scope.instance_table.reload();
                     $scope.instancemanage_table.reload();
@@ -385,7 +386,72 @@ CloudApp.controller('InstancemanageController',
         };
 
         var instance_set_jimi = function (ins) {
-            do_instance_action(ins, "set_jimi", need_confirm);
+            // do_instance_action(ins, "set_jimi", need_confirm);
+            //bootbox.confirm($i18next("instance.confirm_set_jimi") + "[" + ins.name + "]", function (confirm) {
+            //    if (confirm) {
+            //        post_action(ins, "set_jimi");
+            //    }
+            //});
+            console.log("we are here!!!!");
+            bootbox.confirm($i18next("instance.confirm_set_jimi") + "[" + ins.name + "]", function (confirm) {
+                console.log("we are here2!!!!");
+                if (confirm) {
+
+                    var post_data = {
+                        "action": "set_jimi",
+                        "instance": ins.id
+                    };
+
+                    CommonHttpService.post("/api/instances/" + ins.id + "/action/", post_data).then(function (data) {
+                        console.log(data);
+                        if (data.OPERATION_STATUS == 1) {
+                            //$scope.instance_table.reload();
+                            $scope.instancemanage_table.reload();
+                            var trace_status = function (ins, pro) {
+                              CommonHttpService.get('/api/instances/sec_status?vm='+ins.id).then(function(data) {
+                                ins.security_cls = data.status;
+                                if(data.status == 0 || data.status == 1){
+                                  $interval.cancel(pro)
+                                  $scope.instancemanage_table.reload();
+                                }
+                              })
+                            }
+                            var pro = $interval(function() {
+                              trace_status(ins, pro)
+                            }, 2000);
+                        } else if (data.OPERATION_STATUS == 2) {
+                            var msg = data.MSG || $i18next("op_forbid_msg");
+                            ToastrService.warning(msg, $i18next("op_failed"));
+                        } else {
+                            var msg = data.MSG || $i18next("op_failed_msg");
+                            ToastrService.error(msg, $i18next("op_failed"));
+                        }
+                    });
+
+                    /*
+                    ins.security_cls = 1 - ins.security_cls;
+                    CommonHttpService.post('/api/software/' + action + '/', data).then(function(data) {
+                      if(data.success) {
+                        ToastrService.success(data.msg, $i18next('success'));
+                        var trace_status = function (vm, user, pro) {
+                          CommonHttpService.get('/api/software/actionstatus?vm='+vm).then(function(data) {
+                            if(data.status == (action+'_ok') || data.status == 'error')
+                              $interval.cancel(pro)
+                            user.action_state = data.status
+                          })
+                        }
+                        for(var i = 0; i < data.ids.length; ++i) {
+                          (function(x) {
+                            var pro = $interval(function() {
+                              trace_status(data.ids[x], userlist[x], pro)
+                            }, 2000)
+                          })(i);
+                        }
+                      }
+                    });
+                    */
+                }
+            });
         };
 
         var action_func = {

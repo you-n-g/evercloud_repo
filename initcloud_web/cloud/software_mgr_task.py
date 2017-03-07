@@ -4,6 +4,7 @@ import logging, time
 from celery import app
 
 from biz.vir_desktop.models import VirDesktopAction
+from biz.instance.models import Instance
 
 import cloud.api.software_manager.api as mgr
 # import cloud.api as mgr
@@ -60,5 +61,17 @@ def uninstall_software(ids, addrs, softwares):
         for vm in ids:
             VirDesktopAction.objects.filter(id=vm).update(state='error')
     
+    return True
+
+@app.task
+def set_wallpaper(instance, host_list, wallpaper):
+    try:
+        LOG.info("---set wallpaper---: start task")
+        mgr.set_wallpaper(host_list, wallpaper)
+        Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)
+        LOG.info("---set wallpaper---: finish task")
+    except Exception, e:
+        LOG.info("---set wallpaper---: %s" % e)
+        Instance.objects.filter(id=instance.id).update(security_cls=Instance.MIMI)
     return True
 
