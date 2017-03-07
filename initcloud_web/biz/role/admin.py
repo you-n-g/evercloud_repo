@@ -7,6 +7,6 @@ from biz.role.models import Role
 
 
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ("user", "mobile", "user_type", "balance")
+    list_display = ("rolename", "datacenter", "deleted", "create_date")
 
 admin.site.register(Role, RoleAdmin)

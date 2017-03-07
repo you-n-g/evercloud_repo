@@ -61,9 +61,11 @@ class Instance(models.Model):
     
     MIMI = 0
     JIMI = 1
+    SETTING = 2
     SECURITY_CLS = (
         (MIMI, u"秘密"),
         (JIMI, u"机密"),
+        (SETTING, u"正在设置"),
     )
     security_cls = models.IntegerField(u"密级",  choices=SECURITY_CLS, 
                                 default=MIMI)
