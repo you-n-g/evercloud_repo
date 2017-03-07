@@ -23,9 +23,19 @@ hosts:
     - "192.168.90.1"
 '''
 
-
-with open(os.path.join(DIRNAME, "config.yml")) as f:
-    config = yaml.load(f)
+config_path = os.path.join(DIRNAME, "config.yml")
+try:
+    with open(config_path) as f:
+        config = yaml.load(f)
+except IOError:
+    LOG.warning("You didn't configure %s, please follow the instructions"
+            " of \"cloud/api/software_manager/ansible_hosts.py\" to create the"
+            "configuration.")
+    config = {
+        'ansible_ssh_user': "username",
+        'ansible_ssh_pass': "password",
+        'hosts': ["192.168.1.1"]
+    }
 
 
 
