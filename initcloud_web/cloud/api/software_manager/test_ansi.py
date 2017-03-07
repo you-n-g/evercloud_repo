@@ -1,14 +1,15 @@
 import api
 
-host = "192.168.1.224"
+# host = "192.168.1.224"
+host = "192.168.1.232"
 # host = "192.168.1.202"
 # host = "192.168.150.101"
 
 def test_install():
     print api.get_installed_software(host)
-    api.install_software([api.Config.package_list[3]["Product_Id"]], [host])
+    api.install_software([api.Config.package_list[4]["Product_Id"]], [host])
     print api.get_installed_software(host)
-    api.uninstall_software([api.Config.package_list[3]["Product_Id"]], [host])
+    api.uninstall_software([api.Config.package_list[4]["Product_Id"]], [host])
     print api.get_installed_software(host)
 
 
