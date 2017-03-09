@@ -105,7 +105,16 @@ def delete_snapshots(request):
 	for snapshot in Snapshot.objects.filter(pk__in=ids):
 	    image_id = snapshot.snapshot_id
 	    LOG.info(image_id)
-	    client.images.delete(image_id)
+            try:
+     	        client.images.delete(image_id)
+            except Exception as e:
+                LOG.info(str(e)) 
+                Snapshot.objects.filter(pk__in=ids).delete()
+                LOG.info("dddd")
+                Image.objects.filter(uuid = image_id).delete()
+                LOG.info("dddd")
+                continue
+                return Response({'success': False, "msg": _('Snapshots have not been deleted!')}, status=status.HTTP_201_CREATED)
             LOG.info("dddd")
             Snapshot.objects.filter(pk__in=ids).delete()
             LOG.info("dddd")

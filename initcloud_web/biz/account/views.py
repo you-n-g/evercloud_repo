@@ -971,3 +971,105 @@ def is_email_unique(request):
 def is_mobile_unique(request):
     mobile = request.GET['mobile']
     return Response(not UserProfile.objects.filter(mobile=mobile).exists())
+
+@require_GET
+def get_member_users(request):
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    users = User.objects.all()
+    member_users = []
+    for user in users:
+        LOG.info('cccccccccccccccccccccccccccccc')
+        keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
+        tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
+        LOG.info(keystone_user_id)
+        LOG.info(tenant_uuid)
+        rc = create_rc_by_dc(DataCenter.objects.all()[0])
+        user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        system = False
+        security = False
+        audit = False
+        for user_role in user_roles:
+            if user_role.name == "system":
+                system = True
+                break
+            if user_role.name == "audit":
+                audit = True
+                break
+            if user_role.name == "security":
+                security = True
+                break
+        LOG.info(system)
+        LOG.info(audit)
+        LOG.info(security)
+        if not system and not security and not audit:
+            LOG.info('zzzzzzzzzzzzzzzzzzzzzzzzz')
+            member_users.append(user)
+    LOG.info(member_users)
+""" 
+    if not system and not security and not audit:
+        member = True
+ 
+            sec_avail_userids = []
+            audit_avail_userids = []
+            for q in querys:
+                q_system = False
+                q_security = False
+                q_audit = False
+                q_member = False
+                LOG.info("aaa")
+                LOG.info(q.user_id)
+                ud = UserDataCenter.objects.filter(user_id=q.user_id)[0] 
+                LOG.info(str(ud))
+                keystone_user_id = ud.keystone_user_id
+                LOG.info(str(keystone_user_id))
+                tenant_uuid = ud.tenant_uuid
+                LOG.info("ccc")
+                user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+                LOG.info("aaa")
+                for user_role in user_roles:
+                    if user_role.name == "system":
+                        q_system = True
+                        break
+                    if user_role.name == "security":
+                        q_security = True
+                        break
+                    if user_role.name == "audit":
+                        q_audit = True
+                        break
+
+                if not q_system and not q_security and not q_audit:
+                      q_member = True
+                if q_audit or q_member:
+                    LOG.info("2221111")
+                    if q.user_id not in sec_avail_userids:
+                        sec_avail_userids.append(q.user_id) 
+                if q_system or q_security:
+                    LOG.info("00000")
+                    if q.user_id not in audit_avail_userids:
+                        audit_avail_userids.append(q.user_id)
+  
+
+            if security:
+                LOG.info("aaa")
+                LOG.info(str(request.session["UDC_ID"]))
+                LOG.info(str(sec_avail_userids))
+                queryset = Operation.objects.exclude(user_id__in=sec_avail_userids)
+
+                LOG.info("*** process done with queryset")
+                return queryset.order_by('-create_date')
+            if audit:
+                LOG.info("audit_can_log")
+                queryset = Operation.objects.exclude(user_id__in=audit_avail_userids)
+
+                return queryset.order_by('-create_date')
+
+            if system:
+                LOG.info("audit_can_log")
+                queryset = Operation.objects.filter(user_id=request.user.id)
+
+                return queryset.order_by('-create_date')
+
+"""

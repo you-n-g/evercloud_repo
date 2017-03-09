@@ -92,7 +92,7 @@ angular.module("CloudApp")
                             return CommonHttpService.get("/api/volumes/typelist/"); 
                         },
                         users: function() {
-                            return CommonHttpService.get("/api/users/");
+                            return CommonHttpService.get("/api/users/member_users/");
                         }
                     }
                 });

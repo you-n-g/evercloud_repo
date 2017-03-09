@@ -367,6 +367,11 @@ def instance_verify_resize(request):
 
 @api_view(["POST"])
 def instance_assignedusers(request):
+    ins = Instance.objects.get(uuid = request.data['uuid'], deleted = False)
+    user = ins.assigned_user
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+"""
     ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
     assign_set = []
     for ins in ins_set:
@@ -375,9 +380,38 @@ def instance_assignedusers(request):
     #query_set = Instance.objects.all()
     serializer = UserSerializer(assign_set, many=True)
     return Response(serializer.data)
-
+"""
 @api_view(["POST"])
 def instance_unassignedusers(request):
+    ins = Instance.objects.get(uuid = request.data['uuid'], deleted = False)
+    users = User.objects.all()
+    member_users = []
+    for user in users:
+        keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
+        tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
+        rc = create_rc_by_dc(DataCenter.objects.all()[0])
+        user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        system = False
+        security = False
+        audit = False
+        for user_role in user_roles:
+            if user_role.name == "system":
+                system = True
+                break
+            if user_role.name == "audit":
+                audit = True
+                break
+            if user_role.name == "security":
+                security = True
+                break
+        if not system and not security and not audit:
+            if user != ins.assigned_user:
+                member_users.append(user)
+    LOG.info(member_users)
+    serializer = UserSerializer(member_users, many=True)
+    return Response(serializer.data)
+
+"""
     ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
     assign_set = []
     return_set = []
@@ -390,8 +424,16 @@ def instance_unassignedusers(request):
 	    return_set.append(user)
     serializer = UserSerializer(return_set, many=True)
     return Response(serializer.data)
-
+"""
 def assign_ins(request):
+    try:    
+        check_user = User.objects.get(id = request.data["assign"])
+	ins = Instance.objects.get(id = request.data["id"])
+        ins.assigned_user = check_user
+        ins.save()
+    except:
+        pass
+"""
     try:
         check_user = User.objects.get(id = request.data["assign"])
 	ins = Instance.objects.get(id = request.data["id"])
@@ -419,8 +461,17 @@ def assign_ins(request):
 	#traceback.print_exc()
     #serializer = UserSerializer(queryset, many=True)
     #return Response(serializer.data)
-
+"""
 def unassign_ins(request):
+    try:
+        check_user = User.objects.get(id = request.data["unassign"])
+        ins = Instance.objects.get(id = request.data["id"])
+        ins.assigned_user = check_user
+        ins.save()
+    except:
+        pass
+
+"""
     try:
         check_user = User.objects.get(id = request.data["unassign"])
         ins = Instance.objects.get(id = request.data["id"])
@@ -436,7 +487,7 @@ def unassign_ins(request):
 	    return 0
     except:
 	pass
-	    
+"""	    
 
 @api_view(["POST"])
 def instance_assign_instance(request):
