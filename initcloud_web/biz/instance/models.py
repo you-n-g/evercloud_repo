@@ -45,7 +45,7 @@ class Instance(models.Model):
     network_id = models.IntegerField(_("Network"), null=False, blank=False, default=0)
     
     user = models.ForeignKey('auth.User')
-    assigned_user = models.ForeignKey('auth.User', null=True)
+    assigneduser = models.ForeignKey('auth.User', null=True, related_name="assign")
     user_data_center = models.ForeignKey('idc.UserDataCenter')
     
     uuid = models.CharField('instance uuid', null=True, blank=True, max_length=128)

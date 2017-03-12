@@ -94,7 +94,14 @@ CloudApp.controller('DataCenterController',
                         name: {
                             minlength: 2,
                             maxlength: 128,
-                            required: true
+                            required: true,
+                            remote: {
+                                url: "/api/data-centers/is-name-unique",
+                                data: {
+                                    name: $("#name").val()
+                                },
+                                async: false
+                            }
                         },
                         host: {
                             required: true,

@@ -16,7 +16,7 @@ var FormWizard = function () {
                 focusInvalid: false,
                 rules: {
                     name: {
-                        minlength: 6,
+                        minlength: 7,
                         maxlength: 24,
                         required: true
                     },

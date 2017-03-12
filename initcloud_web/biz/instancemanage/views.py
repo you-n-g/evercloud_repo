@@ -228,6 +228,21 @@ def devicepolicyundo(request):
            'Sucess.')})
 
 @require_POST
+def batch_delete(request):
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+"""
+    LOG.info(request.data)
+    LOG.info(request.data['ids[]'])
+    instance_id = None
+    ids = []
+    for key, value in request.data.items():
+        instance_id = value
+        LOG.info(instance_id)
+    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    LOG.info(instance_id)
+    LOG.info(ids)
+"""
+@require_POST
 def delete_instance(request):
     LOG.info("*** request.data is ***"  + str(request.data))
     instance_id = None

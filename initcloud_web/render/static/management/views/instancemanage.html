@@ -18,7 +18,8 @@
                         <i class="fa  fa-bullhorn"></i> {[{ 'notification.data_center_broadcast' | i18next }]}
                     </a>
                     -->
-                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
+                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">  
+<!--                    <a class="btn btn-danger" ng-click="batchDelete()">-->
                         <i class="fa fa-trash"></i>
                         {[{ 'action.batch_delete' | i18next }]}
                     </a>
@@ -33,7 +34,8 @@
                         <tbody>
                         <tr ng-repeat="instancemanage in $data">
                             <td width="30" style="text-align: left" header="'ng-table/headers/checkbox.html'">
-                                <input type="checkbox" ng-model="checkboxes.items[instancemanage.id]"/>
+<!--                                <input type="checkbox" ng-model="checkboxes.items[instancemanage.id]"/>-->
+                                <input type="checkbox" data-ng-model="instancemanage.checked"/>
                             </td>
                             <td width="100" data-title="'instancemanage.name' | i18next">
                                 <a class="btn default blue-stripe btn-xs"

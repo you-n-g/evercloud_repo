@@ -154,6 +154,10 @@ def delete_data_centers(request):
         return Response({"success": False, 
                 "msg": _('Failed to delete data centers for unknown reason.')})
 
+@api_view(['GET'])
+def is_name_unique(request):
+    name = request.query_params['name']
+    return Response(not DataCenter.objects.filter(name = name).exists())
 
 @api_view(['GET'])
 def is_host_unique(request):

@@ -116,7 +116,7 @@ class InstanceList(generics.ListCreateAPIView):
             UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
             project_id = UDC.tenant_uuid
             queryset = self.get_queryset().filter(
-                Q(user=request.user, user_data_center__pk=udc_id) | Q(tenant_uuid=project_id))
+                Q(user=request.user, user_data_center__pk=udc_id) | Q(tenant_uuid=project_id) |Q(assigneduser=request.user))
             serializer = InstanceSerializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
@@ -300,6 +300,11 @@ def instance_create_view(request):
         return Response({"OPERATION_STATUS": OPERATION_SUCCESS,
                           "msg": msg}, status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+def is_name_unique(request):
+    name = request.query_params['name']
+    return Response(not Instance.objects.filter(name = name, deleted = False).exists())
+
 @api_view(["POST"])
 def instance_resize(request):
     ins = Instance.objects.get(id = request.data['id'])
@@ -367,9 +372,11 @@ def instance_verify_resize(request):
 
 @api_view(["POST"])
 def instance_assignedusers(request):
-    ins = Instance.objects.get(uuid = request.data['uuid'], deleted = False)
-    user = ins.assigned_user
-    serializer = UserSerializer(user)
+    ins = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)[0]
+    user = ins.assigneduser
+    assignuser = []
+    assignuser.append(user)
+    serializer = UserSerializer(assignuser, many = True)
     return Response(serializer.data)
 """
     ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
@@ -383,14 +390,17 @@ def instance_assignedusers(request):
 """
 @api_view(["POST"])
 def instance_unassignedusers(request):
-    ins = Instance.objects.get(uuid = request.data['uuid'], deleted = False)
+    ins = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)[0]
     users = User.objects.all()
     member_users = []
     for user in users:
         keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
         tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        try:
+            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        except:
+            continue
         system = False
         security = False
         audit = False
@@ -404,9 +414,8 @@ def instance_unassignedusers(request):
             if user_role.name == "security":
                 security = True
                 break
-        if not system and not security and not audit:
-            if user != ins.assigned_user:
-                member_users.append(user)
+        if not system and not security and not audit and not user.is_superuser:
+            member_users.append(user)
     LOG.info(member_users)
     serializer = UserSerializer(member_users, many=True)
     return Response(serializer.data)
@@ -428,8 +437,8 @@ def instance_unassignedusers(request):
 def assign_ins(request):
     try:    
         check_user = User.objects.get(id = request.data["assign"])
-	ins = Instance.objects.get(id = request.data["id"])
-        ins.assigned_user = check_user
+	ins = Instance.objects.get(id = request.data["id"], deleted = False)
+        ins.assigneduser = check_user
         ins.save()
     except:
         pass
@@ -465,8 +474,8 @@ def assign_ins(request):
 def unassign_ins(request):
     try:
         check_user = User.objects.get(id = request.data["unassign"])
-        ins = Instance.objects.get(id = request.data["id"])
-        ins.assigned_user = check_user
+        ins = Instance.objects.get(id = request.data["id"], deleted = False)
+        ins.assigneduser = None
         ins.save()
     except:
         pass

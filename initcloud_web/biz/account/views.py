@@ -461,6 +461,72 @@ class UserList(generics.ListAPIView):
     #permission_classes = (IsSystemUser,)
 
     queryset = UserProxy.normal_users.all()
+    """
+    for q in queryset:
+        rc = create_rc_by_dc(DataCenter.objects.all()[0])
+        roles = []
+        LOG.info("q is" + str(q))
+        user_id = q.id
+        udc = UserDataCenter.objects.filter(user_id=int(user_id))[0]
+        keystone_user_id = udc.keystone_user_id
+        user_tenant_id = udc.tenant_uuid
+        try:
+            current_user_roles = keystone.roles_for_user(rc, keystone_user_id, user_tenant_id)
+        except:
+            continue
+        #for role in keystone.role_list(rc):
+        tri_checked = False
+        user_roles = []
+        for role in current_user_roles:
+            user_roles.append(role.name)
+            checked = False
+        s = ["system","security","audit","_member_"]
+        tri_list = sorted(s, reverse=True)
+        system = False
+        audit = False
+        security = False
+        member = False
+        for role in user_roles:
+            if role == "system":
+                system = True
+            elif role == "security":
+                security = True
+            elif role == "audit":
+                audit = True
+            else:
+                member = True
+        if system or audit or security:
+            member = False
+        for all_role in tri_list:
+            checked = False
+            name = ''
+            if all_role == "system":
+                if system:
+                    checked = True
+                else:
+                    checked = False
+                name = "系统管理员"
+            if all_role == "security":
+                if security:
+                    checked = True
+                else:
+                    checked = False
+                name = "安全保密员"
+            if all_role == "audit":
+                if audit:
+                    checked = True
+                else:
+                    checked = False
+                name = "安全审计员"
+            if all_role == "_member_":
+                if member:
+                    checked = True
+                else:
+                    checked = False
+                name = "普通用户"
+        q.tri_type = name
+
+    """
     serializer_class = UserSerializer
     pagination_class = PagePagination
 
@@ -853,6 +919,10 @@ def create_user(request):
     LOG.info("****** start to create user *****")
     LOG.info("******* data is ******" + str(request.data))
     LOG.info("****** username is ******" + str(request.data['username']))
+    posted_username = request.data['username']
+    if str(posted_username) in ['neutron', 'cinder', 'keystone', 'nova', 'glance', 'heat', 'swift', 'admin', 'ceilometer']:     
+        return Response({"success": False,
+                     "msg": _("Service user must not be created.")})
     LOG.info("****** password is ******" + str(request.data['password1']))
     user = User()
     LOG.info("ccccccccccccc")
@@ -974,20 +1044,19 @@ def is_mobile_unique(request):
 
 @require_GET
 def get_member_users(request):
-    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    LOG.info("---------- members -------------")
     users = User.objects.all()
     member_users = []
     for user in users:
-        LOG.info('cccccccccccccccccccccccccccccc')
         keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
         tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
         LOG.info(keystone_user_id)
         LOG.info(tenant_uuid)
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        try:
+            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+        except:
+            continue
         system = False
         security = False
         audit = False
@@ -1001,13 +1070,11 @@ def get_member_users(request):
             if user_role.name == "security":
                 security = True
                 break
-        LOG.info(system)
-        LOG.info(audit)
-        LOG.info(security)
-        if not system and not security and not audit:
-            LOG.info('zzzzzzzzzzzzzzzzzzzzzzzzz')
+        if not system and not security and not audit and not user.is_superuser:
             member_users.append(user)
     LOG.info(member_users)
+    serializer = UserSerializer(member_users, many=True)
+    return Response(serializer.data)
 """ 
     if not system and not security and not audit:
         member = True

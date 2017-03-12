@@ -378,6 +378,10 @@ def assignrole(request):
         LOG.info("******** role is *********" + str(role))
         if role not in current_user_roles_list:
             add_user_role(keystone_user, role, user_tenant_id) 
+            user = User.objects.get(pk=user_id)
+            user.last_name = role
+            user.save()
+
     
     return Response(
-            {'success': True, "msg": _('Policy_Nova is updated successfully!')}) 
+            {'success': True, "msg": _('User role assigned successfully!')}) 

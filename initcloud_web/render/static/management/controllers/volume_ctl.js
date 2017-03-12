@@ -149,7 +149,7 @@ angular.module("CloudApp")
                             return volume;
                         },
                         users: function() {
-                            return CommonHttpService.get("/api/users/");
+                            return CommonHttpService.get("/api/users/member_users/");
                         }
                     }
                 }).result.then(function(){
@@ -248,7 +248,8 @@ angular.module("CloudApp")
 
 
             $scope.roles = volume_types;
-            $scope.users = users.results;
+            //$scope.users = users.results;
+            $scope.users = users;
             var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.roles);
             $scope.quota = quota;
             $scope.volume = {
@@ -441,7 +442,8 @@ angular.module("CloudApp")
                   CommonHttpService, ToastrService, volume, users) {
 
             $scope.volume = volume;
-            $scope.users = users.results;
+            //$scope.users = users.results;
+            $scope.users = users;
             $scope.target_user = null;
             $scope.supercode = null;
             $scope.cancel =  $modalInstance.dismiss;

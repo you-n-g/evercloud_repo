@@ -101,6 +101,8 @@ CloudApp.controller('UserController',
                 }
             }).result.then(function(){
                    checkboxGroup.uncheck();
+                $scope.user_table.reload();
+
             });
         };
 

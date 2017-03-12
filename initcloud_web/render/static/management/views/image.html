@@ -34,9 +34,7 @@
                                 <td data-title="'image.os_type' | i18next"> {[{ image.os_name }]} </td>
                                 <td data-title="'image.disk_size' | i18next"> {[{ image.disk_size }]} GB </td>
                                 <td data-title="'image.uuid' | i18next">{[{ image.uuid }]}</td>
-                                <td data-title="'image.login_name' | i18next"> {[{ image.login_name }]}</td>
                                 <td data-title="'image.data_center' | i18next"> {[{ image.data_center_name }]}</td>
-                                <td data-title="'image.owner' | i18next"> {[{ image.owner_name }]}</td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
                                         <button class="btn btn-default"
@@ -92,10 +90,11 @@
                     <span class="required" aria-required="true"> * </span>
                 </label>
                 <div class="col-md-5">
-                    <input id="uuid" name="uuid" type="text" maxlength="255"
+                    <input name="uuid" type="text" maxlength="255"
                            data-ng-model="image.uuid" class="form-control input-medium required">
                 </div>
             </div>
+            <!--
             <div class="form-group">
                 <label class="col-md-3 control-label" for="login_name">
                     {[{ 'image.login_name' | i18next }]}
@@ -106,6 +105,7 @@
                            data-ng-model="image.login_name" class="form-control input-medium required">
                 </div>
             </div>
+            -->
             <div class="form-group">
                 <label class="col-md-3 control-label" for="os_type">
                     {[{ 'image.os_type' | i18next }]}
@@ -143,6 +143,7 @@
                             class="form-control input-medium" style="display: inline-block;">(GB)
                 </div>
             </div>
+            <!--
             <div class="form-group">
                 <label class="col-md-3 control-label" for="user">{[{ 'image.owner' | i18next }]} </label>
                 <div class="col-md-5">
@@ -154,6 +155,7 @@
                     <span class="help-block"> {[{ 'image.help.owner' | i18next }]} </span>
                 </div>
             </div>
+            -->
             <div class="clear"></div>
         </form>
     </div>

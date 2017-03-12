@@ -43,6 +43,8 @@ class UserSerializer(serializers.ModelSerializer):
     is_system_user = serializers.ReadOnlyField()
     is_safety_user = serializers.ReadOnlyField()
     is_audit_user = serializers.ReadOnlyField()
+    tri_type = serializers.ReadOnlyField()
+
 
 
 

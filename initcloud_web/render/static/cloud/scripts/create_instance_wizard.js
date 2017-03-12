@@ -16,9 +16,17 @@ var FormWizard = function () {
                 focusInvalid: false,
                 rules: {
                     name: {
-                        minlength: 6,
+                        minlength: 7,
                         maxlength: 24,
-                        required: true
+                        required: true,
+                       remote: {
+                              url: "/api/instances/is-name-unique",
+                              data: {
+                                  name: $("#name").val()
+                              },
+                              async: false
+                          }
+
                     },
                     count: {
                         minlength: 1,

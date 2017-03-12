@@ -51,6 +51,12 @@
                                 <td data-title="'user.date_joined' | i18next">
                                     <span> {[{ user.date_joined }]} </span>
                                 </td>
+                                <td data-title="'user.type' | i18next">
+                                    <span data-ng-if="user.last_name == 'audit' "> 安全审计员</span>
+                                    <span data-ng-if="user.last_name == 'security' "> 安全保密员</span>
+                                    <span data-ng-if="user.last_name == 'system' "> 系统管理员</span>
+                                    <span data-ng-if="user.last_name != 'audit' && user.last_name != 'security' && user.last_name != 'system'"> 普通用户</span>
+                                </td>
                                 <td data-title="'user.last_login' | i18next">
                                     <span> {[{ user.last_login }]} </span>
                                 </td>
@@ -69,12 +75,12 @@
                                             <i class="fa fa-angle-down"></i>
                                         </button>
                                         <ul role="menu" class="dropdown-menu">
+                                            <!-- 
                                             <li>
                                                 <a href="javascript:void(0)" data-ng-click="viewUdcList(user);">
                                                     <i class="fa fa-list"></i> {[{ 'user.user_data_centers' | i18next }]}
                                                 </a>
                                             </li>
-                                            <!--
                                             <li>
                                                 <a href="javascript:void(0)" data-ng-click="openNotifyModal(user);">
                                                     <i class="fa  fa-bullhorn"></i> {[{ 'notification.notify' | i18next }]}

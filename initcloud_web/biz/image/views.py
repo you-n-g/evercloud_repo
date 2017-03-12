@@ -13,6 +13,12 @@ from biz.image.models import Image
 from biz.image.serializer import ImageSerializer
 from biz.account.models import UserProxy
 from biz.idc.models import UserDataCenter
+from biz.common.decorators import require_POST, require_GET
+from cloud.cloud_utils import create_rc_by_dc
+from django.conf import settings
+from biz.idc.models import DataCenter
+from cloud.api import glance
+import traceback
 
 LOG = logging.getLogger(__name__)
 
@@ -56,6 +62,7 @@ class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
 @api_view(["POST"])
 def create_image(request):
     try:
+        request.data['login_name'] = 'user'
         serializer = ImageSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.save()
@@ -99,3 +106,21 @@ def delete_images(request):
     Image.objects.filter(pk__in=ids).delete()
 
     return Response({'success': True, "msg": _('Images have been deleted!')}, status=status.HTTP_200_OK)
+
+@require_GET
+def is_uuid_unique(request):
+    LOG.info(request.GET['uuid'])
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    try:
+        uuid = request.GET['uuid']
+        LOG.info("uuid is" + str(uuid))
+        client = glance.glanceclient_tm(rc, settings.GLANCE_ENDPOINT, version='1')
+        LOG.info("client is" + str(client))
+        try:
+            images = client.images.get(str(uuid))
+        except Exception as e:
+            LOG.info(str(e))
+        
+        return Response(True)
+    except:
+	return Response(False)

@@ -96,6 +96,15 @@ def volume_list_view_by_instance(request):
 @api_view(['POST'])
 def volume_create_view(request):
     try:
+
+        os_volume_type = request.data['os_volume_type']
+        os_volume_type = ast.literal_eval(os_volume_type)
+        os_volume_type = os_volume_type['name']
+
+        LOG.info("********** os volume type is ************" + str(os_volume_type))
+        request.data['os_volume_type'] = os_volume_type
+        LOG.info("********** os volume type is ************" + str(os_volume_type))
+
         serializer = VolumeSerializer(data=request.data,
                                       context={"request": request})
         if not serializer.is_valid():
@@ -104,10 +113,6 @@ def volume_create_view(request):
                         status=status.HTTP_400_BAD_REQUEST)
 
         pay_type = request.data['pay_type']
-        os_volume_type = request.data['os_volume_type']
-        os_volume_type = ast.literal_eval(os_volume_type)
-        LOG.info("********** os volume type is ************" + str(os_volume_type))
-        os_volume_type = os_volume_type['name']
         LOG.info("********** os volume type is ************" + str(os_volume_type))
         pay_num = int(request.data['pay_num'])
 

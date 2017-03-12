@@ -574,6 +574,7 @@
   "user": {
     "name": "用户名",
     "email": "邮箱",
+    "type": "三员类型",
     "tenants": "租户",
     "delete": "删除用户",
     "resetpassword": "重置密码",

@@ -131,21 +131,37 @@ CloudApp.controller('ImageController',
     ).factory('ImageForm', ['ValidationTool', function (ValidationTool) {
         return {
             init: function(){
-
                 var config = {
                     rules: {
+                        uuid:{
+                                required: true,
+                                remote: {
+                                    url: "/api/images/is-uuid-unique/",
+                                    data: {
+                                        uuid: $("#uuid").val()    //注意不能有id的tag，需要用name
+                                    },
+                                    async: false
+                                }
+
+                        },
                         name: {
                             minlength: 2,
                             maxlength: 50,
                             required: true
                         },
                         os_type: 'required',
-                        login_name: 'required',
+                        //login_name: 'required',
                         data_center: 'required',
                         disk_size: {
                             required: true,
                             digits: true
                         }
+                        /*messages: {
+                            uuid: {
+                                //remote: $i18next('user.name_is_used')
+                                remote: 'No Image Found!'
+                            }
+                        }*/
                     }
                 };
 

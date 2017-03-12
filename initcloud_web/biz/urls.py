@@ -130,12 +130,14 @@ urlpatterns += [
     url(r'^instancemanage/devicepolicy/update/$', instancemanage_view.devicepolicyupdate),
     url(r'^instancemanage/devicepolicy/undo/$', instancemanage_view.devicepolicyundo),
     url(r'^instancemanage/delete_instance/$', instancemanage_view.delete_instance),
+    #url(r'^instancemanage/delete_instance/$', instancemanage_view.batch_delete),
     url(r'^instances/vdi/$', instance_view.vdi_view),
     url(r'^instances/(?P<pk>[0-9]+)/$', instance_view.InstanceDetail.as_view()),
     url(r'^instances/details/(?P<pk>[0-9]+)/$', instance_view.instance_detail_view),
     url(r'^instances/(?P<uuid_or_ip>[\w\.\-]+)/detail/$', instance_view.instance_detail_view_via_uuid_or_ip),
     url(r'^instances/status/$', instance_view.instance_status_view),
     url(r'^instances/create/$', instance_view.instance_create_view),
+    url(r'^instances/is-name-unique/$', instance_view.is_name_unique),
     url(r'^instances/search/$', instance_view.instance_search_view),
     url(r'^instances/(?P<pk>[0-9]+)/action/$', instance_view.instance_action_view),
     url(r'^instances/vdi_action/$', instance_view.instance_action_vdi_view),
@@ -154,6 +156,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^images/create/$', image_view.create_image),
     url(r'^images/update/$', image_view.update_image),
     url(r'^images/batch-delete/$', image_view.delete_images),
+    url(r'^images/is-uuid-unique/$', image_view.is_uuid_unique),
 ])
 
 # network
@@ -447,6 +450,7 @@ urlpatterns += format_suffix_patterns([
 urlpatterns += format_suffix_patterns([
     url(r'^data-centers/$', idc_views.DataCenterList.as_view()),
     url(r'^data-centers/is-host-unique/$', idc_views.is_host_unique),
+    url(r'^data-centers/is-name-unique/$', idc_views.is_name_unique),
     url(r'^data-centers/create/$', idc_views.create_data_center),
     url(r'^data-centers/update/$', idc_views.update_data_center),
     url(r'^data-centers/batch-delete/$', idc_views.delete_data_centers),
