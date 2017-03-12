@@ -1067,7 +1067,8 @@
       "security_level": "密级",
       "all_security_level": {
           "mimi": "秘密",
-          "jimi": "机密"
+          "jimi": "机密",
+          "setting": "正在设置"
       }
 },
   "heat":{

@@ -694,7 +694,12 @@ def vdi_view(request):
         LOG.info("host_ip=" + host_ip)
         LOG.info("port=" + str(port))
         if "error" in str(port):
-            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
+            public_ip = ''
+            if settings.FLAT:
+                public_ip = q.private_ip
+            else:
+                public_ip = q.public_ip
+            vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
             count = count + 1
             continue
         split_port = port.split(":")
@@ -702,7 +707,13 @@ def vdi_view(request):
         port_2 = port_1.split("\\")
         port_3 = port_2[0]
         vnc_port = 5900 + int(port_3)
-        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": q.public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
+        public_ip = ''
+        if settings.FLAT:
+            public_ip = q.private_ip
+        else:
+            public_ip = q.public_ip
+        LOG.info("*** public_ip is ****" + str(public_ip))
+        vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": vnc_port, "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
         LOG.info("*** count is ***" + str(count))
         count = count + 1
     LOG.info("count done")
@@ -877,3 +888,16 @@ def new_vdi(request):
     return json_value
 
 monitor_proxy = login_required(csrf_exempt(MonitorProxy.as_view()))
+
+
+# get instance security class changing status
+@require_GET
+def instance_sec_status(request):
+    ins_id = request.query_params.get("vm")
+    try:
+        ins = Instance.objects.get(id=ins_id)
+        return Response({'status': ins.security_cls})
+    except Exception, e:
+        LOG.info("Instance sec status error: %s" % e)
+        return Response({'success': False})
+

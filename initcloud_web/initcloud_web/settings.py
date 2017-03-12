@@ -296,8 +296,10 @@ CONSOLE_PORT = "6081"
 #glance endpoint
 GLANCE_ENDPOINT = "http://192.168.1.48:9292"
 
+
 MONITOR_CPU = "http://192.168.1.48:5601/app/kibana#/visualize/edit/UDP?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(field:counter_volume),schema:metric,type:max),(enabled:!t,id:'2',params:(field:counter_name.keyword,order:desc,orderBy:'1',row:!t,size:5),schema:split,type:terms),(enabled:!t,id:'3',params:(field:resource_id.keyword,order:desc,orderBy:'1',size:5),schema:group,type:terms),(enabled:!t,id:'4',params:(customInterval:'2h',extended_bounds:(),field:'@timestamp',interval:auto,min_doc_count:1),schema:segment,type:date_histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,legendPosition:right,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),title:UDP,type:line))"
 
 MONITOR_DISK = "http://www.baidu.com"
 MONITOR_NETWORK = ""
-FLAT = False 
+
+FLAT = True

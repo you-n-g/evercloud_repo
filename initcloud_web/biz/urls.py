@@ -142,6 +142,7 @@ urlpatterns += [
     url(r'^instances/(?P<pk>[0-9]+)/action/$', instance_view.instance_action_view),
     url(r'^instances/vdi_action/$', instance_view.instance_action_vdi_view),
     url(r'^instances/monitor/(?P<url>.*)$', instance_view.monitor_proxy),
+    url(r'^instances/sec_status/$', instance_view.instance_sec_status),
     url(r'^flavors/$', instance_view.FlavorList.as_view()),
     url(r'^flavors/create/$', instance_view.create_flavor),
     url(r'^flavors/update/$', instance_view.update_flavor),
