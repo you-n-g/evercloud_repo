@@ -145,8 +145,9 @@ def get_isos(request):
         template_iso = []
         i = 1
         for f in file_name:
-            template_iso.append({"name":f})
-            i = i+1
+            if not f.startswith('virtio') and not f.startswith('RHEV'):
+                template_iso.append({"name":f})
+                i = i+1
       
         return Response(template_iso)
 

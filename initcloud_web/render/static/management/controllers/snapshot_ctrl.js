@@ -129,9 +129,9 @@ CloudApp.controller('SnapshotController',
                  CommonHttpService, ToastrService, SnapshotForm){
 
             var form = null;
-            //$modalInstance.rendered.then(function(){
-            //    form = SnapshotForm.init($scope.site_config.WORKFLOW_ENABLED);
-            //});
+            $modalInstance.rendered.then(function(){
+                form = SnapshotForm.init();
+            });
 	    $scope.snapshot = snapshot;
             $scope.instance_name = $scope.snapshot.snapshotname;
             //$scope.snapshot = {is_resource_user: false, is_approver: false};
@@ -162,9 +162,10 @@ CloudApp.controller('SnapshotController',
 
                         rules: {
                             snapshotname: {
+                                minlength: 2,
                                 required: true,
                                 remote: {
-                                    url: "/api/snapshot/is-name-unique/",
+                                    url: "/api/snapshot/is_snapshotname_unique/",
                                     data: {
                                         snapshotname: $("#snapshotname").val()
                                     },

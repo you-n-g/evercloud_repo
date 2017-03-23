@@ -1034,9 +1034,9 @@ CloudApp.controller('InstancemanageController',
         };
 
         $scope.cancel = function () {
+
             $modalInstance.dismiss();
         };
-        $scope.instance_config.GPU = false;
         $scope.submit_click = function (instance_config) {
             var post_data = {
                 "name": instance_config.name,
@@ -1051,8 +1051,7 @@ CloudApp.controller('InstancemanageController',
                 "password": instance_config.password,
                 "instance": instance_config.instance,
                 "pay_type": instance_config.pay_type,
-                "pay_num": instance_config.pay_num,
-                "gpu": instance_config.GPU
+                "pay_num": instance_config.pay_num
             };
             CommonHttpService.post("/api/instances/create/", post_data).then(function (data) {
                 if (data.OPERATION_STATUS == 1) {

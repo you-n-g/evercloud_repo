@@ -61,9 +61,11 @@ from cloud.api import nova, keystone
 import time
 from django.db.models import Q
 
+
 LOG = logging.getLogger(__name__)
 OPERATION_SUCCESS = 1
 OPERATION_FAILED = 0
+
 
 class InstanceList(generics.ListCreateAPIView):
     queryset = Instance.objects.all().filter(deleted=False)
@@ -266,7 +268,7 @@ def instance_create_view(request):
 
     has_error, msg = False, None
     for i in range(count):
-        serializer = InstanceSerializer(data=request.data, context={"request": request})
+        serializer = InstanceSerializer(data=request.data, context={"request": request}) 
         if serializer.is_valid():
             name = request.DATA.get("name", "Server")
             if i > 0:
@@ -307,20 +309,16 @@ def is_name_unique(request):
 def instance_resize(request):
     ins = Instance.objects.get(id = request.data['id'])
     LOG.info(request.data)
-    if ins.sys_disk > int(request.data['sys_disk']):
-        return Response({"success":False, "msg":"Disk too smal.Please enter a bigger disk size."})
-    if int(request.data['vcpu']) == ins.cpu and int(request.data['core']) == ins.core and int(request.data['socket']) == ins.socket and int(request.data['memory']) == ins.memory and int(request.data['sys_disk']) == ins.sys_disk:
+    if int(request.data['vcpu']) == ins.cpu and int(request.data['core']) == ins.core and int(request.data['socket']) == ins.socket and int(request.data['memory']) == ins.memory:
 	return Response({"success":False, "msg": "No change!"})
     org_cpu = ins.cpu
     org_core = ins.core
     org_socket = ins.socket
     org_memory = ins.memory
-    org_sys_dick = ins.sys_disk
     ins.cpu = request.data['vcpu']
     ins.core = request.data['core']
     ins.socket = request.data['socket']
     ins.memory = request.data['memory']
-    ins.sys_disk = request.data['sys_disk']
     ins.save()
     #ins_ser = InstanceSerializer(ins)
     #LOG.info(ins_ser.data)
@@ -336,7 +334,6 @@ def instance_resize(request):
         ins.core = org_core
         ins.socket = org_socket
         ins.memory = org_memory
-        ins.sys_disk = org_sys_disk
         ins.save()
         return Response({"success":False, "msg":str(e)})
 	#traceback.print_exc()
@@ -914,75 +911,3 @@ def instance_sec_status(request):
         LOG.info("Instance sec status error: %s" % e)
         return Response({'success': False})
 
-
-def batch_create(request, user_id):
-    LOG.info("** user_id is ***" + str(user_id))
-    user_data_center = UserDataCenter.objects.filter(user__id=request.user.id)[0]
-    LOG.info("*** user_data_center ***" + str(user_data_center))
-    user_tenant_uuid = user_data_center.tenant_uuid
-    LOG.info("*** user_tenant_uuid is ***" + str(user_tenant_uuid))
-
-    pay_type = request.data['pay_type']
-    pay_num = int(request.data['pay_num'])
-
-
-    network_id = request.DATA.get("network_id", u"0")
-    try:
-        network = Network.objects.get(pk=network_id)
-    except Network.DoesNotExist:
-        pass
-    else:
-        # VLAN mode: we do not have to add router to network.
-        if settings.VLAN_ENABLED == False:
-            if not network.router:
-                msg = _("Your selected network has not linked to any router.")
-                return Response({"OPERATION_STATUS": OPERATION_FAILED,
-                               "msg": msg}, status=status.HTTP_409_CONFLICT)
-    has_error, msg = False, None
-    user = User.objects.all().get(id = user_id)
-    username = user.username
-    serializer = InstanceSerializer(data=request.data, context={"request": request})
-    if serializer.is_valid():
-        name = request.DATA.get("name", "Server")
-        name = "%s-%s" % (name, username)
-        #name = "%s-%04d" % (name, i)
-        LOG.info(name)
-        ins = serializer.save(name=name, assigneduser=user)
-        Operation.log(ins, obj_name=ins.name, action="launch", result=1)
-        workflow = Workflow.get_default(ResourceType.INSTANCE)
-        instance_create_task.delay(ins, password=request.DATA["password"],user_tenant_uuid=user_tenant_uuid)
-        Order.for_instance(ins, pay_type=pay_type, pay_num=pay_num)
-         
-        #msg = _("Your instance is created, please wait for instance booting.")
-    else:
-        has_error = True
-    if has_error: 
-        return {'name':name, 'user':user_id, 'status':'failed'}
-    else:
-        return {'name':name, 'user':user_id, 'status':'succeed'}
-
-
-@check_quota(["instance", "vcpu", "memory"])
-@api_view(["POST"])
-def instance_batch_create_view(request):
-    LOG.info(request.data)
-    user_ids = request.data.getlist('user_ids[]')
-    LOG.info(user_ids)
-    LOG.info(len(user_ids))
-    if len(user_ids) > settings.BATCH_INSTANCE:
-        return Response({"OPERATION_STATUS": OPERATION_FAILED},
-                    status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
-    response = ''
-    error_flag = False
-    for user_id in user_ids:
-        result = batch_create(request, user_id)
-        result_str = result['name'] + ' id:' + str(result['user']) + ' create ' + result['status'] + '. '
-        response = response + result_str
-        if result['status'] == 'failed':
-            error_flag = True
-            LOG.info('oooooooooooooooooooooooooooooo')
-    LOG.info(response)
-    LOG.info(error_flag)
-    if error_flag:
-        return Response({'success':False, "msg":response})
-    return Response({"OPERATION_STATUS":1, "msg":response})

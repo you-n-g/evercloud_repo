@@ -230,18 +230,33 @@ def devicepolicyundo(request):
 @require_POST
 def batch_delete(request):
     LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-"""
     LOG.info(request.data)
-    LOG.info(request.data['ids[]'])
-    instance_id = None
-    ids = []
-    for key, value in request.data.items():
-        instance_id = value
-        LOG.info(instance_id)
-    LOG.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    LOG.info(instance_id)
-    LOG.info(ids)
-"""
+    LOG.info(request.data.getlist('ids[]'))
+    for ID in request.data.getlist('ids[]'):
+        instance_id = str(ID)
+        instance = Instance.objects.get(pk=instance_id)
+        instance_id = instance.uuid
+        try:
+            delete_user_instance_network(request, instance_id)
+        except:
+            pass
+        try:
+            LOG.info("resource is" + str(instance.id))
+        #floating = Floating.objects.filter(resource=instance.id)[0]
+            floating = Floating.objects.filter(resource=instance.id)
+            if floating:
+                LOG.info("********")
+                floating.resource = None
+                LOG.info("********")
+                floating.save()
+                LOG.info("********")
+        except:
+            return Response({"success": False, "msg": _(
+                  'failed.')})
+        instance.deleted = True
+        instance.save()
+    return Response({"success": True, "msg": _(
+               'Sucess.')})
 @require_POST
 def delete_instance(request):
     LOG.info("*** request.data is ***"  + str(request.data))

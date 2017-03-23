@@ -39,6 +39,7 @@ from biz.workflow.models import Step
 from cloud.tasks import (link_user_to_dc_task, send_notifications,
                          send_notifications_by_data_center, delete_user_instance_network, delete_network, router_delete_task, delete_subnet, detach_network_from_router, delete_keystone_user, change_user_keystone_passwd)
 from frontend.forms import CloudUserCreateFormWithoutCapatcha
+import traceback
 
 LOG = logging.getLogger(__name__)
 
@@ -1024,6 +1025,86 @@ def revoke_workflow_approve(request):
     return Response({"success": True,
                      "msg": msg % {'name': user.username}})
 
+@require_POST
+def update_user(request):
+
+    LOG.info("******* data is ******" + str(request.data))
+    LOG.info("****** username is ******" + str(request.data['username']))
+    posted_username = request.data['username']
+    email = request.data['email']
+    mobile = request.data['mobile']
+    user_id = request.data['id']
+    user = User.objects.all().get(id = request.data['id'])
+    userprofile = UserProfile.objects.all().get(user = user)
+    LOG.info(user_id)
+    if User.objects.filter(username = posted_username).exists():
+        if User.objects.get(username = posted_username).id != int(user_id):
+            return Response({"success": False,
+                     "msg": _("Duplicated user name.Please enter another user name.")})
+    if User.objects.filter(email = email).exists():
+        if User.objects.get(email = email).id != int(user_id):
+            return Response({"success": False,
+                     "msg": _("Duplicated email.Please enter another email address.")})
+    if UserProfile.objects.filter(mobile = mobile).exists():
+        if UserProfile.objects.get(mobile = mobile).user != user:
+            return Response({"success": False,
+                     "msg": _("Duplicated mobile.Please enter another mobile.")})
+    if str(posted_username) in ['neutron', 'cinder', 'keystone', 'nova', 'glance', 'heat', 'swift', 'admin', 'ceilometer']:     
+        return Response({"success": False,
+                     "msg": _("Service user must not be created.")})
+    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+    try:
+        user_data_center = UserDataCenter.objects.all().get(user = user)
+        keystone_user_id = user_data_center.keystone_user_id
+        rc = create_rc_by_dc(DataCenter.get_default())
+        keystone_user = keystone.user_get(rc, keystone_user_id)
+        LOG.info(keystone_user)
+        manager = keystone.keystoneclient(rc, admin=True).users
+        update_user = manager.update(keystone_user, name = posted_username, email = email)
+        #keystone.user_update(rc, keystone_user, name = posted_username, email = email)
+        keystone_user = keystone.user_get(rc, keystone_user_id)
+        LOG.info(keystone_user)
+    except Exception as e:
+        traceback.print_exc()
+        return Response({"success":False, "msg":str(e)})
+    try:
+        user.username = posted_username
+        user.email = email
+        userprofile.mobile = mobile
+        user.save()
+        userprofile.save()
+    except:
+        traceback.print_exc()
+    return Response({"success":True})
+
+@require_POST
+def get_user_mobile(request):
+    LOG.info(" request.data is" + str(request.data))
+    LOG.info(request.data['user_id'])
+    user = User.objects.get(id = request.data['user_id'])
+    LOG.info(user)
+    LOG.info(UserProfile.objects.get(user=user).mobile)
+    return Response(UserProfile.objects.get(user=user).mobile)
+
+@require_GET
+def update_username_unique(request):
+    LOG.info(" request.data is" + str(request.GET))
+    username = request.GET['username']
+    LOG.info(str(username))
+    LOG.info(request.GET['id'])
+    return Response(not UserProxy.objects.filter(username=username).exists())
+@require_GET
+def update_email_unique(request):
+    email = request.GET['email']
+    LOG.info(request.GET['id'])
+    return Response(not UserProxy.objects.filter(email=email).exists())
+@require_GET
+def update_mobile_unique(request):
+    mobile = request.GET['mobile']
+    LOG.info(request.GET['id'])
+    return Response(not UserProfile.objects.filter(mobile=mobile).exists())
 
 @require_GET
 def is_username_unique(request):
@@ -1050,8 +1131,8 @@ def get_member_users(request):
     for user in users:
         keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
         tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
-        LOG.info(keystone_user_id)
-        LOG.info(tenant_uuid)
+        #LOG.info(keystone_user_id)
+        #LOG.info(tenant_uuid)
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
         try:
             user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
@@ -1075,68 +1156,3 @@ def get_member_users(request):
     LOG.info(member_users)
     serializer = UserSerializer(member_users, many=True)
     return Response(serializer.data)
-""" 
-    if not system and not security and not audit:
-        member = True
- 
-            sec_avail_userids = []
-            audit_avail_userids = []
-            for q in querys:
-                q_system = False
-                q_security = False
-                q_audit = False
-                q_member = False
-                LOG.info("aaa")
-                LOG.info(q.user_id)
-                ud = UserDataCenter.objects.filter(user_id=q.user_id)[0] 
-                LOG.info(str(ud))
-                keystone_user_id = ud.keystone_user_id
-                LOG.info(str(keystone_user_id))
-                tenant_uuid = ud.tenant_uuid
-                LOG.info("ccc")
-                user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-                LOG.info("aaa")
-                for user_role in user_roles:
-                    if user_role.name == "system":
-                        q_system = True
-                        break
-                    if user_role.name == "security":
-                        q_security = True
-                        break
-                    if user_role.name == "audit":
-                        q_audit = True
-                        break
-
-                if not q_system and not q_security and not q_audit:
-                      q_member = True
-                if q_audit or q_member:
-                    LOG.info("2221111")
-                    if q.user_id not in sec_avail_userids:
-                        sec_avail_userids.append(q.user_id) 
-                if q_system or q_security:
-                    LOG.info("00000")
-                    if q.user_id not in audit_avail_userids:
-                        audit_avail_userids.append(q.user_id)
-  
-
-            if security:
-                LOG.info("aaa")
-                LOG.info(str(request.session["UDC_ID"]))
-                LOG.info(str(sec_avail_userids))
-                queryset = Operation.objects.exclude(user_id__in=sec_avail_userids)
-
-                LOG.info("*** process done with queryset")
-                return queryset.order_by('-create_date')
-            if audit:
-                LOG.info("audit_can_log")
-                queryset = Operation.objects.exclude(user_id__in=audit_avail_userids)
-
-                return queryset.order_by('-create_date')
-
-            if system:
-                LOG.info("audit_can_log")
-                queryset = Operation.objects.filter(user_id=request.user.id)
-
-                return queryset.order_by('-create_date')
-
-"""

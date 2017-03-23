@@ -100,11 +100,6 @@
                                             </li>
                                            -->
                                            <li>
-                                                <a href="javascript: void(0)" data-ng-click="edit(user);" data-ng-if="current_user.security">
-                                                    <i class="fa fa-magic"></i> {[{ 'user.edit' | i18next }]}
-                                                </a>
-                                            </li>
-                                           <li>
                                                 <a href="javascript: void(0)" data-ng-click="resetpassword(user);" data-ng-if="current_user.security">
                                                     <i class="fa fa-magic"></i> {[{ 'user.resetpassword' | i18next }]}
                                                 </a>
@@ -554,7 +549,6 @@
     </div>
     <div class="modal-body">
         <form id="userForm" role="form" class="form-horizontal form-bordered">
-            <input type="hidden"  name="id" data-ng-model="user.id">`
             <div class="form-group">
                 <label class="control-label col-md-3">
                     {[{ 'user.name' | i18next }]}
@@ -666,143 +660,6 @@
                     </div>
                 </div>
 
-            <div class="clear"></div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-default" data-ng-click="cancel()">
-            {[{ 'cancel' | i18next }]}
-        </a>
-        <a class="btn" data-ng-show="is_submitting">
-            <img src="/static/assets/global/img/throbber.gif"/>
-        </a>
-        <a class="btn btn-primary" data-ng-click="create()" data-ng-hide="is_submitting">
-            {[{ 'submit' | i18next }]}
-        </a>
-    </div>
-</script>
-<!-- END TEMPLATE DETAIL-->
-
-<!-- BEGIN TEMPLATE UPDATE-USER -->
-<script type="text/ng-template" id="update-user.html">
-    <div class="modal-header">
-       <div class="modal-title"> {[{ 'user.edit_user' | i18next }]}</div>
-    </div>
-    <div class="modal-body">
-        <form id="userForm" role="form" class="form-horizontal form-bordered">
-           <!-- <input type="text" name="id" data-ng-model="user.id">-->
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'user.name' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="text"
-                           placeholder="{[{ 'user.name' | i18next }]}"
-                           name="username" data-ng-model="user.username"
-                           data-message-remote="test"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'user.email' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="text"
-                           data-ng-model="user.email" name="email"
-                           placeholder="{[{ 'user.email' | i18next }]}" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'user.mobile' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="text"
-                           data-ng-model="user.mobile" name="mobile"
-                           placeholder="{[{ 'user.mobile' | i18next }]}"/>
-                </div>
-            </div>
-            <!--
-            <div class="form-group" data-ng-if="site_config.TRI_ENABLED">
-                <label class="control-label col-md-3">
-                    {[{ 'user.tri_policy' | i18next }]}
-                </label>
-                <div class="col-md-6">
-                    <div>
-                        <input type="checkbox" id="is_system_user" name="usertype"
-                                value="system_user"
-                               data-ng-model="user.is_system_user">
-                        {[{ 'user.system_user' | i18next }]}
-                        <input type="checkbox" id="is_safety_user" name="usertype"
-                               data-ng-model="user.is_safety_user" value="safety_user">
-                        {[{ 'user.safety_user' | i18next }]}
-                        <input type="checkbox" id="is_audit_user" name="usertype"
-                               data-ng-model="user.is_audit_user" value="audit_user">
-                        {[{ 'user.audit_user' | i18next }]}
-
-                    </div>
-                    <span class="help-block"> {[{ 'user.tri_description' | i18next }]}</span>
-                </div>
-            </div>
-            -->
-            <div class="form-group" data-ng-if="site_config.WORKFLOW_ENABLED">
-                <label class="control-label col-md-3">
-                    {[{ 'constant.data_center' | i18next }]}
-                </label>
-                <div class="col-md-6">
-                    <div>
-                        <input type="checkbox" id="is_resource_user" name="user_type"
-                                value="resource_user"
-                               data-ng-model="user.is_resource_user">
-                        {[{ 'user.resource_user' | i18next }]}
-                        <input type="checkbox" id="is_approver" name="user_type"
-                               data-ng-model="user.is_approver" value="workflow_approver">
-                        {[{ 'user.workflow_approve' | i18next }]}
-                    </div>
-                    <span class="help-block"> {[{ 'user.approver_or_datacenter' | i18next }]}</span>
-                </div>
-            </div>
-<!--
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'user.password' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="password"
-                           placeholder="{[{ 'user.password' | i18next }]}"
-                           name="password1" id="password1" data-ng-model="user.password1"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">
-                    {[{ 'user.confirm_password' | i18next }]}
-                    <span class="required" aria-required="true"> * </span>
-                </label>
-                <div class="col-md-5">
-                    <input class="form-control placeholder-no-fix" type="password"
-                           placeholder="{[{ 'user.confirm_password' | i18next }]}"
-                           name="password2" data-ng-model="user.password2"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-3 control-label" for="title">{[{'user.tenants' |i18next}]}<span
-                 class="required">* </span></label>
-
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <span class="input-group-addon"> <i class="fa fa-desktop"></i> </span>
-                            <select class="form-control" data-ng-model="user.tenant">
-                                <option ng-repeat="rule in user.tenants" value="{[{rule.id}]}">{[{rule.name}]}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
--->
             <div class="clear"></div>
         </form>
     </div>

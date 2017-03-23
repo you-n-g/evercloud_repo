@@ -303,3 +303,5 @@ MONITOR_DISK = "http://www.baidu.com"
 MONITOR_NETWORK = ""
 
 FLAT = True
+
+GPU = "gpu:1"

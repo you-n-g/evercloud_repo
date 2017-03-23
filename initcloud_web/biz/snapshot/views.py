@@ -38,6 +38,12 @@ from biz.image.models import Image
 LOG = logging.getLogger(__name__)
 
 
+def check_snapshotname(request):
+    snap_name = request.data['snap_name']
+    LOG.info(snap_name)
+    LOG.info(Snapshot.objects.all().filter(snapshotname = snap_name).exists())
+    return Snapshot.objects.all().filter(snapshotname = snap_name).exists()
+    
 class SnapshotList(generics.ListAPIView):
     LOG.info("--------- I am snapshot list in SnapshotList ----------")
     queryset = Snapshot.objects.all()
@@ -56,6 +62,8 @@ def create_instance_snapshot(request):
     try:
 	LOG.info(request.data)
 	#id = request.data['id']
+        if check_snapshotname(request):
+            return Response({"success": False, "msg": _('Duplicated Snapshot name!Please enter another name')})
 	snap_name = request.data['snap_name']
         instance_name = request.data['instance_name']
 	instance_id = request.data['instance_id']
@@ -131,6 +139,8 @@ def update_snapshot(request):
     try:
 
         LOG.info(" **** requesta data is ***" + str(request.data))
+        if check_snapshotname(request):
+            return Response({"success": False, "msg": _('Duplicated Snapshot name!Please enter another name')})
         image_id = request.data.get('snapshot_id')
         name = request.data.get("snapshotname")
         pk = request.data.get("id")

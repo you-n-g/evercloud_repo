@@ -172,15 +172,26 @@ class LoginView(View):
         return HttpResponseRedirect(reverse("cloud"))
 
     def response(self, request, form=None):
-
+        is_active = True 
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            try:
+                user = User.objects.filter(username=username)[0]
+                if not user.is_active:
+                    is_active = False
+            except:
+                pass
         if form is None:
             form = AuthenticationForm(initial={'username': ''})
             error = False
         else:
             error = True
 
+        if not is_active:
+            error = False
         return render(request, 'login.html', {
             "form": form,
+            "is_active": is_active,
             "error": error
         })
 

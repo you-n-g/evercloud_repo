@@ -53,6 +53,14 @@ angular.module('cloud.resources', [])
         });
 }])
 
+.factory('MemberUser', ['$resource', function($resource){
+    return $resource("/api/users/member_users/", {id: '@id'},
+        {
+            query: {isArray: true},
+        });
+}])
+
+
 .factory('Contract', ['$resource', function($resource){
     return $resource("/api/contracts/:id/", {id: '@id'}, {query: {isArray: false}});
 }])

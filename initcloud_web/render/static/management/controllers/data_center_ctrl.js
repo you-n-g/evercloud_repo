@@ -91,7 +91,7 @@ CloudApp.controller('DataCenterController',
 
                 var config = {
                     rules: {
-                        name: {
+                        /*name: {
                             minlength: 2,
                             maxlength: 128,
                             required: true,
@@ -102,7 +102,7 @@ CloudApp.controller('DataCenterController',
                                 },
                                 async: false
                             }
-                        },
+                        },*/
                         host: {
                             required: true,
                             ip: true,
@@ -129,6 +129,17 @@ CloudApp.controller('DataCenterController',
                             minlength: 2,
                             maxlength: 50
                         },
+                        password1: {
+                            required: true,
+                            minlength: 2,
+                            maxlength: 50
+                            //complexPassword: true
+                        },
+                        password2: {
+                            required: true,
+                            equalTo: "#password"
+                        },
+
                         auth_url: {
                             required: true,
                             url: true

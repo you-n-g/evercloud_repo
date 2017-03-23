@@ -81,7 +81,7 @@ msgstr "字段不允许为空。"
 
 #: templates/partial_jquery.html:5
 msgid "Please fix this field."
-msgstr "字段格式错误。"
+msgstr "名称重复。"
 
 #: templates/partial_jquery.html:6
 msgid "Please enter a valid email address."

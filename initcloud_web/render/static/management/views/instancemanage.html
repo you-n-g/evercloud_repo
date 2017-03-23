@@ -12,6 +12,9 @@
                     <a class="btn btn-primary" href="#" ng-click="openNewTemplatemanagerModal()">
                         <i class="fa fa-plus"></i>{[{ 'action.add' | i18next }]}
                     </a>
+                    <a class="btn btn-primary" href="#" ng-click="openBatchNewModal()">
+                        <i class="fa fa-plus"></i>{[{ 'action.batch_add' | i18next }]}
+                    </a>
                     <!--
                     <a class="btn btn-info" href="javascript:void(0)"
                        data-ng-click="openDataCenterBroadcastModal();">
@@ -537,7 +540,6 @@
     <div class="modal-body">
        <table>
         <form id="InstancemanageForm" instancemanage="form" class="form-horizontal form-bordered">
-            <input type="hidden"  name="id" data-ng-model="instancemanage.id">
 	    <div class="form-group">
                 <label class="control-label col-md-3">
                     {[{ 'snapshot.name' | i18next }]}

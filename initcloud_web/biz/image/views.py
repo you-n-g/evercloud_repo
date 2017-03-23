@@ -74,7 +74,8 @@ def create_image(request):
                             status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         LOG.error("Failed to create image, msg:[%s]" % e)
-        return Response({"success": False, "msg": _('Failed to create image for unknown reason.')})
+        #return Response({"success": False, "msg": _('Failed to create image for unknown reason.')})
+        return Response({"success": False, "msg": str(e)})
 
 
 @api_view(["POST"])
@@ -114,7 +115,7 @@ def is_uuid_unique(request):
     try:
         uuid = request.GET['uuid']
         LOG.info("uuid is" + str(uuid))
-        client = glance.glanceclient_tm(rc, settings.GLANCE_ENDPOINT, version='1')
+        client = glance.glanceclient_tm(rc, settings.GLANCE_ENDPOINT, version='2')
         LOG.info("client is" + str(client))
         try:
             images = client.images.get(str(uuid))

@@ -59,6 +59,7 @@ class Instance(models.Model):
     
     core = models.IntegerField(_("Cores"), default=1)
     socket = models.IntegerField(_("Sockets"), default=1)
+    gpu = models.BooleanField(_("GPU"), default=False)
     
     MIMI = 0
     JIMI = 1

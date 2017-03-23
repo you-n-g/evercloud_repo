@@ -33,8 +33,13 @@ LOG = logging.getLogger(__name__)
 def flavor_create(instance):
     assert instance  
     def _generate_name(instance):
-        name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-socket-%s" % (settings.OS_NAME_PREFIX,
-                    instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.socket)
+        gpu = 'no'
+        if instance.gpu == True:
+            gpu = 'yes'
+        else:
+            gpu = 'no'
+        name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-socket-%s-gpu-%s" % (settings.OS_NAME_PREFIX,
+                    instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.socket, gpu)
         return name
 
     def _get_flavor_by_name(instance, name):
@@ -61,7 +66,14 @@ def flavor_create(instance):
     name = _generate_name(instance)
     flavor = _get_flavor_by_name(instance, name)
     metadata = {"hw:cpu_cores":int(instance.core),"hw:cpu_sockets":int(instance.socket)}
-
+    if instance.gpu:
+        #metadata['pci_passthrough:alias'] = ['alias_1:1']
+        metadata['pci_passthrough:alias'] = settings.GPU
+    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
+    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
+    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
+    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
+    LOG.info(metadata)
     if flavor is None:
         try:
             LOG.info(u"Flavor not exist, create new, [%s][%s].", instance, name)

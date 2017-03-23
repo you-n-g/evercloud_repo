@@ -45,6 +45,11 @@ var FormWizard = function () {
                         equalTo: "#login_password"
                     }
                 },
+                /*messages: {
+                    name: {
+                        remote: $i18next('instance.name_is_used')
+                    },
+                },*/
                 errorPlacement: function (error, element) {
                     element.parent().append(error);
                 },
