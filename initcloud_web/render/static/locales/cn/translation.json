@@ -518,6 +518,7 @@
 
   "action": {
     "create": "创建",
+    "batch_add": "批量创建",
     "add": "添加",
     "edit": "编辑",
     "update": "更新",
