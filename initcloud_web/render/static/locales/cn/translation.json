@@ -1,5 +1,6 @@
 {
   "name": "名称",
+  "users": "用户",
   "count": "数量",
   "filter": "过滤器",
   "confirm": "确认",
@@ -581,6 +582,7 @@
     "resetpassword": "重置密码",
     "mobile": "手机号",
     "is_active": "活跃用户",
+    "edit": "用户编辑",
     "assignrole": "指派三员",
     "is_superuser": "超级用户",
     "system_user": "系统管理员",

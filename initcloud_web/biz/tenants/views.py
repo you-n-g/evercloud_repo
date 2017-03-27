@@ -186,7 +186,7 @@ def delete_tenants(request):
         deleted_project = project_delete(request, ID)
         Tenants.objects.filter(tenant_id=ID).delete()
     #Tenants.objects.filter(pk__in=ids).delete()
-    return Response({'success': True, "msg": _('Tenantss have been deleted!')}, status=status.HTTP_201_CREATED)
+    return Response({'success': True, "msg": _('Tenants have been deleted!')}, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])

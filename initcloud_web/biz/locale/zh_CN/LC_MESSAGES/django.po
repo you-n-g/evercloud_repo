@@ -1388,9 +1388,9 @@ msgstr "不能操作该主机，以为它的一块磁盘正在恢复中"
 msgid "This instance have backup chains, please delete these first."
 msgstr "这个云主机还有备份链，请先删除这些备份链"
 
-#: instance/views.py:98
+#: instance/views.py:192
 msgid "Flavor is created successfully!"
-msgstr "规格创建成功！"
+msgstr "规格创建成功"
 
 #: instance/views.py:101 instance/views.py:120
 msgid "Flavor data is not valid!"
@@ -1415,16 +1415,11 @@ msgstr "规格已删除"
 
 #: role/views.py:76
 msgid "Roles have been deleted!"
-msgstr "权限已删除"
-
-#: role/views.py:59
-msgid "Role is created successfully!"
-msgstr "权限已创建成功"
-
+msgstr "角色已删除"
 
 #: role/views.py:62
 msgid "Role data is not valid!"
-msgstr "权限数据不正确"
+msgstr "角色数据不正确"
 
 
 #: role/views.py:68
@@ -1897,37 +1892,13 @@ msgstr "路由器删除成功"
 msgid "The host IP is used by other Data Center, Please check your host IP."
 msgstr "该节点ＩＰ已被其他数据中心使用，请检查您的节点IP."
 
-#: overview/views.py:51
-msgid "Unknown Error happened when creating data center!"
-msgstr "未知错误导致数据中心创建失败！"
-
 #: overview/views.py:58
 msgid "Data center is initialized successfully!"
 msgstr "数据中心初始化成功"
 
-#: overview/views.py:78
-msgid "Unknown Error happened when creating flavors!"
-msgstr "创建规格失败"
-
-#: overview/views.py:81
-msgid "Flavors are initialized successfully!"
-msgstr "规格更新成功"
-
-#: overview/views.py:106
-msgid "Unknown Error happened when creating images!"
-msgstr "创建镜像失败"
-
 #: overview/views.py:110
 msgid "Images are initialized successfully!"
 msgstr "镜像更新成功"
-
-#: overview/views.py:130
-msgid "Hypervisor status is none."
-msgstr ""
-
-#: overview/views.py:134
-msgid "Only super user can view the hypervisor status."
-msgstr ""
 
 #: volume/models.py:13
 msgid "Volume name"
@@ -2160,6 +2131,181 @@ msgstr "该流程成功进入下一审核环节！"
 #: workflow/views.py:180
 msgid "Application is rejected."
 msgstr "申请被驳回."
+
+#: snapshot/views.py:89  snapshot/views.py:101
+msgid "Snapshot is created successfully!"
+msgstr "快照创建成功"
+
+#: snapshot/views.py:93
+msgid "Failed to create snapshot for unknown reason."
+msgstr "未知原因快照创建失败"
+
+#: snapshot/views.py:125
+msgid "Snapshots have not been deleted!"
+msgstr "快照未被删除"
+
+#: snapshot/views.py:131
+msgid "Snapshots have been deleted!"
+msgstr "快照已被删除"
+
+#: snapshot/views.py:134
+msgid "Failed to delete Snapshots!!"
+msgstr "快照删除失败"
+
+#: snapshot/views.py:143
+msgid "Duplicated Snapshot name!Please enter another name"
+msgstr "快照名重复！请出入其他的快照名"
+
+#: snapshot/views.py:168
+msgid "Snapshot updated failed!"
+msgstr "快照更新失败"
+
+#: snapshot/views.py:185
+msgid "Snapshot is updated successfully"
+msgstr "快照更新成功"
+
+#: snapshot/views.py:191
+msgid "Failed to update snapshot for unknown reason."
+msgstr "未知原因快照更新失败"
+
+
+
+#: ceilometer/views.py:86
+msgid "Ceilometer is created successfully!"
+msgstr "云主机监控创建成功"
+
+
+#: ceilometer/views.py:89
+msgid "Ceilometer data is not valid!"
+msgstr "云主机监控数据无效"
+
+#: ceilometer/views.py:95
+msgid "Failed to create ceilometer for unknown reason"
+msgstr "未知原因创建云主机监控失败"
+
+#: ceilometer/views.py:103
+msgid "Ceilometers have been deleted"
+msgstr "云主机监控已被删除"
+
+#: ceilometer/views.py:124
+msgid "Ceilometer is updated successfully!"
+msgstr "云主机监控更新成功"
+
+#: ceilometer/views.py:130
+msgid "Failed to update ceilometer for unknown reason."
+msgstr "未知原因导致云主机监控更新失败"
+
+#: instance/views.py:284
+msgid "Your application for instance \"%(instance_name)s\" is successful,please waiting for approval result!"
+msgstr "申请成功，请等待结果"
+
+#: instance/views.py:519
+msgid "User have been assigned!"
+msgstr "用户已被分配"
+
+#: volume/views.py:129
+msgid "Your application for %(size)d GB volume is successful,please waiting for approval result!"
+msgstr "创建卷请求成功，请等待结果"
+
+#: volume/views.py:263
+msgid "Volume user changed"
+msgstr "磁盘用户已被更改"
+
+#: volume/views.py:266
+msgid "Incorrect supercode"
+msgstr "不正确的超码"
+
+#: tenants/views.py:91
+msgid "Tenants data is not valid!"
+msgstr "无效租户"
+
+#: tenants/views.py:100
+msgid "Tenants is created successfully!"
+msgstr "租户创建成功"
+
+#: tenants/views.py:105
+msgid "Failed to create tenants for unknown reason."
+msgstr "租户创建失败"
+
+#: tenants/views.py:144
+msgid "User has not been added!"
+msgstr "用户没有被加入"
+
+#: tenants/views.py:174 tenants/views.py:176
+msgid "User has been added!"
+msgstr "用户已被加入"
+
+#: tenants/views.py:189
+msgid "Tenants have been deleted!"
+msgstr "租户已被删除"
+
+#: tenants/views.py:202
+msgid "Users have been deleted from this tenant!"
+msgstr "用户已被从该租户中删除"
+
+#: role/views.py:62
+msgid "Role is created successfully!"
+msgstr "角色创建成功"
+
+#: role/views.py:104
+msgid "Role is updated successfully!"
+msgstr "角色更新成功"
+
+#: overview/views.py:89
+msgid "Unknown Error happened when creating data center!"
+msgstr "创建数据中心时发生未知错误"
+
+#: overview/views.py:116
+msgid "Unknown Error happened when creating flavors!"
+msgstr "创建规格时发生未知错误"
+
+#: overview/views.py:119
+msgid "Flavors are initialized successfully!"
+msgstr "规格初始化成功"
+
+#: overview/views.py:144
+msgid "Unknown Error happened when creating images!"
+msgstr "创建镜像时发生未知错误"
+
+#: overview/views.py:172
+msgid "Hypervisor status is none."
+msgstr "Hypervisor无状态"
+
+#: overview/views.py:176
+msgid "Only super user can view the hypervisor status."
+msgstr "只有系统管理员可以查看hypervisor状态"
+
+#: heat/views.py:184
+msgid "Heat is updated successfully!"
+msgstr "编排更新成功"
+
+#: heat/views.py:190
+msgid "Failed to update heat for unknown reason."
+msgstr "未知原因导致编排更新失败"
+
+#: heat/views.py:240
+msgid "Usergroupers have been deleted!"
+msgstr "用户组已被删除"
+
+#: floating/views.py:102
+msgid "Your application for %(bandwidth)d Mbps floating ip is successful,please waiting for approval result!"
+msgstr "申请floating成功，请等待结果"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #~ msgid "%(resource)s:%(resource_name)s execute %(action)s operation"
 #~ msgstr "%(resource)s:%(resource_name)s 执行了 %(action)s 操作"
