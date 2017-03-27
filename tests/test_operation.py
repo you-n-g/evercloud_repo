@@ -70,8 +70,16 @@ Operation_Types(
 )
 
 """
+
+user = 1
+your_resource = 'test'
+your_resouce_name = 'test'
+your_resource_action = 'test'
+alarm_message = 'test'
+
+
 # Logging
-payload = {"user":user, "resource":your_resource, "resource_name": your_resouce_name, "action": your_resource_action, "result": 1, "operation_type": 0}
+payload = {"user":user, "resource":your_resource, "resource_name": your_resouce_name, "action": your_resource_action, "result": 1, "operation_type": 0, "message": alarm_message}
 
 # Alarm
 payload = {"user":user, "resource":your_resource, "resource_name": your_resouce_name, "action": your_resource_action, "result": 1, "operation_type": 1, "message": alarm_message}

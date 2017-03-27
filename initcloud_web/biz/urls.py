@@ -256,6 +256,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^operation/$', account_view.OperationList.as_view()),
     url(r'^operation/filters$', account_view.operation_filters),
     url(r'^operation/push/$', account_view.push_operation),
+    url(r'^operation/collector/$', account_view.collector_operation),
     url(r'^group/$', group_view.GroupList.as_view()),
     url(r'^users/active/$', account_view.active_users),
     url(r'^users/(?P<pk>[0-9]+)/$', account_view.UserDetail.as_view()),

@@ -1156,3 +1156,32 @@ def get_member_users(request):
     LOG.info(member_users)
     serializer = UserSerializer(member_users, many=True)
     return Response(serializer.data)
+
+
+@require_GET
+def collector_operation(request):
+    LOG.info("*** get data is ***" + str(request.GET))
+    user = request.GET['user']
+    LOG.info('1')
+    resource = request.GET['resource']
+    resource_name = request.GET['resource_name']
+    LOG.info('1')
+    action= request.GET['action']
+    LOG.info('1')
+    result = request.GET['result']
+    LOG.info('1')
+    operation_type = request.GET['operation_type']
+    LOG.info('1')
+    message = request.GET['message']
+    LOG.info('1')
+
+
+    # Pending issue: user_id, udc_id, resource_id
+
+    try:
+        operation = Operation(user_id=1, resource=resource, resource_name=resource_name, action=action, operation_type=operation_type, message=message, udc_id=1, resource_id=1)
+        operation.save()
+    except Exception as e:
+        LOG.info(str(e))
+    return Response({"success": True,
+                     "msg": _("Success.")})

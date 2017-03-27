@@ -226,6 +226,8 @@ class Operation(models.Model):
     resource_name = models.CharField(_("Resource Name"), max_length=128)
     action = models.CharField(_("Action"), max_length=128, null=False)
     result = models.IntegerField(_("Result"), default=0)
+    operation_type = models.IntegerField(_("Operation_type"), default=0)
+    message = models.CharField(_("Message"), max_length=255, null=True)
     create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
 
     @classmethod
