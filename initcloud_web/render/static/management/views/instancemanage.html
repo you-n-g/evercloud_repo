@@ -115,14 +115,14 @@
                                 </div>
                             </td>
                             <td class="create-time" data-title="'create_at' | i18next">{[{ instancemanage.create_date }]}</td>
-                            <td data-title="'instance.security_cls' | i18next">
-                                <span data-ng-if="instancemanage.security_cls == 0">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
-                                <span data-ng-if="instancemanage.security_cls == 1">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
-                                <span data-ng-if="instancemanage.security_cls == 2">{[{'instancemanage.all_security_level.setting' | i18next}]}</span>
+                            <td data-title="'instance.security_cls' | i18next" >
+                                <span data-ng-if="instancemanage.security_cls == 0 && current_user.security">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
+                                <span data-ng-if="instancemanage.security_cls == 1 && current_user.security">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
+                                <span data-ng-if="instancemanage.security_cls == 2 && current_user.security">{[{'instancemanage.all_security_level.setting' | i18next}]}</span>
                             </td>
                                 <td class="action-group" data-title="'actions' | i18next">
                                     <div class="btn-group">
-                                        <button class="btn btn-default"
+                                        <button class="btn btn-default" data-ng-if="current_user.security"
                                                 type="button" ng-click="edit(instancemanage)">
                                             <i class="fa fa-edit"></i>
                                             {[{ 'instancemanage.edit' | i18next }]}

@@ -14,7 +14,7 @@ from biz.instance.settings import (INSTANCE_STATE_RUNNING,
                                    INSTANCE_STATE_DELETE,
                                    INSTANCE_STATE_POWEROFF)
 from biz.instance.models import Instance
-
+from biz.network.models import Network
 from biz.volume.settings import (VOLUME_STATE_AVAILABLE,
                                  VOLUME_STATE_IN_USE, VOLUME_STATE_ERROR)
 from biz.image.settings import WINDOWS, LINUX
@@ -227,10 +227,13 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
                 network_id = net.id
                 network_name = net.name
             try:
-                if neutron_enabled:
-                    private_net = "network-%s" % instance.network.id
-                else:
-                    private_net = "private"
+                #if neutron_enabled:
+                #    private_net = "network-%s" % instance.network.id
+                #else:
+                network_ = Network.objects.get(pk=instance.network.id)
+                LOG.info(network_)
+                private_net = network_.name
+                LOG.info("*** private_net is ***" + str(private_net))
                 if  settings.VLAN_ENABLED == False and not settings.FLAT:
                     instance.private_ip = srv.addresses.\
                                 get(private_net)[0].get("addr", "---")

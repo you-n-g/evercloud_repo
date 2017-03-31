@@ -212,6 +212,7 @@ def site_config(request):
         LOG.info("*** current_user is ***" + str(current_user))
         LOG.info("888888")
 
+    LOG.info("*** current_user is ***" + str(current_user))
     return render(request, 'site_config.js',
                   {'current_user': json.dumps(current_user),
                    'site_config': json.dumps(settings.SITE_CONFIG)},

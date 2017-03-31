@@ -40,6 +40,11 @@ msgid ""
 "lock is off)."
 msgstr "您输入的密码不对，请再次输入"
 
+#: templates/login.html:32
+msgid "" 
+"Your account is not active"
+msgstr "用户未激活"
+
 #: templates/login.html:32 templates/resend_activate_email.html:19
 msgid "Username"
 msgstr "用户名"

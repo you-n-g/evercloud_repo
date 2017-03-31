@@ -347,13 +347,20 @@ def template_action(request, template_id):
                         image_size = None
                         if "G" in str(template.template_disksize):
                             image_size = str(template.template_disksize).replace('G', '')
-                        if "g" in str(template.template_disksize):
+                        elif "g" in str(template.template_disksize):
                             image_size = str(template.template_disksize).replace('g', '')   
-
+                        else:
+                            image_size = template.template_disksize
                         data_center = DataCenter.objects.all()[0]
                         LOG.info("data center" + str(data_center))
                         try:
-                            glance_obj = Image(name=template_name, disk_size=image_size, login_name="linux", os_type=2, uuid=image_id, data_center=data_center, create_at=timezone.now())
+                            os_type = 1
+                            os_type_ = template.template_ostype
+                            if str(os_type_) == 'windows':
+                                os_type = 1
+                            else:
+                                os_type = 2
+                            glance_obj = Image(name=template_name, disk_size=image_size, login_name="admin", os_type=os_type, uuid=image_id, data_center=data_center, create_at=timezone.now())
                             LOG.info("dd")
                             glance_obj.save()
                             LOG.info("dd")

@@ -81,7 +81,7 @@ class InstancemanageList(generics.ListCreateAPIView):
 
                 if not system and not security and not audit:
                     member = True
-            if system:
+            if system or security or audit:
                 LOG.info("*** system user ***" + str(system))
                 serializer = InstanceSerializer(self.queryset, many=True)
                 return Response(serializer.data)

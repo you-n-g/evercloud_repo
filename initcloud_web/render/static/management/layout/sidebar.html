@@ -53,8 +53,7 @@
                     <span class="selected"></span></a>
                 </li>
                -->
-                <li id="image"
-                    data-ng-if="current_user.system">
+                <li id="image">
                     <a href="#/image/">
                         <i class="fa fa-circle-o-notch"></i>
                         <span class="title">
@@ -74,7 +73,7 @@
             </ul>
         </li>
         <!-- 虚拟机管理 -->
-        <li class="" data-ng-if="current_user.system">
+        <li class="" >
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.instancemanage' | i18next }]}</span>
@@ -83,7 +82,7 @@
          <ul class="sub-menu">
           <!-- 虚拟机管理 云主机 -->
                 <li id="instancemanage"
-                    data-ng-if="current_user.system">
+                    >
                     <a href="#/instancemanage/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -94,7 +93,7 @@
          </ul>
        </li>
 	<!-- 快照管理 -->
-        <li class="" data-ng-if="current_user.system">
+        <li class="" >
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.snapshot' | i18next }]}</span>
@@ -102,8 +101,7 @@
             </a>
          <ul class="sub-menu">
           <!-- 快照管理 快照 -->
-                <li id="snapshot"
-                    data-ng-if="current_user.system">
+                <li id="snapshot">
                     <a href="#/snapshot/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -115,7 +113,7 @@
        </li>
 
         <!-- 云磁盘管理 -->
-        <li class="" data-ng-if="current_user.system">
+        <li class="" >
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.volumemanage' | i18next }]}</span>
@@ -123,8 +121,7 @@
             </a>
          <ul class="sub-menu">
           <!-- 云磁盘管理 云磁盘 -->
-                <li id="volume"
-                    data-ng-if="current_user.system">
+                <li id="volume">
                     <a href="#/volume/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">
@@ -136,7 +133,7 @@
        </li>
 
         <!-- 网络管理 -->
-        <li data-ng-if="current_user.system">
+        <li >
             <a href="javascript:;">
                 <i class="fa fa-building"></i>
                 <span class="title">{[{ 'sidebar.networkmanage' | i18next }]}</span>
@@ -144,8 +141,7 @@
             </a>
          <ul class="sub-menu">
           <!-- 网络管理 公网ip -->
-                <li id="instancemanage"
-                    data-ng-if="current_user.system">
+                <li id="instancemanage">
                     <a href="#/floating/">
                         <i class="fa fa-adjust"></i>
                         <span class="title">

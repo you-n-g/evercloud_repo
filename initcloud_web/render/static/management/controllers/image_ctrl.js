@@ -147,7 +147,14 @@ CloudApp.controller('ImageController',
                         name: {
                             minlength: 2,
                             maxlength: 50,
-                            required: true
+                            required: true,
+                            remote:{
+                                  url:"/api/images/is-name-unique/",
+                                  data:{
+                                        name: $("#name").val()
+                                   },
+                                     async: false
+                               }
                         },
                         os_type: 'required',
                         //login_name: 'required',
@@ -155,13 +162,13 @@ CloudApp.controller('ImageController',
                         disk_size: {
                             required: true,
                             digits: true
-                        }
-                        /*messages: {
+                        },
+                        messages: {
                             uuid: {
                                 //remote: $i18next('user.name_is_used')
-                                remote: 'No Image Found!'
+                                remote: "No Image Found!"
                             }
-                        }*/
+                        }
                     }
                 };
 

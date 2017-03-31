@@ -121,7 +121,12 @@ def is_uuid_unique(request):
             images = client.images.get(str(uuid))
         except Exception as e:
             LOG.info(str(e))
+	    return Response(False)
         
         return Response(True)
     except:
 	return Response(False)
+@require_GET
+def is_name_unique(request):
+    LOG.info(request.GET['name'])
+    return Response(not Image.objects.all().filter(name = request.GET['name']).exists())
