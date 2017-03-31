@@ -1,0 +1,6 @@
+ELK汉化版本需要的elk版本：
+1.elasticsearch  5.2.1以上
+
+2.logstash       5.1.2以上
+
+3.kibana         5.1.2以上
