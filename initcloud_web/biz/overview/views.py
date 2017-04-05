@@ -154,7 +154,8 @@ def hypervisor_stats(request):
     user = request.user
     user_ = UserProxy.objects.get(pk=user.pk)
     
-    if request.user.is_superuser or user_.is_system_user or user_.is_safety_user or user_.is_audit_user:
+    #if request.user.is_superuser or user_.is_system_user or user_.is_safety_user or user_.is_audit_user:
+    if True:
         data_center = DataCenter.get_default()
         stats = hypervisor_stats_task(data_center)
         if stats: 

@@ -50,6 +50,7 @@ class InstancemanageList(generics.ListCreateAPIView):
                 serializer = InstanceSerializer(self.queryset, many=True)
                 return Response(serializer.data)
 
+            """
             system = False
             security = False
             audit = False
@@ -81,10 +82,13 @@ class InstancemanageList(generics.ListCreateAPIView):
 
                 if not system and not security and not audit:
                     member = True
-            if system:
+            if system or security or audit:
                 LOG.info("*** system user ***" + str(system))
                 serializer = InstanceSerializer(self.queryset, many=True)
                 return Response(serializer.data)
+            """
+            serializer = InstanceSerializer(self.queryset, many=True)
+            return Response(serializer.data)
 	    queryset = self.get_queryset().filter(user = request.user)
             serializer = self.serializer_class(queryset, many=True)
             #serializer = self.serializer_class(self.get_queryset(), many=True)
