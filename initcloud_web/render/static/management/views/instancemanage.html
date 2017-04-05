@@ -1,3 +1,6 @@
+<script type="text/ng-template" id="checkbox-header.html">
+    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
+</script>
 <!-- BEGIN PAGE HEADER-->
 <!-- END PAGE HEADER-->
 <!-- BEGIN MAIN CONTENT ng-controller="instancemanageController"-->
@@ -21,25 +24,23 @@
                         <i class="fa  fa-bullhorn"></i> {[{ 'notification.data_center_broadcast' | i18next }]}
                     </a>
                     -->
-                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">  
-<!--                    <a class="btn btn-danger" ng-click="batchDelete()">-->
+                    <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
                         <i class="fa fa-trash"></i>
                         {[{ 'action.batch_delete' | i18next }]}
                     </a>
                 </div>
                 </div>
             </div>
-            <div class="portlet-body">
+           <div class="portlet-body">
                 <div id="" class="dataTables_wrapper no-footer">
-
                     <table ng-table="instancemanage_table"
                            class="table table-striped table-bordered table-advance table-hover">
                         <tbody>
-                        <tr ng-repeat="instancemanage in $data">
-                            <td width="30" style="text-align: left" header="'ng-table/headers/checkbox.html'">
-<!--                                <input type="checkbox" ng-model="checkboxes.items[instancemanage.id]"/>-->
-                                <input type="checkbox" data-ng-model="instancemanage.checked"/>
-                            </td>
+                            <tr ng-repeat="instancemanage in $data">
+                                 {[{ instancemanage }]}
+                                <td width="30" header="'checkbox-header.html'">
+                                    <input type="checkbox" data-ng-model="instancemanage.checked"/>
+                                </td>
                             <td width="100" data-title="'instancemanage.name' | i18next">
                                 <a class="btn default blue-stripe btn-xs"
                                    data-ng-if="is_available(instancemanage)"
@@ -243,6 +244,12 @@
     </div>
 </div>
 <!-- END MAIN CONTENT -->
+
+
+<script type="text/ng-template" id="checkbox-header.html">
+    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
+</script>
+
 <!-- BEGIN MAIN JS & CSS -->
 <!-- BEGIN MAIN JS & CSS -->
 <script type="text/ng-template" id="ng-table/headers/checkbox.html">
@@ -755,9 +762,6 @@
 </script>
 
 
-<script type="text/ng-template" id="checkbox-header.html">
-    <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
-</script>
 
 <script type="text/ng-template" id="novnc_console.html">
     <div class="modal-header">

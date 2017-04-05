@@ -31,8 +31,8 @@ CloudApp.controller('InstancemanageController',
                 getData: function($defer, params){
                     Instancemanage.query(function(data){
                         $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
-			InstanceState.processList($scope.instancemanages);
                         checkboxGroup.syncObjects($scope.instancemanages);
+			InstanceState.processList($scope.instancemanages);
                     });
                 }
             });
