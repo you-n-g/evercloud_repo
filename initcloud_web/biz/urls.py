@@ -160,6 +160,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^images/update/$', image_view.update_image),
     url(r'^images/batch-delete/$', image_view.delete_images),
     url(r'^images/is-uuid-unique/$', image_view.is_uuid_unique),
+    url(r'^images/is-name-unique/$', image_view.is_name_unique),
 ])
 
 # network

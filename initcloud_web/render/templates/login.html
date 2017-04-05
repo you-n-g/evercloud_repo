@@ -28,12 +28,10 @@
     </div>
     {% if not is_active %}
     <div class="alert alert-danger">
-    {% else %}
-    <div class="alert alert-danger display-hide">
-    {% endif %}
         <button class="close" data-close="alert"></button>
         <span id="errorMsg">{% trans "Your account is not active"%}</span>
     </div>
+    {% endif %}
 
 
     <div class="form-group">

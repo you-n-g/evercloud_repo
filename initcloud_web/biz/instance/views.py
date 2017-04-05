@@ -315,7 +315,7 @@ def instance_resize(request):
     org_core = ins.core
     org_socket = ins.socket
     org_memory = ins.memory
-    org_sys_dick = ins.sys_disk
+    org_sys_disk = ins.sys_disk
     ins.cpu = request.data['vcpu']
     ins.core = request.data['core']
     ins.socket = request.data['socket']
@@ -332,6 +332,7 @@ def instance_resize(request):
 	ins.status = 14
 	ins.save()
     except Exception as e:
+	#traceback.print_exc()
         ins.cpu = org_cpu
         ins.core = org_core
         ins.socket = org_socket
@@ -339,7 +340,6 @@ def instance_resize(request):
         ins.sys_disk = org_sys_disk
         ins.save()
         return Response({"success":False, "msg":str(e)})
-	#traceback.print_exc()
     #return Response(serializer.data)
     return Response({"success":True})
 
@@ -349,6 +349,7 @@ def instance_verify_resize(request):
     rc = create_rc_by_instance(ins)
     try:
 	LOG.info(request.data['action'])
+	instance = nova.server_get(rc, ins.uuid)
 	if request.data['action'] == 'confirm':
 	    nova.server_confirm_resize(rc, ins.uuid)	
 	elif request.data['action'] == 'revert':
@@ -386,10 +387,14 @@ def instance_verify_resize(request):
 @api_view(["POST"])
 def instance_assignedusers(request):
     ins = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)[0]
-    user = ins.assigneduser
-    assignuser = []
-    assignuser.append(user)
-    serializer = UserSerializer(assignuser, many = True)
+    try:
+        user = ins.assigneduser
+        assignuser = []
+        assignuser.append(user)
+        LOG.info(assignuser)
+        serializer = UserSerializer(assignuser, many = True)
+    except:
+       traceback.print_exc()
     return Response(serializer.data)
 """
     ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
@@ -407,9 +412,12 @@ def instance_unassignedusers(request):
     users = User.objects.all()
     member_users = []
     for user in users:
-        keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
-        tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
-        rc = create_rc_by_dc(DataCenter.objects.all()[0])
+        try:
+            keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
+            tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
+            rc = create_rc_by_dc(DataCenter.objects.all()[0])
+        except:
+            continue
         try:
             user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
         except:
@@ -667,7 +675,8 @@ def _get_instance_detail(instance):
 def vdi_view(request):
     LOG.info("****** i am vdi view with method get ********")
 
-    queryset = Instance.objects.all().filter(deleted=False, user_id=request.user.id)
+    #queryset = Instance.objects.all().filter(deleted=False, user_id=request.user.id)
+    queryset = Instance.objects.all().filter(deleted=False, assigneduser_id=request.user.id)
     LOG.info("queryset is" + str(queryset))
     json_value = {}
     count = 0 

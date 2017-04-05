@@ -1129,8 +1129,11 @@ def get_member_users(request):
     users = User.objects.all()
     member_users = []
     for user in users:
-        keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
-        tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
+        try:
+            keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
+            tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
+        except:
+            continue
         #LOG.info(keystone_user_id)
         #LOG.info(tenant_uuid)
         rc = create_rc_by_dc(DataCenter.objects.all()[0])

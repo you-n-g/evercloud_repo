@@ -175,12 +175,13 @@ class LoginView(View):
         is_active = True 
         if request.method == 'POST':
             username = request.POST.get('username')
-            try:
-                user = User.objects.filter(username=username)[0]
-                if not user.is_active:
-                    is_active = False
-            except:
-                pass
+            if username:
+                try:
+                    user = User.objects.filter(username=username)[0]
+                    if not user.is_active:
+                        is_active = False
+                except:
+                    pass
         if form is None:
             form = AuthenticationForm(initial={'username': ''})
             error = False

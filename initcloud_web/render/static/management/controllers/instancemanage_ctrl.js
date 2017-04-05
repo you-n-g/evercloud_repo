@@ -31,8 +31,8 @@ CloudApp.controller('InstancemanageController',
                 getData: function($defer, params){
                     Instancemanage.query(function(data){
                         $scope.instancemanages = ngTableHelper.paginate(data, $defer, params);
-			InstanceState.processList($scope.instancemanages);
                         checkboxGroup.syncObjects($scope.instancemanages);
+			InstanceState.processList($scope.instancemanages);
                     });
                 }
             });
@@ -597,7 +597,6 @@ CloudApp.controller('InstancemanageController',
         $scope.resize = function(instancemanage){
 
             $modal.open({
-                //templateUrl: 'resize.html',
                 templateUrl: '/static/management/views/resize/instance_wizard.html',
                 controller: 'InstancemanageResizeController',
                 backdrop: "static",
@@ -606,9 +605,6 @@ CloudApp.controller('InstancemanageController',
                     instancemanage_table: function () {
                         return $scope.instancemanage_table;
                     },
-                    //flavors: function (CommonHttpService) {
-                    //    return CommonHttpService.get("/api/instancemanage/resize/");
-                    //},
                     quota: function (CommonHttpService) {
                         return CommonHttpService.get("/api/account/quota/");
                     },
@@ -1215,15 +1211,13 @@ CloudApp.controller('InstancemanageController',
             }
         }]).controller('InstancemanageResizeController',
         function($rootScope, $scope, $modalInstance, $i18next,
-                 instancemanage, instancemanage_table, CheckboxGroup, quota, Flavor,//flavors,
-                 Instancemanage, UserDataCenter, //instancemanageForm,
+                 instancemanage, instancemanage_table, CheckboxGroup, quota, Flavor,
+                 Instancemanage, UserDataCenter, 
                  CommonHttpService, ToastrService, ResourceTool){
 
             $scope.instancemanage = instancemanage = angular.copy(instancemanage);
             $scope.cancel = $modalInstance.dismiss;
 	    $scope.instancemanage_table = instancemanage_table;
-	    //$scope.flavors = flavors;
-	    //$scope.select_flavor = new Object;
         $scope.instance_config = {
             "instance": 1,
             "pay_type": "hour",
@@ -1296,7 +1290,6 @@ CloudApp.controller('InstancemanageController',
                     $scope.instance_config.cpu_memory = $scope.cpu_memory_map[cpu];
                 };
 
-		// core & socket control
 		$scope.core_socket_map = [[1,2,4,8],[2,4,8,-1],[4,8,-1,-1],[8,-1,-1,-1]]
 		$scope.core_click = function (core){
 		    $scope.cx = $scope.core_list.indexOf(core)

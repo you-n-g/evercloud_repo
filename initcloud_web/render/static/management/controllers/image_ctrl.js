@@ -89,7 +89,7 @@ CloudApp.controller('ImageController',
 
     .controller('ImageCreateController',
         function($rootScope, $scope, $modalInstance,
-                 image_table, image, Image, User, DataCenter, ImageForm,
+                 image_table, image, Image, User, DataCenter, imageForm,
                  $i18next, CommonHttpService, ResourceTool, ToastrService){
 
             $scope.users = User.getActiveUsers();
@@ -97,7 +97,7 @@ CloudApp.controller('ImageController',
             $scope.image = ResourceTool.copy_only_data(image);
             $scope.os_types = [{key: 1, label: 'Windows'}, {key: 2, label: 'Linux'}];
 
-            $modalInstance.rendered.then(ImageForm.init);
+            $modalInstance.rendered.then(imageForm.init);
 
             $scope.cancel = function () {
                 $modalInstance.dismiss();
@@ -128,7 +128,7 @@ CloudApp.controller('ImageController',
                 });
             };
         }
-    ).factory('ImageForm', ['ValidationTool', function (ValidationTool) {
+    ).factory('imageForm', ['ValidationTool', function (ValidationTool) {
         return {
             init: function(){
                 var config = {
@@ -147,7 +147,14 @@ CloudApp.controller('ImageController',
                         name: {
                             minlength: 2,
                             maxlength: 50,
-                            required: true
+                            required: true,
+                            remote:{
+                                  url:"/api/images/is-name-unique/",
+                                  data:{
+                                        name: $("#name").val()
+                                   },
+                                     async: false
+                               }
                         },
                         os_type: 'required',
                         //login_name: 'required',
@@ -155,13 +162,13 @@ CloudApp.controller('ImageController',
                         disk_size: {
                             required: true,
                             digits: true
-                        }
-                        /*messages: {
+                        },
+                        messages: {
                             uuid: {
-                                //remote: $i18next('user.name_is_used')
-                                remote: 'No Image Found!'
+                                remote: $i18next('user.uuid_is_used')
+                                //remote: "No Image Found!"
                             }
-                        }*/
+                        }
                     }
                 };
 

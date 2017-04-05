@@ -42,6 +42,7 @@ def summary(request):
                 users = keystone.user_list(rc)
                 for admin_user in users:
                     if admin_user.name == settings.ADMIN_NAME:
+                        keystone_user_id = admin_user.id
                         keystone.user_update_tenant(rc, admin_user, tenant)
                         for role in keystone.role_list(rc):
                             if role.name == 'admin':
@@ -54,7 +55,7 @@ def summary(request):
                 #	admin_tenant_name = tenant.name
                 #	LOG.info(tenant.name)
                 #	LOG.info(tenant.id)
-                admin_UDC = UserDataCenter.objects.create(data_center=dc,user=user,tenant_name=tenant.name,tenant_uuid = tenant.id,keystone_user=settings.ADMIN_NAME,keystone_password=settings.ADMIN_PASS)
+                admin_UDC = UserDataCenter.objects.create(data_center=dc,user=user,tenant_name=tenant.name,tenant_uuid = tenant.id,keystone_user=settings.ADMIN_NAME,keystone_password=settings.ADMIN_PASS, keystone_user_id = keystone_user_id)
                 Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
             #if not Contract.objects.filter(user=user).exists():
                 #admin_UDC = UserDataCenter.objects.filter(data_center=dc, user=user)[0]

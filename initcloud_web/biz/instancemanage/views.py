@@ -246,13 +246,14 @@ def batch_delete(request):
             pass
         try:
             LOG.info("resource is" + str(instance.id))
-        #floating = Floating.objects.filter(resource=instance.id)[0]
+            #floating = Floating.objects.filter(resource=instance.id)[0]
             floating = Floating.objects.filter(resource=instance.id)
+            LOG.info(" floating is " + str(floating))
             if floating:
                 LOG.info("********")
-                floating.resource = None
+                floating[0].resource = None
                 LOG.info("********")
-                floating.save()
+                floating[0].save()
                 LOG.info("********")
         except:
             return Response({"success": False, "msg": _(
