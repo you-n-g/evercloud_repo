@@ -142,8 +142,7 @@ CloudApp.controller('ImageController',
                                     },
                                     async: false
                                 }
-
-                        },
+                              },
                         name: {
                             minlength: 2,
                             maxlength: 50,
@@ -156,20 +155,23 @@ CloudApp.controller('ImageController',
                                      async: false
                                }
                         },
-                        os_type: 'required',
-                        //login_name: 'required',
                         data_center: 'required',
                         disk_size: {
                             required: true,
                             digits: true
                         },
+                        os_type: 'required'
+                       },
                         messages: {
+                            name: {
+                                remote: '名称重复' 
+                                //remote: "No Image Found!"
+                            },
                             uuid: {
-                                remote: $i18next('user.uuid_is_used')
+                                remote: '镜像ID不存在!'
                                 //remote: "No Image Found!"
                             }
                         }
-                    }
                 };
 
                 return ValidationTool.init('#imageForm', config);
