@@ -553,7 +553,7 @@ def instance_search_view(request):
             user_data_center=request.session["UDC_ID"]) | Q(tenant_uuid=project_id))
     else:
         LOG.info("user id is not none")
-        instance_set = Instance.objects.filter(deleted=False, user=user_id)
+        instance_set = Instance.objects.filter(deleted=False, assigneduser_id=user_id)
 
     serializer = InstanceSerializer(instance_set, many=True)
     return Response(serializer.data)

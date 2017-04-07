@@ -15,7 +15,7 @@
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="floating_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
-                    <a class="btn btn-primary" href="#" ng-click="modal_create_floating()"
+                    <a class="btn btn-primary" href="#" ng-click="modal_create_floating()" data-ng-if="current_user.system"
                        role="button">
                         <i class="fa fa-plus"></i>
                         {[{ 'floatingIP.allocate' | i18next }]}
@@ -55,7 +55,7 @@
                                 <a class="btn default blue-stripe btn-xs"  ng-href="#/lbaas/" ng-if="floating.resource && floating.resource_type =='LOADBALANCER'">
                                     <i class="fa fa-sitemap"></i> {[{ floating.resource_info.name}]} </a>
                             </td>
-                            <td width="180" data-title="'floatingIP.action'|i18next">
+                            <td width="180" data-title="'floatingIP.action'|i18next" data-ng-if="current_user.system">
                                 <div class="btn-group">
                                     <button class="btn btn-default"
                                             type="button" ng-click="floating_action(floating, 'release')">

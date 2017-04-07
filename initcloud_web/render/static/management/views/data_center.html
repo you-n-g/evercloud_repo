@@ -9,12 +9,10 @@
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="data_center_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
-                    <!--
-                    <a class="btn btn-primary" href="#" ng-click="create()" role="button">
+                    <a class="btn btn-primary" href="#" ng-click="create()" role="button" data-ng-if="current_user.system">
                         <i class="fa fa-plus"></i>
                         {[{ 'action.create' | i18next }]}
                     </a>
-                    -->
                 </div>
             </div>
             <div class="portlet-body">
@@ -48,7 +46,7 @@
                                 </td>
                                 <td data-title="'actions' | i18next">
                                     <div class="btn-group">
-                                        <button class="btn btn-default"
+                                        <button class="btn btn-default" data-ng-if="current_user.system"
                                                 type="button" ng-click="edit(data_center)">
                                             <i class="fa fa-edit"></i>
                                             {[{ 'action.edit' | i18next }]}

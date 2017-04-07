@@ -300,7 +300,7 @@ CloudApp.controller('InstancemanageController',
 	var instance_volume = function (ins, action) {
 	    if (action == "attach") {
                 var volumes = null;
-                CommonHttpService.get("/api/volumes/search/").then(function (data) {
+                CommonHttpService.get("/api/volumes/search/?uid=".concat(ins.id)).then(function (data) {
                     $scope.volumes = data;
                 });
                 } else {
