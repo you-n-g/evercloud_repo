@@ -10,6 +10,16 @@ import copy
 import yaml
 import logging
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
+
+from django.conf import settings
+if not settings.configured:
+    sys.path.append(os.path.abspath(os.path.join(DIRNAME,
+        os.path.pardir, os.path.pardir, os.path.pardir)))
+    import django
+    os.environ["DJANGO_SETTINGS_MODULE"] = 'initcloud_web.settings'
+    django.setup()
+
+
 LOG = logging.getLogger(__name__)
 
 
@@ -19,8 +29,6 @@ debugging software mangement module alone.
 --
 ansible_ssh_user: "username"
 ansible_ssh_pass: "password"
-hosts:
-    - "192.168.90.1"
 '''
 
 config_path = os.path.join(DIRNAME, "config.yml")
@@ -36,7 +44,6 @@ except IOError:
         'ansible_ssh_pass': "password",
         'hosts': ["192.168.1.1"]
     }
-
 
 
 
@@ -58,7 +65,7 @@ def get_hosts():
         LOG.info("Getting floating ips from models.")
         fips = [ip.ip for ip in Floating.objects.all()]
     except ImportError:
-        fips = config["hosts"]
+        fips = config.get("hosts", [])
         LOG.warning("Getting floating ips from config.yml")
     hosts = {
         'all': {

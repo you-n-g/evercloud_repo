@@ -14,7 +14,7 @@ DIRNAME = os.path.abspath(os.path.dirname(__file__))
 import ansible_hosts
 
 
-def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansible_hosts.py'), callback="default"):
+def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansible_hosts.sh'), callback="default"):
     # NOTICE: Here is a trick. The host we acquired must in the host list
     # everytime. However I can't get the host list in advance. So I add the
     # hosts into the host list eveytime if it doesn't exist.
