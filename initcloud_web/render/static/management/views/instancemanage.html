@@ -125,6 +125,7 @@
                                 <span data-ng-if="instancemanage.security_cls == 0 && current_user.security">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 1 && current_user.security">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 2 && current_user.security">{[{'instancemanage.all_security_level.setting' | i18next}]}</span>
+                                <span data-ng-if="instancemanage.security_cls == 3 && current_user.security">{[{'instancemanage.all_security_level.mimi_fail' | i18next}]}</span>
                             </td>
                                 <td class="action-group" data-title="'actions' | i18next" >
                                     <div class="btn-group">
@@ -229,7 +230,7 @@
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.deleteinstance' | i18next }]} </a>
                                             </li>
-                                            <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && instancemanage.security_cls==0">
+                                            <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && ( instancemanage.security_cls==0 || instancemanage.security_cls==3 )">
                                                 <a href="#" ng-click="instance_action(instancemanage, 'set_jimi')">
                                                     <i class="fa fa-play"></i>
                                                     {[{ 'instance.set_jimi' | i18next }]}

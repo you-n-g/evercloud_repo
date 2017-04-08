@@ -67,8 +67,13 @@ def uninstall_software(ids, addrs, softwares):
 def set_wallpaper(instance, host_list, wallpaper):
     try:
         LOG.info("---set wallpaper---: start task")
-        mgr.set_wallpaper(host_list, wallpaper)
-        Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)
+        ret = mgr.set_wallpaper(host_list, wallpaper)                                                                                   
+        if ret:                                                                                                                         
+            Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)                                                  
+            LOG.info("Set wallpaper successfully")                                                                                      
+        else:                                                                                                                           
+            Instance.objects.filter(id=instance.id).update(security_cls=Instance.MIMI_FAIL)                                             
+            LOG.info("Fail to set wallpaper")      
         LOG.info("---set wallpaper---: finish task")
     except Exception, e:
         LOG.info("---set wallpaper---: %s" % e)
