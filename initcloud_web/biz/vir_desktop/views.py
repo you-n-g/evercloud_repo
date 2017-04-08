@@ -44,13 +44,16 @@ class VDStatusList(generics.ListAPIView):
 @require_GET
 def software_can_setup(request):
     # Use the API to get corresponding data
-    return Response(mgr.get_available_software())
+    return Response({'code': 0, 'softwares': mgr.get_available_software()})
 
 @require_GET
 def software_can_remove(request):
     addr = request.query_params.get("addr")
     # Use the API to get corresponding data
-    return Response(mgr.get_installed_software(addr))
+    try:
+        return Response({'code': 0, 'softwares': mgr.get_installed_software(addr)})
+    except RuntimeError:
+        return Response({'code': 1, 'softwares': []})
 
 @require_POST
 def software_setup(request):

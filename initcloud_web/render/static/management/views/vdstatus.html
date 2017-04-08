@@ -108,6 +108,9 @@
             <div class="form-wizard">
               <div class="form-body">
                 <h4>{[{ 'vir_desktop.soft_list' | i18next }]}</h4>
+                <div ng-show="error_flag">
+                   <p>{[{ 'vir_desktop.fail_get_soft_list' | i18next }]}</p>
+                </div>
                 <div style="height:294px;overflow-y:scroll;padding:15px">
                   <div class="page-spinner-bar" ng-show="loading">
                     <div class="bounce1"></div>

@@ -885,7 +885,8 @@
     "removing": "正在卸载",
     "setup_ok": "安装完成",
     "remove_ok": "卸载完成",
-    "error": "错误"
+    "error": "错误",
+    "fail_get_soft_list": "获取软件列表失败，请稍后再试"
   },
 
   "supercode": {

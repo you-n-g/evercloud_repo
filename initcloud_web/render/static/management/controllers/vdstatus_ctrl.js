@@ -132,8 +132,9 @@ CloudApp.controller('VDStatusController',
       CommonHttpService.get('/api/software/select' + action + '/?addr=' + userlist[0].ip_addr)
           .then(function(data) {
         $scope.loading = false;
-        $scope.softwares = data;
-        checkboxGroup.syncObjects($scope.softwares);
+        $scope.softwares = data.softwares;                                                                                              
+        checkboxGroup.syncObjects($scope.softwares);                                                                                    
+        $scope.error_flag = (data.code == 1);   
       });
       $scope.loading = true;
 
