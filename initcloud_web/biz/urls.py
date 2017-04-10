@@ -42,7 +42,7 @@ from biz.heat import views as heat_view
 from biz.templatemanager import views as templatemanager_view
 from biz.snapshot import views as snapshot_view
 from biz.ceilometer import views as ceilometer_view
-
+from biz.paramset import views as paramset_view
 
 
 # various options and configurations
@@ -524,4 +524,11 @@ urlpatterns += [
     url(r'^heat/batch-delete/$', heat_view.delete_heats),
     url(r'^heat/deleteheat/$', heat_view.delete_heat),
     url(r'^heat/update/$', heat_view.update_heat),
+]
+
+urlpatterns += [
+    url(r'^paramset/$', paramset_view.list_kv),
+    url(r'^paramset/create/$', paramset_view.create_kv),
+    url(r'^paramset/update/$', paramset_view.update_kv),
+    url(r'^paramset/batch-delete/$', paramset_view.delete_kvs),
 ]

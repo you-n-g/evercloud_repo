@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'biz.templatemanager',
     'biz.snapshot',
     'biz.ceilometer',
+    'biz.paramset',
 ]
 
 MIDDLEWARE_CLASSES = (
@@ -307,3 +308,6 @@ MONITOR_NETWORK = ""
 FLAT = False 
 
 GPU = "gpu:1"
+
+ETCD_IP = "192.168.1.115"
+ETCD_PORT = 2379

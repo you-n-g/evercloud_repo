@@ -270,6 +270,7 @@
     "loadbalancer": "Load Balancer",
     "topology":"Network Topology",
     "op_log": "Operation Log",
+    "paramset": "Param Set",
     "monitor": "Monitor",
     "support": "Support",
     "contract": "Contract",
@@ -360,7 +361,16 @@
     "data_center": "Openstack Cluster",
     "date_range": "Date Range"
   },
-
+  "paramset": {
+    "key": "Key",
+    "value": "Value",
+    "add_param_title": "Add Param",
+    "update_param_title": "Update Param",
+    "add_name_key": "Key",
+    "add_name_value": "Value",
+    "key_is_used": "Key is used",
+    "confirm_delete": "Confirm Delete?"
+  },
   "management": {
     "overview": {
       "summary": "Summary",

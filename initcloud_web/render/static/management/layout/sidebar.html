@@ -33,7 +33,7 @@
                     <span class="selected"></span></a>
                 </li>
                <!--
-                <li id="contract" 
+                <li id="contract"
                      data-ng-if="current_user.system">
                     <a href="#/contract/">
                         <i class="fa fa-file-word-o"></i>
@@ -60,14 +60,21 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li id="op_log"
-                    >
+                <li id="op_log">
                     <a href="#/operation/">
                         <i class="fa fa-pencil-square-o"></i>
                         <span class="title">
                             {[{ 'sidebar.op_log' | i18next }]}
                         </span>
                     <span class="selected"></span></a>
+                </li>
+                <li id="param_set">
+                   <a href="#/paramset/">
+                       <i class="fa fa-pencil-square-o"></i>
+                       <span class="title">
+                           {[{ 'sidebar.param_set' | i18next }]}
+                       </span>
+                       <span class="selected"></span></a>
                 </li>
             </ul>
         </li>
@@ -182,7 +189,7 @@
           </li>
           </ul>
          </li>
-        
+
         <li class="">
             <a href="javascript:;">
                 <i class="fa fa-file-text-o"></i>
@@ -230,7 +237,7 @@
                -->
             </ul>
         </li>
-        
+
         <li class="" data-ng-if-start="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-ban"></i>
@@ -265,7 +272,7 @@
                 </li>
             </ul>
         </li>
-        
+
         <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-flag fa-circle"></i>
