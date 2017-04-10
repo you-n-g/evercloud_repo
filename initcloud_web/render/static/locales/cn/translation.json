@@ -1073,9 +1073,10 @@
       "all_security_level": {
           "mimi": "秘密",
           "jimi": "机密",
-          "setting": "正在设置",
-          "mimi_fail": "秘密(设为机密失败)"
-      }
+          "setting": "正在设置"
+      },
+      "fail_to_set_jimi": "设为机密失败",
+      "success_to_set_jimi": "设为机密成功"
 },
   "heat":{
     "name": "租户名称",

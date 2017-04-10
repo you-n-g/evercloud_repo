@@ -80,7 +80,7 @@ def set_wallpaper(instance, host_list, wallpaper):
             Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)                                                  
             LOG.info("Set wallpaper successfully")                                                                                      
         else:                                                                                                                           
-            Instance.objects.filter(id=instance.id).update(security_cls=Instance.MIMI_FAIL)                                             
+            Instance.objects.filter(id=instance.id).update(security_cls=Instance.MIMI)                                             
             LOG.info("Fail to set wallpaper")      
         LOG.info("---set wallpaper---: finish task")
     except Exception, e:

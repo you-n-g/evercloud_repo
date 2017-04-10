@@ -436,9 +436,13 @@ CloudApp.controller('InstancemanageController',
                             var trace_status = function (ins, pro) {
                               CommonHttpService.get('/api/instances/sec_status?vm='+ins.id).then(function(data) {
                                 ins.security_cls = data.status;
-                                if(data.status == 0 || data.status == 1 || data.status == 3){
+                                if(data.status == 0 || data.status == 1){
                                   $interval.cancel(pro)
                                   $scope.instancemanage_table.reload();
+                                  if (data.status == 0)
+                                    ToastrService.error($i18next("instancemanage.fail_to_set_jimi"));
+                                  else
+                                    ToastrService.success($i18next("instancemanage.success_to_set_jimi"));
                                 }
                               })
                             }
