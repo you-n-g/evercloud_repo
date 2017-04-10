@@ -22,7 +22,6 @@ for i in range(25):
 
 class VDStatusList(generics.ListAPIView):
     # queryset = data
-    permission_classes = (IsSystemUser,)
     serializer_class = VDStatusSerializer
     pagination_class = PagePagination
     

@@ -518,6 +518,7 @@ urlpatterns += [
 #heat
 urlpatterns += [
     url(r'^heat/$', heat_view.HeatList.as_view()),
+    url(r'^post_test/$', instance_view.post_test),
     url(r'^heat/create/$', heat_view.create_heat),
     url(r'^heat/details/(?P<tenant_id>[^/]+)/$', heat_view.detail.as_view()),
     url(r'^heat/batch-delete/$', heat_view.delete_heats),

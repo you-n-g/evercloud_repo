@@ -63,11 +63,15 @@ def list_view(request):
 
         if not system and not security and not audit:
             member = True
+    """
     if system:
         floatings = Floating.objects.filter(deleted=False)
         serializer = FloatingSerializer(floatings, many=True)
         return Response(serializer.data)
-
+    """
+    floatings = Floating.objects.filter(deleted=False)
+    serializer = FloatingSerializer(floatings, many=True)
+    return Response(serializer.data)
     floatings = Floating.objects.filter(user=request.user,
                                         user_data_center=request.session["UDC_ID"],
                                         deleted=False)
