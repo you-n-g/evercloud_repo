@@ -33,11 +33,15 @@ def get_installed_software(addr):
 def install_software(ids, addrs, softwares):
     try:
         LOG.info("---install_software---: start task")
-        mgr.install_software(softwares, addrs)
+        ret = mgr.install_software(softwares, addrs)
         # Change the log's status to install OK/Err in autitor DB
         # time.sleep(5)
+        if ret:
+            new_state = 'setup_ok'
+        else:
+            new_state = 'error'
         for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state='setup_ok')
+            VirDesktopAction.objects.filter(id=vm).update(state=new_state)
         LOG.info("---install_software---: finish task")
     except Exception, e:
         LOG.info("---install_software---: %s" % e)
@@ -50,11 +54,15 @@ def install_software(ids, addrs, softwares):
 def uninstall_software(ids, addrs, softwares):
     try:
         LOG.info("---uninstall_software---: start task")
-        mgr.uninstall_software(softwares, addrs)
+        ret = mgr.uninstall_software(softwares, addrs)
         # Change the log's status to uninstall OK/Err in autitor DB
         # time.sleep(5)
+        if ret:
+            new_state = 'remove_ok'
+        else:
+            new_state = 'error'
         for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state='remove_ok')
+            VirDesktopAction.objects.filter(id=vm).update(state=new_state)
         LOG.info("---uninstall_software---: finish task")
     except Exception, e:
         LOG.info("---uninstall_software---: %s" % e)
@@ -67,8 +75,13 @@ def uninstall_software(ids, addrs, softwares):
 def set_wallpaper(instance, host_list, wallpaper):
     try:
         LOG.info("---set wallpaper---: start task")
-        mgr.set_wallpaper(host_list, wallpaper)
-        Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)
+        ret = mgr.set_wallpaper(host_list, wallpaper)                                                                                   
+        if ret:                                                                                                                         
+            Instance.objects.filter(id=instance.id).update(security_cls=Instance.JIMI)                                                  
+            LOG.info("Set wallpaper successfully")                                                                                      
+        else:                                                                                                                           
+            Instance.objects.filter(id=instance.id).update(security_cls=Instance.MIMI)                                             
+            LOG.info("Fail to set wallpaper")      
         LOG.info("---set wallpaper---: finish task")
     except Exception, e:
         LOG.info("---set wallpaper---: %s" % e)

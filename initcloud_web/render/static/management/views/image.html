@@ -6,11 +6,11 @@
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="image_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
-                    <a class="btn btn-primary" href="#" ng-click="create()" role="button">
+                    <a class="btn btn-primary" href="#" ng-click="create()" role="button" data-ng-if="current_user.system">
                         <i class="fa fa-plus"></i>
                         {[{ 'action.create' | i18next }]}
                     </a>
-                    <a class="btn btn-danger" ng-click="batchDelete()"
+                    <a class="btn btn-danger" ng-click="batchDelete()" data-ng-if="current_user.system"
                        ng-class="{disabled: checkboxGroup.noneChecked()}">
                         <i class="fa fa-trash"></i>
                         {[{ 'action.batch_delete' | i18next }]}
@@ -35,7 +35,7 @@
                                 <td data-title="'image.disk_size' | i18next"> {[{ image.disk_size }]} GB </td>
                                 <td data-title="'image.uuid' | i18next">{[{ image.uuid }]}</td>
                                 <td data-title="'image.data_center' | i18next"> {[{ image.data_center_name }]}</td>
-                                <td data-title="'actions' | i18next">
+                                <td data-title="'actions' | i18next" data-ng-if="current_user.system">
                                     <div class="btn-group">
                                         <button class="btn btn-default"
                                                 type="button" ng-click="edit(image)">

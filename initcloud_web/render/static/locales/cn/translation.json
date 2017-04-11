@@ -358,6 +358,7 @@
     "lbaas":"负载均衡",
     "topology":"网络拓扑",
     "op_log": "操作日志",
+    "param_set": "参数设置",
     "monitor": "监控报警",
     "support": "工单支持",
     "contract": "合同",
@@ -474,7 +475,16 @@
     "data_center": "openstack集群",
     "date_range": "时间段"
   },
-
+  "paramset": {
+    "key": "Key",
+    "value": "Value",
+    "add_param_title": "添加参数",
+    "update_param_title": "更新参数",
+    "add_name_key": "Key",
+    "add_name_value": "Value",
+    "key_is_used": "Key值已存在",
+    "confirm_delete": "确认删除"
+  },
   "management": {
     "overview": {
       "summary": "概要",
@@ -885,7 +895,8 @@
     "removing": "正在卸载",
     "setup_ok": "安装完成",
     "remove_ok": "卸载完成",
-    "error": "错误"
+    "error": "错误",
+    "fail_get_soft_list": "获取软件列表失败，请稍后再试"
   },
 
   "supercode": {
@@ -1073,7 +1084,9 @@
           "mimi": "秘密",
           "jimi": "机密",
           "setting": "正在设置"
-      }
+      },
+      "fail_to_set_jimi": "设为机密失败",
+      "success_to_set_jimi": "设为机密成功"
 },
   "heat":{
     "name": "租户名称",

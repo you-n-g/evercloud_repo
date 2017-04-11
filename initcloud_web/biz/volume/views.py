@@ -76,6 +76,8 @@ def volume_list_view_by_instance(request):
 
     data = request.data
     LOG.info("**** data is ****" + str(data))
+    instance_id = request.query_params.get('uid', None)
+    LOG.info("*** instance_id is ***" + str(instance_id))
     if data.get('instance_id') is not None:
         volume_set = Volume.objects.filter(
             deleted=False,
@@ -84,9 +86,9 @@ def volume_list_view_by_instance(request):
         serializer = VolumeSerializer(volume_set, many=True)
         return Response(serializer.data)
     else:
+        instance = Instance.objects.get(pk=int(instance_id))
         volume_set = Volume.objects.filter(
-            deleted=False, user=request.user,
-            user_data_center=request.session["UDC_ID"],
+            deleted=False, user_id=instance.assigneduser_id,
             status=VOLUME_STATE_AVAILABLE)
         serializer = VolumeSerializer(volume_set, many=True)
         return Response(serializer.data)

@@ -24,8 +24,7 @@
                 <span class="arrow"></span>
             </a>
             <ul class="sub-menu">
-                <li id="sddc"
-                    data-ng-if="current_user.system">
+                <li id="sddc" data-ng-if="current_user.system">
                     <a href="#/data-center/">
                         <i class="fa fa-building"></i>
                         <span class="title">
@@ -34,7 +33,7 @@
                     <span class="selected"></span></a>
                 </li>
                <!--
-                <li id="contract" 
+                <li id="contract"
                      data-ng-if="current_user.system">
                     <a href="#/contract/">
                         <i class="fa fa-file-word-o"></i>
@@ -61,14 +60,21 @@
                         </span>
                     <span class="selected"></span></a>
                 </li>
-                <li id="op_log"
-                    >
+                <li id="op_log">
                     <a href="#/operation/">
                         <i class="fa fa-pencil-square-o"></i>
                         <span class="title">
                             {[{ 'sidebar.op_log' | i18next }]}
                         </span>
                     <span class="selected"></span></a>
+                </li>
+                <li id="param_set">
+                   <a href="#/paramset/">
+                       <i class="fa fa-pencil-square-o"></i>
+                       <span class="title">
+                           {[{ 'sidebar.param_set' | i18next }]}
+                       </span>
+                       <span class="selected"></span></a>
                 </li>
             </ul>
         </li>
@@ -183,7 +189,7 @@
           </li>
           </ul>
          </li>
-        
+
         <li class="">
             <a href="javascript:;">
                 <i class="fa fa-file-text-o"></i>
@@ -231,49 +237,14 @@
                -->
             </ul>
         </li>
-        
-        <li class="" data-ng-if-start="current_user.is_safety_user">
+
+        <li class="" data-ng-if-start="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-ban"></i>
                 <span class="title">{[{ 'sidebar.authority_management' | i18next }]}</span>
                 <span class="arrow"></span>
             </a>
             <ul class="sub-menu">
-                <!--
-                <li>
-                    <a href="#/roles/"
-                    data-ng-if="current_user.is_safety_user">
-                        <i class="fa fa-ban"></i>
-                        <span class="title">
-                            {[{ 'sidebar.role' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-                <li>
-                    <a href="#/policy_nova/">
-                        <i class="fa fa-lock"></i>
-                        <span class="title">
-                            {[{ 'sidebar.policy_nova' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-                <li>
-                    <a href="#/policy_neutron/">
-                        <i class="fa fa-stethoscope"></i>
-                        <span class="title">
-                            {[{ 'sidebar.policy_neutron' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-                <li>
-                    <a href="#/policy_cinder/">
-                        <i class="fa fa-list"></i>
-                        <span class="title">
-                            {[{ 'sidebar.policy_cinder' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-                -->
                 <li>
                     <a href="#/supercode/">
                         <i class="fa fa-key"></i>
@@ -284,27 +255,7 @@
                 </li>
             </ul>
         </li>
-
-        <!--
-        <li class="" data-ng-if="current_user.is_system_user">
-            <a href="javascript:;">
-                <i class="fa fa-signal"></i>
-                <span class="title">{[{ 'sidebar.heat' | i18next }]}</span>
-                <span class="arrow"></span>
-            </a>
-            <ul class="sub-menu">
-                <li>
-                    <a href="#/heat/">
-                        <i class="fa fa-signal"></i>
-                        <span class="title">
-                            {[{ 'sidebar.heat' | i18next }]}
-                        </span>
-                    <span class="selected"></span></a>
-                </li>
-            </ul>
-        </li>
-        -->
-        <li class="" data-ng-if="current_user.system">
+        <li class="" >
             <a href="javascript:;">
                 <i class="fa fa-signal"></i>
                 <span class="title">{[{ 'sidebar.vd' | i18next }]}</span>
@@ -321,7 +272,7 @@
                 </li>
             </ul>
         </li>
-        
+
         <li class="" data-ng-if="current_user.system">
             <a href="javascript:;">
                 <i class="fa fa-flag fa-circle"></i>

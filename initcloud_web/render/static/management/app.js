@@ -1,5 +1,5 @@
 /**
- * Created by yangdongdong 
+ * Created by yangdongdong
  * Author: ydd322@gmail.com
  * Date: 2015-05-04
  * Description: Main Cloud App
@@ -7,7 +7,7 @@
 
 'use strict';
 
-function template(name){
+function template(name) {
     return "/static/management/views/" + name + ".html";
 }
 /* Cloud App */
@@ -48,7 +48,7 @@ CloudApp.config(['$interpolateProvider', function ($interpolateProvider) {
     $interpolateProvider.endSymbol("}]}");
 }]);
 
-CloudApp.config(['$httpProvider', function($httpProvider){
+CloudApp.config(['$httpProvider', function ($httpProvider) {
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Request-Width'];
     $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
@@ -60,10 +60,10 @@ CloudApp.config(['$ocLazyLoadProvider', function ($ocLazyLoadProvider) {
 }]);
 CloudApp.config(['$compileProvider', function ($compileProvider) {
 
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|spicevm):/);
-        // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
-        //         //         //     }
-                               }]);
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|spicevm):/);
+    // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
+    //         //         //     }
+}]);
 
 /* Setup App Main Controller */
 CloudApp.controller('AppController', ['$scope', '$rootScope', function ($scope, $rootScope) {
@@ -87,7 +87,7 @@ CloudApp.controller('HeaderController', ['$rootScope', '$scope', '$http', 'UserP
         });
 
         $scope.UserProfileService = UserProfileService;
-}]);
+    }]);
 
 /* Setup Layout Part - Sidebar */
 CloudApp.controller('SidebarController', ['$scope', function ($scope) {
@@ -106,11 +106,11 @@ CloudApp.controller('FooterController', ['$scope', function ($scope) {
 
 /* Setup Rounting For All Pages */
 CloudApp.config(['$stateProvider', '$urlRouterProvider',
-    function ($stateProvider, $urlRouterProvider,$stateParams) {
+    function ($stateProvider, $urlRouterProvider, $stateParams) {
         $urlRouterProvider.otherwise("/overview/");
 
         $stateProvider
-            // Overview
+        // Overview
             .state('overview', {
                 url: "/overview/",
                 templateUrl: template('overview'),
@@ -128,14 +128,14 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                             ]
                         });
                     }],
-                    summary: function(CommonHttpService){
+                    summary: function (CommonHttpService) {
                         return CommonHttpService.get("/api/management-summary/");
                     }
                 }
             })
 
-	    //floating_ip
-	    .state("floating", {
+            //floating_ip
+            .state("floating", {
                 url: "/floating/",
                 templateUrl: "/static/management/views/floating.html",
                 data: {pageTitle: 'FloatingIP'},
@@ -158,8 +158,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
             })
 
 
-	    //volume
-	    .state("volume", {
+            //volume
+            .state("volume", {
                 url: "/volume/",
                 templateUrl: "/static/management/views/volume.html",
                 data: {pageTitle: 'Volume'},
@@ -177,7 +177,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-          .state("networkmanager", {
+            .state("networkmanager", {
                 url: "/networkmanager/",
                 templateUrl: "/static/management/views/networkmanager.html",
                 data: {pageTitle: 'Networkmanager'},
@@ -195,8 +195,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-	    //snapshot
-	    .state("snapshot", {
+            //snapshot
+            .state("snapshot", {
                 url: "/snapshot/",
                 templateUrl: "/static/management/views/snapshot.html",
                 data: {pageTitle: 'Snapshot'},
@@ -214,8 +214,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-	  //ceilometer
-          .state("ceilometer", {
+            //ceilometer
+            .state("ceilometer", {
                 url: "/ceilometer/",
                 templateUrl: "/static/management/views/monitor.html",
                 data: {pageTitle: 'Ceilometer'},
@@ -232,7 +232,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                     }]
                 }
             })
-          .state("initcloud_log", {
+            .state("initcloud_log", {
                 url: "/initcloud_log/",
                 templateUrl: "/static/management/views/log_monitor.html",
                 data: {pageTitle: 'initcloud_log'},
@@ -326,8 +326,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                     }]
                 }
             })
-	    //instance detail
-	    //use cloud function
+            //instance detail
+            //use cloud function
             .state("instance_detail", {
                 url: "/instance-detail/:instance_id/",
                 templateUrl: "/static/cloud/views/instance_detail.html",
@@ -412,6 +412,24 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                     }]
                 }
             })
+            //param set
+            .state("paramset", {
+                url: "/paramset/",
+                templateUrl: "/static/management/views/paramset.html",
+                data: {pageTitle: 'Paramset'},
+                controller: "ParamsetController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/paramset_ctl.js'
+                            ]
+                        });
+                    }]
+                }
+            })
 
             // user
             .state("user", {
@@ -474,7 +492,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
             //update start
-            
+
             // roles 
             .state("roles", {
                 url: "/roles/",
@@ -494,8 +512,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-          //policy_cinder
-          .state("policy_cinder", {
+            //policy_cinder
+            .state("policy_cinder", {
                 url: "/policy_cinder/",
                 templateUrl: "/static/management/views/policy_cinder.html",
                 data: {pageTitle: 'Policy_Cinder'},
@@ -513,8 +531,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-          //policy_neutron
-          .state("policy_neutron", {
+            //policy_neutron
+            .state("policy_neutron", {
                 url: "/policy_neutron/",
                 templateUrl: "/static/management/views/policy_neutron.html",
                 data: {pageTitle: 'Policy_Neutron'},
@@ -534,8 +552,8 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
 
 
 
-          //policy_nova
-          .state("policy_nova", {
+            //policy_nova
+            .state("policy_nova", {
                 url: "/policy_nova/",
                 templateUrl: "/static/management/views/policy_nova.html",
                 data: {pageTitle: 'Policy_Nova'},
@@ -553,27 +571,27 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-          // supercode
-          .state("supercode", {
-              url: "/supercode/",
-              templateUrl: "/static/management/views/supercode.html",
-              data: { pageTitle: 'SuperCode' },
-              controller: "SuperCodeController",
-              resolve: {
-                  deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-                      return $ocLazyLoad.load({
-                          name: 'CloudApp',
-                          insertBefore: '#ng_load_plugins_before',
-                          files: [
-                              '/static/management/controllers/supercode_ctrl.js'
-                          ]
-                      });
-                  }]
-              }
-          })
+            // supercode
+            .state("supercode", {
+                url: "/supercode/",
+                templateUrl: "/static/management/views/supercode.html",
+                data: {pageTitle: 'SuperCode'},
+                controller: "SuperCodeController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/supercode_ctrl.js'
+                            ]
+                        });
+                    }]
+                }
+            })
 
-          //group
-          .state("group", {
+            //group
+            .state("group", {
                 url: "/group/",
                 templateUrl: "/static/management/views/group.html",
                 data: {pageTitle: 'Group'},
@@ -592,7 +610,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
             })
 
             //update end
-            
+
             // user
             .state("notifications", {
                 url: "/notifications/",
@@ -614,21 +632,21 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
 
             // virtural desktop connection state
             .state("vdstatus", {
-              url: "/vdstatus/",
-              templateUrl: "/static/management/views/vdstatus.html",
-              data: { pageTitle: 'Connention Status' },
-              controller: "VDStatusController",
-              resolve: {
-                deps: ['$ocLazyLoad', function ($ocLazyLoad) {
-                  return $ocLazyLoad.load({
-                    name: 'CloudApp',
-                    insertBefore: '#ng_load_plugins_before',
-                    files: [
-                      '/static/management/controllers/vdstatus_ctrl.js'
-                    ]
-                  });
-                }]
-              }
+                url: "/vdstatus/",
+                templateUrl: "/static/management/views/vdstatus.html",
+                data: {pageTitle: 'Connention Status'},
+                controller: "VDStatusController",
+                resolve: {
+                    deps: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'CloudApp',
+                            insertBefore: '#ng_load_plugins_before',
+                            files: [
+                                '/static/management/controllers/vdstatus_ctrl.js'
+                            ]
+                        });
+                    }]
+                }
             })
 
 
@@ -671,7 +689,7 @@ CloudApp.config(['$stateProvider', '$urlRouterProvider',
                 }
             })
 
-          .state("templatemanager", {
+            .state("templatemanager", {
                 url: "/templatemanager/",
                 templateUrl: "/static/management/views/templatemanager.html",
                 data: {pageTitle: 'Templatemanager'},
@@ -736,21 +754,21 @@ CloudApp.run(["$rootScope", "settings", "$state", "$http", "$cookies", "$interva
         $rootScope.site_config = site_config;
         var callbacks = [];
 
-        $rootScope.executeWhenLeave = function(callback){
+        $rootScope.executeWhenLeave = function (callback) {
             callbacks.push(callback);
         };
 
-        $rootScope.setInterval = function(func, interval){
+        $rootScope.setInterval = function (func, interval) {
             var timer = $interval(func, interval);
 
-            $rootScope.executeWhenLeave(function(){
+            $rootScope.executeWhenLeave(function () {
                 $interval.cancel(timer);
             });
         };
 
         $rootScope.$on("$stateChangeStart", function (e, toState, toParams, fromState, fromParams) {
 
-            angular.forEach(callbacks, function(callback){
+            angular.forEach(callbacks, function (callback) {
                 callback();
             });
 

@@ -1,4 +1,4 @@
-#-*-coding-utf-8-*-
+# -*- coding:utf8 -*-
 
 # Author Yang
 
@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.contrib.auth.models import check_password
 
 from biz.account.settings import QUOTA_ITEM, NotificationLevel
+from biz.account.models import Operation
 from biz.instance.models import Instance, Flavor
 from biz.instance.serializer import InstanceSerializer, FlavorSerializer
 from biz.instance.utils import instance_action
@@ -222,6 +223,11 @@ def devicepolicyupdate(request):
     LOG.info(">>>>>>> request update policy: {}".format(d)) 
     res = requests.post('{}/policy'.format(settings.MGR_HTTP_ADDR), json=d, timeout=5)
     LOG.info(">>>>>>> response: {}".format(res))
+    try:
+        operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='虚拟机', resource_id=1, resource_name='权限',action="usbrole", result=1)
+        operation.save()
+    except Exception as e:
+        LOG.info(str(e))
     return Response({"success": True, "msg": _(
            'Sucess.')})
 

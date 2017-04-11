@@ -142,8 +142,7 @@ CloudApp.controller('ImageController',
                                     },
                                     async: false
                                 }
-
-                        },
+                              },
                         name: {
                             minlength: 2,
                             maxlength: 50,
@@ -156,19 +155,21 @@ CloudApp.controller('ImageController',
                                      async: false
                                }
                         },
-                        os_type: 'required',
-                        //login_name: 'required',
                         data_center: 'required',
                         disk_size: {
                             required: true,
                             digits: true
                         },
-                        os_type: 'required',
+                        os_type: 'required'
                        },
                         messages: {
+                            name: {
+                                remote: '名称重复' 
+                                //remote: "No Image Found!"
+                            },
                             uuid: {
-                                //remote: $i18next('user.uuid_is_used')
-                                remote: "ID 不存在!"
+                                remote: '镜像ID不存在!'
+                                //remote: "No Image Found!"
                             }
                         }
                 };

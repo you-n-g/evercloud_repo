@@ -14,7 +14,7 @@ DIRNAME = os.path.abspath(os.path.dirname(__file__))
 import ansible_hosts
 
 
-def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansible_hosts.py'), callback="default"):
+def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansible_hosts.sh'), callback="default"):
     # NOTICE: Here is a trick. The host we acquired must in the host list
     # everytime. However I can't get the host list in advance. So I add the
     # hosts into the host list eveytime if it doesn't exist.
@@ -177,6 +177,7 @@ def get_installed_software(hosts):
 
 # 3. 给指定虚拟机(列表)安装指定的软件(列表)
 def install_software(software_list, hosts_list):
+    res = True
     for hosts in hosts_list:
         for Product_Id in software_list:
             software = Config.get_software_from_pid(Product_Id)
@@ -193,7 +194,7 @@ def install_software(software_list, hosts_list):
             }
             if software.get("InstallArguments") is not None:
                 win_package_task['action']['args']['Arguments'] = software.get("InstallArguments")
-            execute_tasks(play_name="Installing software", tasks=[
+            res = res and (0 == execute_tasks(play_name="Installing software", tasks=[
                 {
                     "action": {
                         "module": "win_file",
@@ -213,11 +214,13 @@ def install_software(software_list, hosts_list):
                     }
                 },
                 win_package_task,
-            ], hosts=hosts)
+            ], hosts=hosts))
+    return bool(res)
 
 
 # 4. 卸载指定虚拟机的指定软件(列表)
 def uninstall_software(software_list, hosts_list):
+    res = True
     for hosts in hosts_list:
         for Product_Id in software_list:
             software = Config.get_software_from_pid(Product_Id)
@@ -235,7 +238,7 @@ def uninstall_software(software_list, hosts_list):
             }
             if software.get("UninstallArguments") is not None:
                 win_package_task['action']['args']['Arguments'] = software.get("UninstallArguments")
-            execute_tasks(play_name="Uninstalling software", tasks=[
+            res = res and (0 == execute_tasks(play_name="Uninstalling software", tasks=[
                 {
                     "action": {
                         "module": "win_file",
@@ -255,7 +258,7 @@ def uninstall_software(software_list, hosts_list):
                     }
                 },
                 win_package_task,
-            ], hosts=hosts)
+            ], hosts=hosts))
 
 def set_reg(host_list, key, value, data, state='present', datatype='string'):
     for hosts in host_list:

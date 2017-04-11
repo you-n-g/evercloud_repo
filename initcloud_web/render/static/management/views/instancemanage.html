@@ -8,7 +8,7 @@
     <div class="col-md-12">
          <div class="portlet">
             <div class="portlet-title">
-                <div class="caption font-green-sharp">
+                <div class="caption font-green-sharp" data-ng-if="current_user.system">
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="instancemanagemanage_table.reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
@@ -43,8 +43,13 @@
                                 </td>
                             <td width="100" data-title="'instancemanage.name' | i18next">
                                 <a class="btn default blue-stripe btn-xs"
-                                   data-ng-if="is_available(instancemanage)"
+                                   data-ng-if="is_available(instancemanage) && current_user.system"
                                    data-ng-click="go_detail(instancemanage)"
+                                   data-tooltip="{[{ instancemanage.id }]}">
+                                    <i class="fa fa-desktop"></i> {[{ instancemanage.name }]}
+                                </a>
+                                <a class="btn default blue-stripe btn-xs"
+                                   data-ng-if="is_available(instancemanage) && !current_user.system"
                                    data-tooltip="{[{ instancemanage.id }]}">
                                     <i class="fa fa-desktop"></i> {[{ instancemanage.name }]}
                                 </a>
@@ -90,14 +95,14 @@
                             </td>
                             <td width="160" data-title="'instance.status' | i18next">
                                 <span data-ng-if="instancemanage.isStable">
-                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
-                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/vnc-black.png">
+                                    <a href="#" data-ng-if="instancemanage.is_running && current_user.system" ng-click="instance_action(instancemanage, 'vnc_console')"><img src="/static/assets/global/img/vnc.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1 || !current_user.system" src="/static/assets/global/img/vnc-black.png">
 
-                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'spice_console')"><img src="/static/assets/global/img/spice.png"></a>
-                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/spice-black.png">
+                                    <a href="#" data-ng-if="instancemanage.is_running && current_user.system" ng-click="instance_action(instancemanage, 'spice_console')"><img src="/static/assets/global/img/spice.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1 || !current_user.system" src="/static/assets/global/img/spice-black.png">
 
-                                    <a href="#" data-ng-if="instancemanage.is_running" ng-click="instance_action(instancemanage, 'novnc_console')"><img src="/static/assets/global/img/novnc.png"></a>
-                                    <img data-ng-if="instancemanage.status != 1" src="/static/assets/global/img/novnc-black.png">
+                                    <a href="#" data-ng-if="instancemanage.is_running && current_user.system" ng-click="instance_action(instancemanage, 'novnc_console')"><img src="/static/assets/global/img/novnc.png"></a>
+                                    <img data-ng-if="instancemanage.status != 1 || !current_user.system" src="/static/assets/global/img/novnc-black.png">
 
                                     <!--
                                     <a href="spicevm:vnc:{[{instance.private_ip}]}:5900" data-ng-if="instancemanage.status == 1" ><img src="/static/assets/global/img/docker.png"></a>
@@ -120,8 +125,9 @@
                                 <span data-ng-if="instancemanage.security_cls == 0 && current_user.security">{[{'instancemanage.all_security_level.mimi' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 1 && current_user.security">{[{'instancemanage.all_security_level.jimi' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 2 && current_user.security">{[{'instancemanage.all_security_level.setting' | i18next}]}</span>
+                                <span data-ng-if="instancemanage.security_cls == 3 && current_user.security">{[{'instancemanage.all_security_level.mimi_fail' | i18next}]}</span>
                             </td>
-                                <td class="action-group" data-title="'actions' | i18next">
+                                <td class="action-group" data-title="'actions' | i18next" >
                                     <div class="btn-group">
                                         <button class="btn btn-default" data-ng-if="current_user.security"
                                                 type="button" ng-click="edit(instancemanage)">
@@ -132,7 +138,7 @@
                                                 type="button" aria-expanded="false">
                                             <i class="fa fa-angle-down"></i>
                                         </button>
-                                        <ul role="menu" class="dropdown-menu">
+                                        <ul role="menu" class="dropdown-menu" data-ng-if="current_user.system">
                                         <li data-ng-if="(instancemanage.is_poweroff || instancemanage.is_error) && is_available(instancemanage)">
                                             <a href="#" ng-click="instance_action(instancemanage, 'power_on')">
                                                 <i class="fa fa-play"></i>
@@ -224,7 +230,7 @@
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.deleteinstance' | i18next }]} </a>
                                             </li>
-                                            <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && instancemanage.security_cls==0">
+                                            <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && ( instancemanage.security_cls==0 || instancemanage.security_cls==3 )">
                                                 <a href="#" ng-click="instance_action(instancemanage, 'set_jimi')">
                                                     <i class="fa fa-play"></i>
                                                     {[{ 'instance.set_jimi' | i18next }]}

@@ -570,6 +570,13 @@ def deactivate_user(request):
     user.is_active = False
     user.save()
 
+
+    try:
+        operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource=user.username, resource_id=1, resource_name='用户',action="禁用用户", result=1)
+        operation.save()
+    except Exception as e:
+        LOG.info(str(e))
+
     return Response({"success": True, "msg": _('User has been deactivated!')},
                     status=status.HTTP_200_OK)
 
@@ -582,6 +589,12 @@ def activate_user(request):
     user.is_active = True
     user.save()
 
+
+    try:
+        operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource=user.username, resource_id=1, resource_name='用户',action="启用用户", result=1)
+        operation.save()
+    except Exception as e:
+        LOG.info(str(e))
     return Response({"success": True, "msg": _('User has been activated!')},
                     status=status.HTTP_200_OK)
 
@@ -616,6 +629,13 @@ def resetuserpassword(request):
         change_user_keystone_passwd(user_id, username, tenant_id, new_password)
     except:
         raise 
+
+
+    try:
+        operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='用户', resource_id=1, resource_name='重置密码',action="resetpassword", result=1)
+        operation.save()
+    except Exception as e:
+        LOG.info(str(e))
 
     return Response({"success": True, "msg": _(
         "Password has been changed! Please login in again.")})
@@ -980,6 +1000,13 @@ def create_user(request):
         LOG.info("tennat_id is " + str(tenant_id))
         password = request.data['password1']
         link_user_to_dc_task.delay(user, DataCenter.get_default(), tenant_id, password)
+
+
+        try:
+            operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='用户', resource_id=1, resource_name='用户',action="创建用户", result=1)
+            operation.save()
+        except Exception as e:
+            LOG.info(str(e))
     else:
 
         if 'is_resource_user' in request.data and \

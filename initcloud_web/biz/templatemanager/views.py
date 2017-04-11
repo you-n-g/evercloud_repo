@@ -333,7 +333,10 @@ def template_action(request, template_id):
             if str(data) == "OK":
                 url = settings.GLANCE_ENDPOINT
                 LOG.info(url)
-                images = glanceclient_tm(request,url).images.list()
+                try:
+                    images = glanceclient_tm(request,url, '2').images.list()
+                except Exception as e:
+                    LOG.info(str(e))
                 LOG.info("start to get images")
                 LOG.info(images)
                 for img in images:

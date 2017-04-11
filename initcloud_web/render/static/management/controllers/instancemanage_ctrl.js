@@ -300,7 +300,7 @@ CloudApp.controller('InstancemanageController',
 	var instance_volume = function (ins, action) {
 	    if (action == "attach") {
                 var volumes = null;
-                CommonHttpService.get("/api/volumes/search/").then(function (data) {
+                CommonHttpService.get("/api/volumes/search/?uid=".concat(ins.id)).then(function (data) {
                     $scope.volumes = data;
                 });
                 } else {
@@ -420,15 +420,7 @@ CloudApp.controller('InstancemanageController',
         };
 
         var instance_set_jimi = function (ins) {
-            // do_instance_action(ins, "set_jimi", need_confirm);
-            //bootbox.confirm($i18next("instance.confirm_set_jimi") + "[" + ins.name + "]", function (confirm) {
-            //    if (confirm) {
-            //        post_action(ins, "set_jimi");
-            //    }
-            //});
-            console.log("we are here!!!!");
             bootbox.confirm($i18next("instance.confirm_set_jimi") + "[" + ins.name + "]", function (confirm) {
-                console.log("we are here2!!!!");
                 if (confirm) {
 
                     var post_data = {
@@ -447,6 +439,10 @@ CloudApp.controller('InstancemanageController',
                                 if(data.status == 0 || data.status == 1){
                                   $interval.cancel(pro)
                                   $scope.instancemanage_table.reload();
+                                  if (data.status == 0)
+                                    ToastrService.error($i18next("instancemanage.fail_to_set_jimi"));
+                                  else
+                                    ToastrService.success($i18next("instancemanage.success_to_set_jimi"));
                                 }
                               })
                             }
@@ -461,29 +457,6 @@ CloudApp.controller('InstancemanageController',
                             ToastrService.error(msg, $i18next("op_failed"));
                         }
                     });
-
-                    /*
-                    ins.security_cls = 1 - ins.security_cls;
-                    CommonHttpService.post('/api/software/' + action + '/', data).then(function(data) {
-                      if(data.success) {
-                        ToastrService.success(data.msg, $i18next('success'));
-                        var trace_status = function (vm, user, pro) {
-                          CommonHttpService.get('/api/software/actionstatus?vm='+vm).then(function(data) {
-                            if(data.status == (action+'_ok') || data.status == 'error')
-                              $interval.cancel(pro)
-                            user.action_state = data.status
-                          })
-                        }
-                        for(var i = 0; i < data.ids.length; ++i) {
-                          (function(x) {
-                            var pro = $interval(function() {
-                              trace_status(data.ids[x], userlist[x], pro)
-                            }, 2000)
-                          })(i);
-                        }
-                      }
-                    });
-                    */
                 }
             });
         };

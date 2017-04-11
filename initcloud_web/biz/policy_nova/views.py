@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.contrib.auth.models import check_password
 
 from biz.account.settings import QUOTA_ITEM, NotificationLevel
-from biz.account.models import UserDataCenter
+from biz.account.models import UserDataCenter, Operation
 from biz.policy_nova.models import Policy_Nova 
 from biz.policy_nova.serializer import Policy_NovaSerializer
 from biz.policy_nova.utils import * 
@@ -333,6 +333,9 @@ def assignrole(request):
     for r in roles_split:
         r_ = r.split(":")
         roles_name.append(r_[1])
+    # system managers need admin role to create/delete encrypted disks
+    if "system" in roles_name:
+        roles_name.append("admin")
     LOG.info("******** roles are ******" + str(roles_name))
 
     # Check user has instances or not.
@@ -382,6 +385,13 @@ def assignrole(request):
             user.last_name = role
             user.save()
 
+    #user_ = request.user
+    #Operation.log(user_, obj_name=user_.name, action="分配权限", result=1)
+    try:
+        operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='用户', resource_id=1, resource_name='权限',action="asignrole", result=1)
+        operation.save() 
+    except Exception as e:
+        LOG.info(str(e))
     
     return Response(
             {'success': True, "msg": _('User role assigned successfully!')}) 

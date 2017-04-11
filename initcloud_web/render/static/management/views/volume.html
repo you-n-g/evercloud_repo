@@ -11,16 +11,16 @@
         <!-- BEGIN INSTANCE  -->
         <div class="portlet ">
             <div class="portlet-title">
-                <div class="caption font-green-sharp">
+                <div class="caption font-green-sharp" >
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="volume_table.reload()">
                         <i class="fa fa-refresh"></i>
                     </a>
                     <a class="btn btn-primary" href="#" ng-click="modal_create_volume()"
-                       role="button">
+                       role="button" data-ng-if="current_user.system">
                         <i class="fa fa-plus"></i>
                         {[{ 'volume.create_new' | i18next }]}
                     </a>
-                    <a class="btn btn-danger" ng-click="batchDelete()"
+                    <a class="btn btn-danger" ng-click="batchDelete()" data-ng-if="current_user.system"
                        ng-class="{'disabled-link disabled ': checked_count <= 0}">
                         <i class="fa fa-trash"></i>
                         {[{ 'volume.terminate' | i18next }]}
@@ -60,7 +60,7 @@
                             <td data-title="'volume.size' | i18next">{[{ volume.size }]}GB</td>
                             <td data-title="'volume.user' | i18next">{[{ volume.user_info.username }]}</td>
                             <td data-title="'create_at' | i18next">{[{ volume.create_date }]}</td>
-                            <td data-title="'actions' | i18next">
+                            <td data-title="'actions' | i18next" data-ng-if="current_user.system">
                                 <div class="btn-group">
                                     <button class="btn btn-default"
                                             type="button" ng-click="modal_update_volume(volume)">

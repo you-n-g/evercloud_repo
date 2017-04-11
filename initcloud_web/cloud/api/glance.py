@@ -32,7 +32,7 @@ from cloud.utils import functions as utils
 from cloud.utils.memoized import memoized  # noqa
 from cloud.api import base
 from keystoneclient import v2_0
-from glanceclient.v1 import client
+from glanceclient.v2 import client
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def glanceclient(request, url, version='1'):
                                 insecure=insecure, cacert=cacert)
 
 #@memoized
-def glanceclient_tm(request, url, version='1'):
+def glanceclient_tm(request, url, version):
     insecure = True#getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', True)
     cacert = None#getattr(settings, 'OPENSTACK_SSL_CACERT', None)
     #LOG.debug('glanceclient connection created using token "%s" and url "%s"'

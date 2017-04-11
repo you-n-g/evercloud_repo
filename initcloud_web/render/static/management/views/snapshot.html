@@ -43,7 +43,7 @@
                                 <td data-title="'snapshot.snapshot_name' | i18next">
                                     <span> {[{ snapshot.snapshot_name }]} </span>
                                 </td>
-                                <td data-title="'actions' | i18next">
+                                <td data-title="'actions' | i18next" data-ng-if="current_user.system">
                                     <div class="btn-group">
                                         <button class="btn btn-default"
                                                 type="button" ng-click="edit(snapshot)">

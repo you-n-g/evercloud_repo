@@ -244,6 +244,7 @@ class Operation(models.Model):
                 result=result
             )
         except Exception as e:
+            LOG.info(str(e))
             pass
 
     @property
