@@ -664,7 +664,7 @@ CloudApp.controller('InstancemanageController',
                     },
                     instancemanage: function(){return instancemanage},
                     AssignRoles: function(){
-                        return CommonHttpService.get('/api/instancemanage/devicepolicy/');
+                        return CommonHttpService.get('/api/instancemanage/devicepolicy/'+instancemanage.id);
                     }
                 }
             });

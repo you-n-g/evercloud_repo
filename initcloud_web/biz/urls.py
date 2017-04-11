@@ -127,7 +127,7 @@ urlpatterns += [
     url(r'^instancemanage/assignins/$', instance_view.instance_assign_instance),
     url(r'^instancemanage/resize/$', instance_view.instance_resize),
     url(r'^instancemanage/verify_resize/$', instance_view.instance_verify_resize),
-    url(r'^instancemanage/devicepolicy/$', instancemanage_view.InstancemanageDevicePolicy.as_view()),
+    url(r'^instancemanage/devicepolicy/(?P<pk>[0-9]+)$', instancemanage_view.InstancemanageDevicePolicy.as_view()),
     url(r'^instancemanage/devicepolicy/update/$', instancemanage_view.devicepolicyupdate),
     url(r'^instancemanage/devicepolicy/undo/$', instancemanage_view.devicepolicyundo),
     #url(r'^instancemanage/delete_instance/$', instancemanage_view.delete_instance),

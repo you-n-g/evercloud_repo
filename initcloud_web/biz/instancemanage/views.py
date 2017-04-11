@@ -103,10 +103,17 @@ class InstancemanageList(generics.ListCreateAPIView):
 
 class InstancemanageDevicePolicy(generics.ListCreateAPIView):
 
-    def list(self, request):
+    def list(self, request, pk):
         LOG.info("dddddddddd")
+        LOG.info("pk is" + str(pk))
         try:
             devicepolicy = settings.DEVICEPOLICY
+            for d in devicepolicy:
+                instance = Instance.objects.get(pk=int(pk))
+                if instance.policy:
+                    d['checked'] = True
+                else:
+                    d['checked'] = False
             LOG.info("dddddddddd")
             return Response(devicepolicy)
         except Exception as e:

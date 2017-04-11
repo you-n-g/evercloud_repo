@@ -163,13 +163,14 @@ CloudApp.controller('ImageController',
                             required: true,
                             digits: true
                         },
+                        os_type: 'required',
+                       },
                         messages: {
                             uuid: {
-                                remote: $i18next('user.uuid_is_used')
-                                //remote: "No Image Found!"
+                                //remote: $i18next('user.uuid_is_used')
+                                remote: "ID 不存在!"
                             }
                         }
-                    }
                 };
 
                 return ValidationTool.init('#imageForm', config);

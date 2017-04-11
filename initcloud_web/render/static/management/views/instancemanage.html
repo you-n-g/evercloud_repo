@@ -675,7 +675,7 @@
             <div class="form-group">
                 <tr data-ng-repeat="role in roles">
                 <td width="30" header="'checkbox-header.html'">
-                    <input type="checkbox" data-ng-model="role.checked"/>
+                    <input type="checkbox" data-ng-model="role.checked" ng-checked="{[{role.checked}]}"/>
                 </td>
                 <td data-title="'user.policy_nova' | i18next">
                     <span> {[{ role.name }]} </span>
