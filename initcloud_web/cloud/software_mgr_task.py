@@ -31,43 +31,43 @@ def get_installed_software(addr):
 
 @app.task
 def install_software(ids, addrs, softwares):
-    try:
-        LOG.info("---install_software---: start task")
-        ret = mgr.install_software(softwares, addrs)
-        # Change the log's status to install OK/Err in autitor DB
-        # time.sleep(5)
-        if ret:
-            new_state = 'setup_ok'
-        else:
-            new_state = 'error'
-        for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state=new_state)
-        LOG.info("---install_software---: finish task")
-    except Exception, e:
-        LOG.info("---install_software---: %s" % e)
-        for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state='error')
+    for aid, addr in zip(ids, addrs):
+        try:
+            LOG.info("---install_software---: start task")
+            LOG.info("softwares=%s, addr=%s" % (str(softwares), str(addr)))
+            ret = mgr.install_software(softwares, [addr])
+            # Change the log's status to install OK/Err in autitor DB
+            # time.sleep(5)
+            if ret:
+                new_state = 'setup_ok'
+            else:
+                new_state = 'error'
+            VirDesktopAction.objects.filter(id=aid).update(state=new_state)
+            LOG.info("---install_software---: finish task")
+        except Exception, e:
+            LOG.info("---install_software---: %s" % e)
+            VirDesktopAction.objects.filter(id=aid).update(state='error')
     
     return True
 
 @app.task
 def uninstall_software(ids, addrs, softwares):
-    try:
-        LOG.info("---uninstall_software---: start task")
-        ret = mgr.uninstall_software(softwares, addrs)
-        # Change the log's status to uninstall OK/Err in autitor DB
-        # time.sleep(5)
-        if ret:
-            new_state = 'remove_ok'
-        else:
-            new_state = 'error'
-        for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state=new_state)
-        LOG.info("---uninstall_software---: finish task")
-    except Exception, e:
-        LOG.info("---uninstall_software---: %s" % e)
-        for vm in ids:
-            VirDesktopAction.objects.filter(id=vm).update(state='error')
+    for aid, addr in zip(ids, addrs):
+        try:
+            LOG.info("---uninstall_software---: start task")
+            LOG.info("softwares=%s, addr=%s" % (str(softwares), str(addr)))
+            ret = mgr.uninstall_software(softwares, [addr])
+            # Change the log's status to uninstall OK/Err in autitor DB
+            # time.sleep(5)
+            if ret:
+                new_state = 'remove_ok'
+            else:
+                new_state = 'error'
+            VirDesktopAction.objects.filter(id=aid).update(state=new_state)
+            LOG.info("---uninstall_software---: finish task")
+        except Exception, e:
+            LOG.info("---uninstall_software---: %s" % e)
+            VirDesktopAction.objects.filter(id=aid).update(state='error')
     
     return True
 
