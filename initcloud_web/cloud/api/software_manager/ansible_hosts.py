@@ -8,7 +8,6 @@ from optparse import OptionParser
 import json
 import copy
 import yaml
-import logging
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
 
 from django.conf import settings
@@ -20,30 +19,42 @@ if not settings.configured:
     django.setup()
 
 
+import logging
+logging.config.dictConfig(settings.LOG_CONFIG)
 LOG = logging.getLogger(__name__)
 
 
-'''
-Here is an example of config.yml. Hosts is not necessary if you are not
-debugging software mangement module alone.
---
-ansible_ssh_user: "username"
-ansible_ssh_pass: "password"
-'''
-
-config_path = os.path.join(DIRNAME, "config.yml")
-try:
-    with open(config_path) as f:
-        config = yaml.load(f)
-except IOError:
-    LOG.warning("You didn't configure %s, please follow the instructions"
-            " of \"cloud/api/software_manager/ansible_hosts.py\" to create the"
-            "configuration.")
+if hasattr(settings, "ANSIBLE_SSH_USER") and hasattr(settings, "ANSIBLE_SSH_PASS"):
+    # We will read the config from django settings first
     config = {
-        'ansible_ssh_user': "username",
-        'ansible_ssh_pass': "password",
-        'hosts': ["192.168.1.1"]
+        'ansible_ssh_user': settings.ANSIBLE_SSH_USER,
+        'ansible_ssh_pass': settings.ANSIBLE_SSH_PASS,
     }
+    LOG.info("reading settigns from django settings....")
+else:
+    '''
+    NOTICE: If we config the ansible_ssh_user and ansible_ssh_pass in the settings, It
+    will read from the config.yml !!!!
+
+    Here is an example of config.yml. Hosts is not necessary if you are not
+    debugging software mangement module alone.
+    --
+    ansible_ssh_user: "username"
+    ansible_ssh_pass: "password"
+    '''
+    LOG.info("reading settigns from config.yml....")
+    config_path = os.path.join(DIRNAME, "config.yml")
+    try:
+        with open(config_path) as f:
+            config = yaml.load(f)
+    except IOError:
+        LOG.warning("You didn't configure %s, please follow the instructions"
+                " of \"cloud/api/software_manager/ansible_hosts.py\" to create the"
+                "configuration.")
+        config = {
+            'ansible_ssh_user': "username",
+            'ansible_ssh_pass': "password",
+        }
 
 
 

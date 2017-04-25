@@ -311,3 +311,8 @@ GPU = "gpu:1"
 
 ETCD_IP = "192.168.1.115"
 ETCD_PORT = 2379
+
+
+# Software management
+ANSIBLE_SSH_USER = "username"
+ANSIBLE_SSH_PASS = "password"
