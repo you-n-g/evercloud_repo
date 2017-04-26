@@ -131,7 +131,11 @@ def get_instance_novnc_console(instance):
 
 
 def set_instance_jimi(instance):
-    # import rpdb; rpdb.set_trace()
+    """set an instance to jimi
+
+    :param instance: the instance object
+    :rtype: return a dict to describe the operation status
+    """
     if instance.is_running and instance.public_ip and set_wallpaper.delay(instance, [instance.public_ip], "jimi"):
         instance.security_cls = Instance.SETTING
         instance.save()

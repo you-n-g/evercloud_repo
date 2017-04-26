@@ -15,6 +15,16 @@ import ansible_hosts
 
 
 def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansible_hosts.sh'), callback="default"):
+    """Execute the task
+
+    :param play_name: the name of the play(a group of task)
+    :param tasks: the diction to describe the tasks
+    :param hosts: the hosts to execute the tasks
+    :param host_list: the script to get the information of the hosts.
+    :param callback: user can pass specific callback class to collect the result.
+
+    :rtype: if the task run successfully, it will return 0. Otherwise it will return 0.
+    """
     # NOTICE: Here is a trick. The host we acquired must in the host list
     # everytime. However I can't get the host list in advance. So I add the
     # hosts into the host list eveytime if it doesn't exist.
@@ -62,6 +72,34 @@ def execute_tasks(play_name, tasks, hosts, host_list=os.path.join(DIRNAME, 'ansi
 
 
 class Config(object):
+    """Configuration and helper functions
+        
+    Attributes:
+        package_list: the configuration of the softwares
+            here is an configuration example of a msi installation package.
+            {
+                "name": "python2.7.13(x64)",  # The name of the software, it will be displayed in the frontend.
+                "filename": r'python-2.7.13.amd64.msi',  # the file name of the installation package
+                "Product_Id": "{4A656C6C-D24A-473F-9747-3A8D00907A04}", # The product id of the package. 
+                "url": 'https://www.python.org/ftp/python/2.7.13/python-2.7.13.amd64.msi',  # Here is the download url. It will only be used in `windows_helper.sh`
+            },
+            here is an configuration example of an exe installation package.
+            {
+                "name": "Microsoft Visual C thingy(x64)",  # The name of the software, it will be displayed in the frontend.
+                "filename": r'vcredist_x64.exe',  # the file name of the installation package
+                "Product_Id": "{CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}",  # The product id of the package. 
+                "InstallArguments": "/install /passive /norestart",  # The arguments used when installing the software
+                "UninstallArguments": "/uninstall /passive /norestart",  # The arguments used when uninstalling the software
+                "url": 'http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe',  # Here is the download url. It will only be used in `windows_helper.sh`
+            },
+            You can get the product id by run `Get-WmiObject -Class Win32_Product` in powershell after installation of the software
+        dest_dir: the path to upload the installation package in the virtual machine
+        package_dir: the path to store the installation package on the server run ansible
+        package_list: the configuration of softwares 
+        wallpaper_path:  the wallpaper path of the virtual machine
+        wallpaper_options: the optional wallpaper path of the virtual machine
+
+    """
     dest_dir = r'C:\\ansible\\'
     package_dir = "/root/tmp/"
     package_list = [
@@ -119,6 +157,11 @@ class Config(object):
 
     @staticmethod
     def get_software_from_pid(Product_Id):
+        """get software configuration by product id
+
+        :param Product_Id: the product id of the software.
+        :rtype the detailed software package configuration.
+        """
         for software in Config.package_list:
             if software["Product_Id"] == Product_Id:
                 return software
@@ -126,16 +169,21 @@ class Config(object):
 
     @staticmethod
     def print_package_urls():
+        """print the software download urls.
+
+        It will only be use in the windows_helper.sh
+        """
         for software in Config.package_list:
             print software['url']
 
 
 # 1. 获取可安装软件的列表
 def get_available_software():
+    """get available software configurations"""
     return Config.package_list
 
 
-# 2. 获取某个虚拟机已安装软件的列表
+# 2. 获取某个虚拟机已安装软件的列表.
 LIST_SCRIPT = '''$UninstallKey="SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
 #Create an instance of the Registry Object and open the HKLM base key
 $reg=[microsoft.win32.registrykey]::OpenRemoteBaseKey(‘LocalMachine’,$computername)
@@ -157,16 +205,32 @@ echo $regkey.GetSubKeyNames()
 
 
 class InstallResultCallback(CallbackBase):
+    """A call back class to collect the result when executing ansible tasks successfully
+    Attributes:
+        result: the return result of the tasks
+        host: the hosts where the tasks are executed.
+    """
 
     def v2_runner_on_ok(self, result, **kwargs):
+        """A hook function after executing the tasks successfully
+
+        :param result: the result
+        :param **kwargs: other arguments will not be used by this class
+        """
         self.result = result._result
         self.host = result._host
 
     def get_result(self):
+        """get the result of task"""
         return getattr(self, "result", {})
 
 
 def get_installed_software(hosts):
+    """get installed software of specific host
+
+    :param hosts: the host we are querying
+    :raises: RuntimeError when we fail to execute the task,
+    """
     callback = InstallResultCallback()
     code = execute_tasks(play_name="List installed software", tasks=[{"raw": LIST_SCRIPT}],
         hosts=hosts, callback=callback)
@@ -177,6 +241,13 @@ def get_installed_software(hosts):
 
 # 3. 给指定虚拟机(列表)安装指定的软件(列表)
 def install_software(software_list, hosts_list):
+    """install softwares for hosts
+
+    :param software_list: the softwares to be installed.
+    :param hosts_list: the hosts where the softwares are installed.
+
+    :rtype: True will be returned if softwares are installed successfully. Otherwise False will be returned.
+    """
     res = True
     for hosts in hosts_list:
         for Product_Id in software_list:
@@ -220,6 +291,13 @@ def install_software(software_list, hosts_list):
 
 # 4. 卸载指定虚拟机的指定软件(列表)
 def uninstall_software(software_list, hosts_list):
+    """uninstall softwares for hosts
+
+    :param software_list: the softwares to be uninstalled.
+    :param hosts_list: the hosts where the softwares are uninstalled.
+
+    :rtype: True will be returned if softwares are uninstalled successfully. Otherwise False will be returned.
+    """
     res = True
     for hosts in hosts_list:
         for Product_Id in software_list:
@@ -262,6 +340,19 @@ def uninstall_software(software_list, hosts_list):
     return res
 
 def set_reg(host_list, key, value, data, state='present', datatype='string'):
+    """edit the registry of the hosts
+
+    :param host_list: the hosts whose registry will be edited.
+    :param key:  Name of registry path.  Should be in one of the following
+                 registry hives: HKCC, HKCR, HKCU, HKLM, HKU.
+    :param value: Name of registry entry in path.
+    :param data:  Value of the registry entry name in path.
+    :param state: State of registry entry. present or absent
+    :param datatype: Registry value data type. 
+                    (binary , dword , expandstring , multistring , string , qword)
+
+    :rtype: True will be returned if registries are set successfully. Otherwise False will be returned.
+    """
     for hosts in host_list:
         if 0 != execute_tasks(play_name="Set Registry Key", tasks=[
             {
@@ -285,6 +376,11 @@ def set_reg(host_list, key, value, data, state='present', datatype='string'):
 
 
 def set_wallpaper(host_list, wallpaper):
+    """set wallpaper for hosts
+
+    :param host_list: the hosts to set wall paper
+    :param wallpaper:  the wall paper you want. The value can be mimi or jimi
+    """
     for hosts in host_list:
         if 0 != execute_tasks(play_name="set_wallpaper", tasks=[
             {

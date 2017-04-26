@@ -10,6 +10,8 @@ import copy
 import yaml
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
 
+
+# Config django environment values
 from django.conf import settings
 if not settings.configured:
     sys.path.append(os.path.abspath(os.path.join(DIRNAME,
@@ -58,6 +60,7 @@ else:
 
 
 
+# This is an template of hosts information
 VARS = {
     "ansible_ssh_host": None,
     "ansible_ssh_user": config["ansible_ssh_user"],
@@ -70,6 +73,10 @@ VARS = {
 
 
 def get_hosts():
+    """get the host list
+
+    :rtype: a dict contains the host list information.
+    """
     global hosts
     try:
         from biz.floating.models import Floating
@@ -89,12 +96,18 @@ hosts = get_hosts()
 
 
 def pick_host(name):
+    """pick_host
+
+    :param name: the ip address of the host
+    :rtype: the information of specific host.
+    """
     res = copy.deepcopy(VARS)
     res["ansible_ssh_host"] = name
     return res
 
 
 if __name__ == "__main__":
+    # parse the arguments of the host
     parser = OptionParser()
     parser.add_option(
         "--list",
