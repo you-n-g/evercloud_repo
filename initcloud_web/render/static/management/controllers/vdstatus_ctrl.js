@@ -1,6 +1,22 @@
 'use strict';
 
-CloudApp.controller('VDStatusController',
+CloudApp.controller('VDStatusController', 
+    /**
+     * The controller of VDStatus model
+     * @param $rootScope {Object} AngularJS' root scope object
+     * @param $scope {Object} AngularJS' scope object
+     * @param $i18next {Object} AngularJS' module for handling locale string
+     * @param $madal {Object} AngularJS' module for handling modal dialog
+     * @param lodash {Object} AngularJS' module for handling infomation load
+     * @param ngTableParams {Object} AngularJS' module for handling table
+     * @param CommonHttpService {Object} AngularJS's module for handling HTTP requests
+     * @param ToastrService {Object} AngularJS's module for handling toast
+     * @param CheckboxGroup {Object} AngularJS's module for handling group checkbox
+     * @param ngTableHelper {Object} AngularJS's module for handling table pagination
+     * @param VDStatus {Object} Resource request object for virtual desktop
+     * @param VDStatusWS {Object} Websocket operation object for virtual desktop
+     * @return void
+     */
     function ($rootScope, $scope, $i18next, $ngBootbox, $modal, lodash, ngTableParams,
               CommonHttpService, ToastrService, CheckboxGroup, ngTableHelper, VDStatus, VDStatusWS) {
 
@@ -36,6 +52,8 @@ CloudApp.controller('VDStatusController',
         console.log("Websocket error occured:", e);
       });
 
+      // Handle messages received for websocket connection
+      // TODO: Error handling
       VDStatusWS.onMessage(function(msgEvt) {
         console.log(msgEvt);
         var new_user = true,
@@ -52,7 +70,6 @@ CloudApp.controller('VDStatusController',
             var msg = $i18next('vir_desktop.user') + data.user + $i18next('vir_desktop.do_offline');
             ToastrService.success(msg);
           }
-          // $scope.status[i].online = data.online;
 
           // VM status change
           if($scope.status[i].vm == null && data.vm != null) {
@@ -62,7 +79,6 @@ CloudApp.controller('VDStatusController',
             var msg = $i18next('vir_desktop.user') + data.user + $i18next('vir_desktop.disconn_desktop') + $scope.status[i].vm;
             ToastrService.success(msg);
           }
-          // $scope.status[i].vm = data.vm;
           $scope.status[i] = data
 
           new_user = false;
@@ -76,6 +92,14 @@ CloudApp.controller('VDStatusController',
         } 
       });
 
+      /**
+       * Action button's controller function which will 
+       * send a message through websocket connection.
+       * @param user {String} user ID
+       * @param vm {String} virtual desktop's ID
+       * @param action {String} which action, e.g. 'disconnect'
+       * @return void
+       */
       $scope.takeAction = function(user, vm, action) {
         VDStatusWS.send(JSON.stringify({
           user: user,
@@ -84,6 +108,12 @@ CloudApp.controller('VDStatusController',
         }));
       };
 
+      /**
+       * Action button's controller function which will 
+       * open a software install modal dialog.
+       * @param userlist {Array} the array of user ID
+       * @return void
+       */
       $scope.openSoftwareSetupModal = function(userlist) {
         $modal.open({
           templateUrl: 'softwareconf.html',
@@ -103,6 +133,12 @@ CloudApp.controller('VDStatusController',
         });
       };
 
+      /**
+       * Action button's controller function which will 
+       * open a software uninstall modal dialog.
+       * @param userlist {Array} the array of user ID
+       * @return void
+       */
       $scope.openSoftwareRemoveModal = function(userlist) {
         $modal.open({
           templateUrl: 'softwareconf.html',
@@ -124,6 +160,19 @@ CloudApp.controller('VDStatusController',
     }
 )
 
+/**
+ * The controller of modal dialog
+ * @param $scope {Object} AngularJS' scope object
+ * @param $modalInstance {Object} AngularJS' module for handling modal dialog
+ * @param $i18next {Object} AngularJS' module for handling locale string
+ * @param $interval {Object} AngularJS' module for handling interval tasks
+ * @param CommonHttpService {Object} AngularJS's module for handling HTTP requests
+ * @param ToastrService {Object} AngularJS's module for handling toast
+ * @param CheckboxGroup {Object} AngularJS's module for handling group checkbox
+ * @param userlist {Array} Array of user ID
+ * @param action {String} Which action, 'setup' or 'remove'
+ * @return void
+ */
 .controller('SoftwareController', function($scope, $modalInstance, $i18next, $interval,
     CommonHttpService, ToastrService, CheckboxGroup, userlist, action) {
       $scope.userlist = userlist;
@@ -139,6 +188,11 @@ CloudApp.controller('VDStatusController',
       $scope.loading = true;
 
       $scope.is_submitting = false;
+      /**
+       * Action button's controller function which will 
+       * send a HTTP request to execute actions.
+       * @return void
+       */
       $scope.commit = function() {
         var users = [],
           vms = [],
@@ -184,24 +238,14 @@ CloudApp.controller('VDStatusController',
     }
 )
 
-// TODO: Remove
-// .controller('SoftwareRemoveController', function($scope, $modalInstance, $i18next, 
-    // CommonHttpService, ToastrService, CheckboxGroup, userlist) {
-      // $scope.userlist = userlist;
-      // $scope.softwares = [];
-      // var checkboxGroup = $scope.checkboxGroup = CheckboxGroup.init($scope.softwares);
-      // // TODO: initialize softwares
-      // $scope.is_submitting = false;
-      // $scope.commit = function() {
-        // // TODO: call the API
-      // };
-      // $scope.cancel = $modalInstance.dismiss;
-    // }
-// )
-
+/**
+ * The factory method for initializing a websocket instance
+ * @param $websocket {Object} AngularJS's module for handling websocket
+ * @return ws {Object} An instance of AngularJS's websocket module 
+ */
 .factory('VDStatusWS', function($websocket) {
+  // MGR_WS_ADDR is configured at settings.py
   var ws = $websocket(MGR_WS_ADDR);
-  /* MGR_WS_ADDR = "ws://192.168.161.9:8893/ws", */
     
   return ws;
 });
