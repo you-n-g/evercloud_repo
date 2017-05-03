@@ -8,7 +8,7 @@
                 {[{ 'floatingIP.page_desc' | i18next }]}
             </p>
         </div>
-        <!-- BEGIN INSTANCE  -->
+        <!-- BEGIN CONTENT  -->
         <div class="portlet">
             <div class="portlet-title">
                 <div class="caption font-green-sharp">
@@ -20,11 +20,6 @@
                         <i class="fa fa-plus"></i>
                         {[{ 'floatingIP.allocate' | i18next }]}
                     </a>
-                    <!--a class="btn btn-danger" ng-click="action('release')"
-                       ng-class="{'disabled-link disabled ': checked_count <= 0}">
-                        <i class="fa fa-trash"></i>
-                        {[{ 'floatingIP.release' | i18next }]}
-                    </a-->
                 </div>
             </div>
             <div class="portlet-body">
@@ -87,7 +82,6 @@
                 </div>
             </div>
         </div>
-
         <!-- END INSTANCE  -->
     </div>
 </div>
@@ -190,7 +184,7 @@
     </div>
 </script>
 
-
+<!--  changeBandwidth --->
 <script type="text/ng-template" id="changeBandwidth.html">
     <div class="modal-header ">
         <a class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()"></a>

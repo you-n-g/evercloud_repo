@@ -3,6 +3,7 @@
         <div class="form-group">
             <label class="col-md-2 control-label">CPU</label>
             <div class="col-md-10">
+                 <!-- cpu选择  -->
                 <div class="input-group">
                     <button ng-repeat="vcpu in cpu_list" class="btn btn-default" type="button"
                             ng-class="{'btn-primary': instance_config.vcpu == vcpu}"
@@ -16,6 +17,7 @@
          <div class="form-group">
             <label class="col-md-2 control-label">多核</label>
             <div class="col-md-10">
+                <!-- core选择  -->
                 <div class="input-group">
                     <button ng-repeat="core in core_list" class="btn btn-default" type="button"
                             ng-class="{'btn-primary': instance_config.core == core}"
@@ -27,6 +29,7 @@
             </div>
         </div>
          <div class="form-group">
+                <!-- socket选择  -->
             <label class="col-md-2 control-label">多路</label>
             <div class="col-md-10">
                 <div class="input-group">
@@ -58,12 +61,14 @@
         <div class="form-group">
             <label class="col-md-2 control-label">{[{ 'instance.os_disk' | i18next }]}</label>
 
+                <!--disk选择  -->
             <div class="col-md-10">
                 <div class="note note-info" style="margin-bottom: 0px;">
                     <strong>{[{ instance_config.select_image.disk_size }]}GB {[{'instance.os_disk_free' | i18next }]}</strong>
                 </div>
             </div>
         </div>
+        <!-- GPU支持 -->
         <div class="form-group">
             <label class="col-md-2 control-label">{[{ 'instance.GPU' | i18next }]}</label>
             <div class="col-md-10">
@@ -71,56 +76,6 @@
                 </div>
             </div>
         </div>
-
-        <!--
-        <div class="form-group">
-            <label class="col-md-2 control-label">{[{ 'instance.network' | i18next }]}</label>
-
-            <div class="col-md-10">
-                <select class="form-control" data-ng-if="network_list.length > 0"
-                        ng-options="network as network.name for network in network_list"
-                        ng-model="instance_config.network">
-                </select>
-
-                <div class="note note-warning" data-ng-if="network_list.length <= 0">
-                    <strong> {[{ 'instance.default_network_alert' | i18next }]}</strong>
-                </div>
-            </div>
-        </div>
-        -->
-        <!--
-        <div class="form-group">
-            <label class="col-md-2 control-label">{[{ 'billing.pay_type' | i18next }]}</label>
-            <div class="col-md-3">
-                <select name="pay_type" class="form-control"
-                        data-ng-model="instance_config.pay_type"
-                        data-ng-click="instance_config.pay_num=1"
-                        disabled>
-                    <option value="year">{[{ 'billing.pay_type_year' | i18next }]}</option>
-                    <option value="month">{[{ 'billing.pay_type_month' | i18next }]}</option>
-                    <option value="hour">{[{ 'billing.pay_type_hour' | i18next }]}</option>
-                </select>
-            </div>
-            <div class="col-md-3" data-ng-if="instance_config.pay_type != 'hour'">
-                <input name="pay_quantity" class="form-control"
-                        data-ng-model="instance_config.pay_num"
-                        data-rule-required="true"
-                        data-rule-digits="true"
-                        data-rule-min="1">
-            </div>
-          -->
-            <!--
-            <div class="col-md-3" data-ng-if="instance_config.pay_type == 'month'">
-                <select name="pay_quantity" class="form-control"
-                        data-ng-model="instance_config.pay_num"
-                        data-ng-options="opt.value as opt.label for opt in month_options"> </select>
-            </div>
-            <div class="col-md-3" data-ng-if="instance_config.pay_type == 'year'">
-                <select name="pay_quantity" class="form-control"
-                        data-ng-model="instance_config.pay_num"
-                        data-ng-options="opt.value as opt.label for opt in year_options"> </select>
-            </div>
-            -->
         </div>
 
     </div>

@@ -10,19 +10,23 @@
                 <form action="/api/instances/" class="form-horizontal" id="submit_form" method="POST">
                     <div class="form-wizard">
                         <div class="form-body">
+                            <!-- 步骤定义 -->
                             <ul class="nav nav-pills nav-justified steps" style="margin-bottom: 0px;">
+                                <!-- 第一步：选择镜像 -->
                                 <li>
                                     <a href="#tab1" data-toggle="tab" class="step">
                                         <span class="number">1</span>
                                         <span class="desc"><i class="fa fa-check"></i> {[{ "instance.image" | i18next }]} </span>
                                     </a>
                                 </li>
+                                <!-- 第二步：设置云主机规格 -->
                                 <li>
                                     <a href="#tab2" data-toggle="tab" class="step">
                                         <span class="number">2</span>
                                         <span class="desc"><i class="fa fa-check"></i> {[{ "instance.flavor" | i18next }]} </span>
                                     </a>
                                 </li>
+                                <!-- 第三步：用户自定义 -->
                                 <li>
                                     <a href="#tab3" data-toggle="tab" class="step">
                                         <span class="number">3 </span>
@@ -72,6 +76,7 @@
         </div>
     </div>
     <div class="col-md-4" style="padding-left:0px;">
+        <!-- 右侧部分展示 -->
         <div class="portlet box blue-chambray"
              style="border-left-style: none;border-bottom-style: none;border-right-style:none; margin-bottom: 0px;">
             <div class="portlet-title">

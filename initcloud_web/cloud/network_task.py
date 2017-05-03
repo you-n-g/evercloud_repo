@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 
 
 
-# We try to get default private netwok.
+# Logic: first we try to query network info in openstack and create a new network,including router if not existing. 
 def make_sure_default_private_network(instance, rc, user_tenant_uuid):
     network = None
     try:
@@ -92,12 +92,12 @@ def make_sure_default_private_network(instance, rc, user_tenant_uuid):
                         subnet_name = s.name
                         subnet_id = s.id
                         subnet_addr = s.cidr
-                LOG.info("********* network_id is *********" + str(network_id))
-                LOG.info("********* network_name is *********" + str(network_name))
-                LOG.info("********* network_status is *********" + str(network_status))
-                LOG.info("********* subnet_id is *********" + str(subnet_id))
-                LOG.info("********* subnet_name is *********" + str(subnet_name))
-                LOG.info("********* subnet_addr is *********" + str(subnet_addr))
+                LOG.debug("********* network_id is *********" + str(network_id))
+                LOG.debug("********* network_name is *********" + str(network_name))
+                LOG.debug("********* network_status is *********" + str(network_status))
+                LOG.debug("********* subnet_id is *********" + str(subnet_id))
+                LOG.debug("********* subnet_name is *********" + str(subnet_name))
+                LOG.debug("********* subnet_addr is *********" + str(subnet_addr))
                 # Create Default network to initcloud
                 default_private_network = Network.objects.create(
                     name=network_name, network_id=network_id, status=network_status,
@@ -313,25 +313,6 @@ def make_sure_default_private_network(instance, rc, user_tenant_uuid):
                             user_data_center=instance.user_data_center)
 
 
-                        """
-                        create_subnet(default_private_subnet)
-
-                        routers = neutron.router_list(rc, tenant_id=user_tenant_uuid)
-                        
-
-                        neutron_subnet_id = None
-                        for r in routers:
-                            LOG.info("*** router is ***" + str(r))
-                            external_gateway_info = r.external_gateway_info
-                            LOG.info("*** external_gateway_info is ***" + str(external_gateway_info))
-                            if external_gateway_info:
-                                external_fixed_ips = external_gateway_info['external_fixed_ips']
-                                if external_fixed_ips:
-                                    for fip in external_fixed_ips:
-                                        neutron_subnet_id = fip['subnet_id']
-                        LOG.info("*** neutron_subnet_id is ***" + str(neutron_subnet_id))
-
-                        """
                         default_router = Router.objects.create(
                             name=settings.DEFAULT_ROUTER_NAME, status=0, is_default=True,
                             is_gateway=settings.DEFAULT_ROUTER_AUTO_SET_GATEWAY, user=instance.user,
@@ -401,6 +382,7 @@ def make_sure_default_private_network(instance, rc, user_tenant_uuid):
         network = default_private_network
     
     # Wait for network creation complete
+    # Sync network creation
     count = 1
     while True:
         if count > settings.MAX_COUNT_SYNC:
@@ -416,6 +398,7 @@ def make_sure_default_private_network(instance, rc, user_tenant_uuid):
                 time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
                 continue
 
+            # Get network info and status
             net = neutron.network_get(rc, network.network_id)
             if net.status.upper() not in ["ACTIVE", ]:
                 time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
@@ -432,8 +415,10 @@ def make_sure_default_private_network(instance, rc, user_tenant_uuid):
     return network
 
 
+# Task: create network in openstack
 @app.task
 def create_network(network):
+    # Construct network auth info
     rc = create_rc_by_network(network)
     network_params = {'name': "network-%s" % network.id, "admin_state_up": True}
     LOG.info("Start to create network, id:[%s], name[%s]",
@@ -448,6 +433,7 @@ def create_network(network):
         LOG.info("Create network api apply [%s] seconds", \
                     (end-begin).seconds) 
         network.network_id = net.id
+        # Save network status in db
         network.status = NETWORK_STATE_ACTIVE
         network.save()
     except Exception as ex:
@@ -463,9 +449,10 @@ def create_network(network):
 
     return network
 
-
+# Task: delete the network in openstack
 @app.task
 def delete_network(network):
+    # Construct auth info
     rc = create_rc_by_network(network)
     LOG.info("Start to delete network, id:[%s], name[%s]",
              network.id, network.name)
@@ -478,6 +465,7 @@ def delete_network(network):
         neutron.network_delete(rc, network.network_id)
 
         network.network_id = None
+        # Set db 
         network.deleted = True
         network.save()
     except Exception as ex:
@@ -489,7 +477,7 @@ def delete_network(network):
 
     return network
 
-
+# Task: create a new subnet in openstack
 @app.task
 def create_subnet(subnet=None):
     rc = create_rc_by_subnet(subnet)
@@ -497,15 +485,14 @@ def create_subnet(subnet=None):
     LOG.info("subnet address is"+ str(subnet.address))
 
     # start to get gateway.
-
     sub_cidr = str(subnet.address)
     subnet_split = sub_cidr.split('/') 
     sub_addr = subnet_split[0]
     sub_addr_split = sub_addr.split('.')
-   
     gateway = sub_addr_split[0] + "." + sub_addr_split[1] + "." + sub_addr_split[2] + ".1"
-    LOG.info("gateway is" + str(gateway)) 
+    LOG.debug("gateway is" + str(gateway)) 
 
+    # Subnet params
     subnet_params = {"network_id": subnet.network.network_id,
                      "name": "subnet-%s" % subnet.id,
                      "cidr": subnet.address,
@@ -538,7 +525,7 @@ def create_subnet(subnet=None):
 
     return subnet
 
-
+# Task: delete a subnet from openstack
 @app.task
 def delete_subnet(subnet):
     rc = create_rc_by_subnet(subnet)
@@ -558,25 +545,27 @@ def delete_subnet(subnet):
 
     return subnet
 
-
+# Task: create a router
 @app.task
 def router_create_task(router=None):
 
     LOG.info("********** start to create router ***********")
     rc = create_rc_by_router(router)
 
+    # Router param
     router_params = {"name": "router-%s" % router.id}
                      #"distributed": False,
                      #"ha": False}
     begin = datetime.datetime.now()
     try:
-        LOG.info("*********** create start **********")
+        LOG.debug("*********** create start **********")
         rot = neutron.router_create(rc, **router_params)
         end = datetime.datetime.now()
         LOG.info("Create router api apply [%s] seconds", \
                             (end-begin).seconds) 
         router.router_id = rot.id
         if router.is_gateway:
+            # Call a new task to handle this
             router_add_gateway_task(router)
         router.status = NETWORK_STATE_ACTIVE
         router.save()
@@ -591,13 +580,14 @@ def router_create_task(router=None):
 
     return router
 
-
+# Task: delete a router
 @app.task
 def router_delete_task(router=None):
     rc = create_rc_by_router(router)
 
     LOG.info("delete router,id:[%s],name[%s]" % (router.id, router.name))
     try:
+        # Delete a router in openstack
         neutron.router_delete(rc, router.router_id)
         router.router_id = None
         router.deleted = True
@@ -610,7 +600,7 @@ def router_delete_task(router=None):
 
     return network
 
-
+# Task: add a gateway to a router
 @app.task
 def router_add_gateway_task(router=None):
     if not router:
@@ -663,7 +653,7 @@ def router_add_gateway_task(router=None):
     LOG.info("End set gateway [Router:%s][%s]", router.id, router.name)
     return True
 
-
+# Task: remove a gateway from a router
 @app.task
 def router_remove_gateway_task(router=None):
     if not router:
@@ -671,6 +661,7 @@ def router_remove_gateway_task(router=None):
     rc = create_rc_by_router(router)
     LOG.info("Begin clean gateway [Router:%s][%s]", router.id, router.name)
     try:
+        # Request openstack to remove gateway
         neutron.router_remove_gateway(rc, router.router_id)
         router.gateway = None
         router.status = NETWORK_STATE_ACTIVE
@@ -683,13 +674,13 @@ def router_remove_gateway_task(router=None):
 
     LOG.info("End clean gateway [Router:%s][%s]", router.id, router.name)
 
-
+# Task: composite network creation and subnet creation
 @app.task
 def create_network_and_subnet(network, subnet):
     create_network(network)
     create_subnet(subnet)
 
-
+# Task: attach network to a router.Network ID, subnet ID and router ID are required
 @app.task
 def attach_network_to_router(network_id, router_id, subnet_id):
 
@@ -700,6 +691,7 @@ def attach_network_to_router(network_id, router_id, subnet_id):
     rc = create_rc_by_router(router)
 
     begin = datetime.datetime.now()
+    # Request to openstack neutron for add
     try:
         LOG.info("Start to attach network[%s] to router[%s]",
                  network.name, router.name)
@@ -713,6 +705,7 @@ def attach_network_to_router(network_id, router_id, subnet_id):
                       "exception:%s",  network.name, router.name, e)
         network.change_status(NETWORK_STATE_ERROR)
     else:
+        # RouterInterface 
         end = datetime.datetime.now()
         LOG.info("Attach network to router api apply [%s] seconds", \
                             (end-begin).seconds) 
@@ -723,7 +716,7 @@ def attach_network_to_router(network_id, router_id, subnet_id):
 
         network.change_status(NETWORK_STATE_ACTIVE)
 
-
+# Task: detach network from a router
 @app.task
 def detach_network_from_router(network_id):
 
@@ -759,7 +752,7 @@ def detach_network_from_router(network_id):
     else:
         network.change_status(NETWORK_STATE_ACTIVE)
 
-
+# Allocate a fip
 @app.task
 def allocate_floating_task(floating=None):
     rc = create_rc_by_floating(floating)
@@ -771,16 +764,21 @@ def allocate_floating_task(floating=None):
     if ext_net and len(ext_net) > 0:
         ext_net_id = ext_net[0].id
     if ext_net_id: 
+        # Request to openstack for allocation
         try:
             fip = network.tenant_floating_ip_allocate(rc, pool=ext_net_id)
             floating.ip = fip.ip
+            # Set status in cloud_web
             floating.status = FLOATING_AVAILABLE
             floating.uuid = fip.id
             floating.save()
+            # TODO: Chargesystem logic
             billing_task.charge_resource(floating.id, Floating)
             LOG.info("End to allocate floating, [%s][%s]" % (floating.id, fip.ip));
         except Exception as e:
             floating.status = FLOATING_ERROR
+            LOG.info(str(e.message))
+            floating.status_reason = e.message
             floating.save()
             LOG.exception(e)
             LOG.info("End to allocate floating, [%s][exception]" % floating.id);
@@ -789,19 +787,21 @@ def allocate_floating_task(floating=None):
         floating.save()
         LOG.info("End to allocate floating, [%s][---]" % floating.id);
 
-
+# Task: release a fip
 def floating_release(floating, **kwargs):
     rc = create_rc_by_floating(floating)
     result = True
     if floating.uuid:
+        # Request to openstack for releasing
         result = network.tenant_floating_ip_release(rc, floating.uuid)
         LOG.info("release floating associate instance, [%s]" % result)
-    
+    # Update info in cloud_web 
     floating.status = FLOATING_RELEASED
     floating.deleted = 1
     floating.delete_date = datetime.datetime.now()
     floating.save()
 
+    # TODO: Chargesystem logic
     Order.disable_order_and_bills(floating)
     if floating.ip:
         ins = Instance.objects.filter(public_ip=floating.ip)
@@ -809,8 +809,10 @@ def floating_release(floating, **kwargs):
 
     LOG.info("floating action, [%s][relese][%s]" % (floating.id, result));
 
-
+# Task: associate a fip
 def floating_associate(floating, **kwargs):
+
+    # Two resources can be associate with fip, INSTANCE and LOADBALANCE
     resource_type_dict = dict(RESOURCE_TYPE)
     resource_type = kwargs.get('resource_type')[0]
     resource = kwargs.get('resource')[0]
@@ -823,6 +825,7 @@ def floating_associate(floating, **kwargs):
             ins = Instance.objects.get(pk=resource)
             resource_obj = ins
             if neutron.is_neutron_enabled(rc):
+                # Request to neutron for associate 
                 ports = network.floating_ip_target_get_by_instance(rc, ins.uuid)
             else:
                 ports = ins.uuid
@@ -845,12 +848,14 @@ def floating_associate(floating, **kwargs):
 
         LOG.info("floating action, [%s][associate][ins:%s][ports:%s]" % (
                             floating.id, resource, ports))
+        # Fip associate
         try:
             network.floating_ip_associate(rc, floating.uuid, ports)
             if len(ports.split('_')) > 1:
                 port, fixed_ip = ports.split('_')
             else:
                 port, fixed_ip = ports, ports
+            # Update info in db
             floating.resource = resource
             floating.resource_type = resource_type
             floating.status = FLOATING_BINDED
@@ -873,12 +878,13 @@ def floating_associate(floating, **kwargs):
     else:
         LOG.info("floating action, [%s][associate] no ins_id" % floating.id);
 
-
+# Disassociate fip
 def floating_disassociate(floating, **kwargs):
     LOG.info("Begin to disassociate floating [%s]", floating)
     try:
         if floating.uuid and floating.port_id:
             rc = create_rc_by_floating(floating)
+            # disassociate fip from port
             network.floating_ip_disassociate(rc, floating.uuid,
                                              floating.port_id)
     except Exception:
@@ -891,18 +897,19 @@ def floating_disassociate(floating, **kwargs):
         LOG.info("Floating IP[%s] is disassociated.", floating)
         return True
 
-        
+# FIP action interface 
 @app.task
 def floating_action_task(floating=None, act=None, **kwargs):
     LOG.info("Begin to floating action, [%s][%s]" % (floating.id, act));
     try:
+        # Call action to do this
         globals()["floating_%s" % act](floating, **kwargs) 
     except Exception as e:
         LOG.exception(e)
 
     LOG.info("End floating action, [%s][%s]" % (floating.id, act));
 
-
+# Security_group task
 @app.task
 def security_group_create_task(firewall):
     assert firewall
@@ -910,6 +917,7 @@ def security_group_create_task(firewall):
     start = datetime.datetime.now()
     try:
         LOG.info(u"Firewall create task start, [%s]." % firewall)
+        # Call neutron to handle
         security_group = network.security_group_create(rc,
                                 firewall.name, firewall.desc)
     except Exception as ex:
@@ -925,7 +933,7 @@ def security_group_create_task(firewall):
         firewall.save()
         return True
 
-
+# Delete a security goup
 @app.task
 def security_group_delete_task(firewall):
     rc = create_rc_by_security(firewall)
@@ -940,6 +948,7 @@ def security_group_delete_task(firewall):
                       firewall, (end - start).seconds)
         return False
     else: 
+        # Save rule info to cloud_web
         for rule in firewall.firewallrules_set.all():
             rule.firewall_rules_id = None
             rule.deleted = True
@@ -956,7 +965,7 @@ def security_group_delete_task(firewall):
 
         return True
 
-
+# Task: security group rule creation
 @app.task
 def security_group_rule_create_task(firewall_rule=None):
     assert firewall_rule
@@ -964,6 +973,7 @@ def security_group_rule_create_task(firewall_rule=None):
     start = datetime.datetime.now()
     try:
         LOG.info(u"Firewall rule create task start, [%s].", firewall_rule)
+        # handle sc request to openstack
         rule = network.security_group_rule_create(rc,
                             parent_group_id=firewall_rule.firewall.firewall_id,
                             direction=firewall_rule.direction,
@@ -981,6 +991,7 @@ def security_group_rule_create_task(firewall_rule=None):
                         firewall_rule, (end-start).seconds)
         return False
     else:
+        # Save rule info to db
         firewall_rule.firewall_rules_id = rule.id
         firewall_rule.save()
         end = datetime.datetime.now()
@@ -989,7 +1000,7 @@ def security_group_rule_create_task(firewall_rule=None):
                         firewall_rule, (end-start).seconds)
         return True
 
-
+# Task: delete a sc rule to task
 @app.task
 def security_group_rule_delete_task(firewall_rule):
     assert firewall_rule
@@ -1014,7 +1025,7 @@ def security_group_rule_delete_task(firewall_rule):
                       firewall_rule, (end-start).seconds)
         return True
 
-
+# Update server sc
 @app.task
 def server_update_security_groups_task(instance, firewall=None):
     assert firewall
@@ -1023,6 +1034,7 @@ def server_update_security_groups_task(instance, firewall=None):
     try:
         LOG.info(u"Instance change firewall task start, [%s][%s]." % (
                                     instance, firewall))
+        # Request to openstack for updating server's sc
         network.server_update_security_groups(rc, instance.uuid, [firewall.firewall_id])
     except Exception as e:
         end = datetime.datetime.now()
@@ -1031,6 +1043,7 @@ def server_update_security_groups_task(instance, firewall=None):
                     instance, firewall, (end-start).seconds))
         return False
     else:
+        # Save sc info in db
         end = datetime.datetime.now()
         LOG.info(u"Instance change firewall task succeed, [%s][%s], "
                  "apply [%s] seconds." % (
@@ -1039,11 +1052,12 @@ def server_update_security_groups_task(instance, firewall=None):
         instance.save()
         return True
 
-
+# edit default sc in openstack
 def edit_default_security_group(user, udc):
     rc = create_rc_by_udc(udc) 
     sec_group_list = network.security_group_list(rc)
     default_sec_group = None
+    # Check if default sc existing
     for sec_group in sec_group_list:
         if sec_group.name == "default":
             default_sec_group = sec_group
@@ -1053,6 +1067,7 @@ def edit_default_security_group(user, udc):
         LOG.error("Default security group not found. user:[%s], date_center:[%s]",\
                 user.username, udc.data_center.name)
         return
+    # Sync firewall staus
     firewall = Firewall.objects.create(name=settings.DEFAULT_FIREWALL_NAME,
                         desc=settings.DEFAULT_FIREWALL_NAME,
                         is_default=True,
@@ -1060,7 +1075,7 @@ def edit_default_security_group(user, udc):
                         user=user,
                         user_data_center=udc,
                         deleted=False)
-
+# Task: delete user router
 @app.task
 def delete_user_router_interface(router=None):
     rc = create_rc_by_router(router)
@@ -1071,7 +1086,7 @@ def delete_user_router_interface(router=None):
     time.sleep(1)
     LOG.info("delete router,id:[%s],name[%s]" % (router.id, router.name))
     try:
-
+        # Forward router deletion to openstack
         neutron.router_delete(rc, router.router_id)
         router.router_id = None
         router.deleted = True
@@ -1084,12 +1099,14 @@ def delete_user_router_interface(router=None):
 
     return network
 
+# Remove router gateway
 def router_remove_gateway_(router=None):
     if not router:
         return
     rc = create_rc_by_router(router)
     LOG.info("Begin clean gateway [Router:%s][%s]", router.id, router.name)
     try:
+        # Forward request to openstack neutron
         neutron.router_remove_gateway(rc, router.router_id)
         router.gateway = None
         router.status = NETWORK_STATE_ACTIVE

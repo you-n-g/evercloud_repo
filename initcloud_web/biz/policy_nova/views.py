@@ -324,6 +324,7 @@ def assignrole(request):
 
     username = request.data.get('username')
     roles = request.data.get('roles') 
+    LOG.info("**** roles are ****" + str(roles))
     if not roles:
         return Response(
              {'success': False, "msg": _('请选择')})
@@ -377,6 +378,7 @@ def assignrole(request):
             keystone.remove_tenant_user_role(rc, project=user_tenant_id, user=keystone_user_id, role=c_role.id)
 
 
+    # we use user.last_name to save user role
     for role in roles_name:
         LOG.info("******** role is *********" + str(role))
         if role not in current_user_roles_list:

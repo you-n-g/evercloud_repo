@@ -66,9 +66,11 @@ OPERATION_SUCCESS = 1
 OPERATION_FAILED = 0
 
 class InstanceList(generics.ListCreateAPIView):
+    """
+    Normal user instance list interface
+    """
     queryset = Instance.objects.all().filter(deleted=False)
     serializer_class = InstanceSerializer
-    #LOG.info(Instance.objects.all())
     def list(self, request):
         try:
             udc_id = request.session["UDC_ID"]
@@ -76,40 +78,6 @@ class InstanceList(generics.ListCreateAPIView):
                 serializer = InstanceSerializer(queryset, many=True)
                 return Response(serializer.data)
       
-            system = False
-            security = False
-            audit = False
-            member = False
-            UDC = UserDataCenter.objects.get(pk=udc_id)
-            LOG.info(UDC)
-            LOG.info("4")
-            keystone_user_id = UDC.keystone_user_id
-            LOG.info("4")
-            tenant_uuid = UDC.tenant_uuid
-            LOG.info("4")
-            rc = create_rc_by_dc(DataCenter.objects.all()[0])
-            LOG.info("4")
-            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-            LOG.info("4")
-            for user_role in user_roles:
-                LOG.info("5")
-                LOG.info(user_role.name)
-                if user_role.name == "system":
-                    LOG.info("5")
-                    system = True
-                    break
-                if user_role.name == "security":
-                    security = True
-                    break
-                if user_role.name == "audit":
-                    audit = True
-                    break
-
-                if not system and not security and not audit:
-                    member = True
-            if request.user.is_superuser or system:
-                serializer = InstanceSerializer(queryset, many=True)
-                return Response(serializer.data)
 
             UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
             project_id = UDC.tenant_uuid
@@ -126,6 +94,9 @@ class InstanceList(generics.ListCreateAPIView):
 
 
 class InstanceDetail(generics.RetrieveAPIView):
+    """
+    Get current instance detail 
+    """
     queryset = Instance.objects.all().filter(deleted=False)
     serializer_class = InstanceSerializer
 
@@ -143,6 +114,9 @@ class InstanceDetail(generics.RetrieveAPIView):
 
 
 class FlavorList(generics.ListCreateAPIView):
+    """
+    List all the flavors.Attention: These may not sync with openstack
+    """
     queryset = Flavor.objects.all()
     serializer_class = FlavorSerializer
 
@@ -152,42 +126,56 @@ class FlavorList(generics.ListCreateAPIView):
 
 
 class FlavorDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    List the detailed info of one flavor
+    """
     queryset = Flavor.objects.all()
     serializer_class = FlavorSerializer
 
 
 def get_nova_admin(request):
+    """
+    Nova admin client 
+    param: auth_url
+    param: username
+    param: password
+    param: admin tenant name
+    """
+    # make v2 auth
     auth = v2.Password(auth_url=settings.AUTH_URL,
 			username = settings.ADMIN_NAME,
 			password = settings.ADMIN_PASS,
 			tenant_name = settings.ADMIN_TENANT_NAME)
+    # sess 
     sess = session.Session(auth=auth)
+    # novaclient version is 2 currently
     novaClient = Client(settings.NOVA_VERSION, session = sess)
     return novaClient
 
 @api_view(["POST"])
 def create_flavor(request):
+    """
+    Create a new flavor.
+
+    This flavor is synced with openstack 
+    """
     try:
         serializer = FlavorSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-	    #LOG.info(serializer.data)
-	    LOG.info("************ CREATE FLAVOR ***************")
+	    LOG.debug("************ CREATE FLAVOR ***************")
 	    novaadmin = get_nova_admin(request)
-	    #LOG.info(type(novaadmin))
-	    #LOG.info(novaadmin)
-	    #LOG.info(novaadmin.flavors.list())
 	    mem = request.data.get("memory")
 	    name = request.data.get("name")
 	    cpu = request.data.get("cpu")
 	    disk = request.data.get("disk")
+            # Sync flavor creation with novaadmin
 	    flavor = novaadmin.flavors.create(name = name , ram = mem, vcpus = cpu, disk = disk)
-	    #LOG.info(flavor.id)
 	    flavorid = flavor.id
 	    try:
 	    	serializer.save(flavorid = flavor.id)
 	    except:
 		traceback.print_exc()
-	    LOG.info(Flavor.objects.all().filter(flavorid = flavor.id))
+	    LOG.debug(Flavor.objects.all().filter(flavorid = flavor.id))
 	    
             return Response({'success': True, "msg": _('Flavor is created successfully!')},
                             status=status.HTTP_201_CREATED)
@@ -202,6 +190,13 @@ def create_flavor(request):
 
 @api_view(["POST"])
 def update_flavor(request):
+    """
+    Update flavor info with requested param
+    param: vcpu
+    param: mem
+    param: sys_disk
+    param: name
+    """
     try:
         flavor = Flavor.objects.get(pk=request.data['id'])
         serializer = FlavorSerializer(instance=flavor, data=request.data, context={"request": request})
@@ -221,6 +216,9 @@ def update_flavor(request):
 
 @api_view(["POST"])
 def delete_flavors(request):
+    """
+    Delete flavor from db
+    """
     ids = request.data.getlist('ids[]')
     LOG.info("*** ids are ***" + str(ids))
     Flavor.objects.filter(pk__in=ids).delete()
@@ -230,6 +228,17 @@ def delete_flavors(request):
 @check_quota(["instance", "vcpu", "memory"])
 @api_view(["POST"])
 def instance_create_view(request):
+    """
+    Instance create with param
+    param: instance
+    param: pay_type
+    param: pay_num
+    param: network_id
+    param: name
+    param: vcpu
+    param: mem
+    param: sys_disk
+    """
     count = request.DATA.get("instance", u"1")
     try:
         count = int(count)
@@ -237,19 +246,21 @@ def instance_create_view(request):
         count = 1
 
     user_id = request.user.id
-    LOG.info("** user_id is ***" + str(user_id))
+    LOG.debug("** user_id is ***" + str(user_id))
     user_data_center = UserDataCenter.objects.filter(user__id=request.user.id)[0]
     LOG.info("*** user_data_center ***" + str(user_data_center))
     user_tenant_uuid = user_data_center.tenant_uuid
-    LOG.info("*** user_tenant_uuid is ***" + str(user_tenant_uuid))
+    LOG.debug("*** user_tenant_uuid is ***" + str(user_tenant_uuid))
 
     pay_type = request.data['pay_type']
     pay_num = int(request.data['pay_num'])
 
+    # Instance batch creation limit
     if count > settings.BATCH_INSTANCE:
         return Response({"OPERATION_STATUS": OPERATION_FAILED},
                     status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
 
+    # Check if user has network_id
     network_id = request.DATA.get("network_id", u"0")
     try:
         network = Network.objects.get(pk=network_id)
@@ -265,17 +276,22 @@ def instance_create_view(request):
 
 
     has_error, msg = False, None
+    # Create multi instances
     for i in range(count):
         serializer = InstanceSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             name = request.DATA.get("name", "Server")
             if i > 0:
+                # For multi instances.instance name generated format
                 name = "%s-%04d" % (name, i)
             ins = serializer.save(name=name)
 
+            # Operaion logic
             Operation.log(ins, obj_name=ins.name, action="launch", result=1)
+            # Workflow logic
             workflow = Workflow.get_default(ResourceType.INSTANCE)
 
+            # TODO: workflow
             if settings.SITE_CONFIG['WORKFLOW_ENABLED'] and workflow:
                 ins.status = INSTANCE_STATE_APPLYING
                 ins.save()
@@ -284,6 +300,7 @@ def instance_create_view(request):
                 msg = _("Your application for instance \"%(instance_name)s\" is successful, "
                         "please waiting for approval result!") % {'instance_name': ins.name}
             else:
+                # Delivery the request to celery
                 instance_create_task.delay(ins, password=request.DATA["password"],user_tenant_uuid=user_tenant_uuid)
                 Order.for_instance(ins, pay_type=pay_type, pay_num=pay_num)
                 msg = _("Your instance is created, please wait for instance booting.")
@@ -300,11 +317,25 @@ def instance_create_view(request):
 
 @api_view(['GET'])
 def is_name_unique(request):
+    """
+    Check instance name is unique or not
+    """
     name = request.query_params['name']
     return Response(not Instance.objects.filter(name = name, deleted = False).exists())
 
 @api_view(["POST"])
 def instance_resize(request):
+    """
+    Resize instance with requested param
+
+    param: id
+    param: vcpu
+    param: socket
+    param: core
+    param: sys_disk
+    param: socket
+    param: memory
+    """
     ins = Instance.objects.get(id = request.data['id'])
     LOG.info(request.data)
     if ins.sys_disk > int(request.data['sys_disk']):
@@ -322,17 +353,16 @@ def instance_resize(request):
     ins.memory = request.data['memory']
     ins.sys_disk = request.data['sys_disk']
     ins.save()
-    #ins_ser = InstanceSerializer(ins)
-    #LOG.info(ins_ser.data)
     rc = create_rc_by_instance(ins)
     try:
         new_flavor = flavor_create(ins)
+        # Get server info
 	instance = nova.server_get(rc, ins.uuid)
 	nova.server_resize(rc, ins.uuid, new_flavor)
+        # Set instance status
 	ins.status = 14
 	ins.save()
     except Exception as e:
-	#traceback.print_exc()
         ins.cpu = org_cpu
         ins.core = org_core
         ins.socket = org_socket
@@ -340,15 +370,17 @@ def instance_resize(request):
         ins.sys_disk = org_sys_disk
         ins.save()
         return Response({"success":False, "msg":str(e)})
-    #return Response(serializer.data)
     return Response({"success":True})
 
 @api_view(["POST"])
 def instance_verify_resize(request):
+    """
+    Verify instance resize action
+    """
     ins = Instance.objects.get(id = request.data['id'])
     rc = create_rc_by_instance(ins)
     try:
-	LOG.info(request.data['action'])
+	LOG.debug(request.data['action'])
 	instance = nova.server_get(rc, ins.uuid)
 	if request.data['action'] == 'confirm':
 	    nova.server_confirm_resize(rc, ins.uuid)	
@@ -359,13 +391,15 @@ def instance_verify_resize(request):
 	time.sleep(3)
 	instance = nova.server_get(rc, ins.uuid)
 	ins.status = get_ins_status(instance)
+        # Check instance status
 	if ins.status == 99:
-	    LOG.info("--------------- WAIT --------------------")
+	    LOG.debug("--------------- WAIT --------------------")
 	    ins.status = 11
 	    return Response({"success":False, "msg":"Verify timeout!"})
         flavor = nova.flavor_get(rc, instance.flavor['id'])
         LOG.info(flavor.vcpus)
         LOG.info(flavor.ram)
+        # Get flavor extras
         extra = nova.flavor_get_extras(rc, flavor.id, True)
         core = extra['hw:cpu_cores']
         socket = extra['hw:cpu_sockets']
@@ -386,6 +420,9 @@ def instance_verify_resize(request):
 
 @api_view(["POST"])
 def instance_assignedusers(request):
+    """
+    Get instance assigned 
+    """
     ins = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)[0]
     try:
         user = ins.assigneduser
@@ -393,68 +430,39 @@ def instance_assignedusers(request):
         assignuser.append(user)
         LOG.info(assignuser)
         serializer = UserSerializer(assignuser, many = True)
-    except:
+    except Exception as e:
+       LOG.info("*** error is ***" + str(e))
        traceback.print_exc()
     return Response(serializer.data)
-"""
-    ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
-    assign_set = []
-    for ins in ins_set:
-	if not ins.user.is_superuser:
-	    assign_set.append(ins.user)
-    #query_set = Instance.objects.all()
-    serializer = UserSerializer(assign_set, many=True)
-    return Response(serializer.data)
-"""
+
 @api_view(["POST"])
 def instance_unassignedusers(request):
+    """
+    Undo the instance assignment
+    """
     ins = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)[0]
     users = User.objects.all()
+    # Get member users
     member_users = []
     for user in users:
-        try:
-            keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
-            tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
-            rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        except:
-            continue
-        try:
-            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-        except:
-            continue
         system = False
         security = False
         audit = False
-        for user_role in user_roles:
-            if user_role.name == "system":
-                system = True
-                break
-            if user_role.name == "audit":
-                audit = True
-                break
-            if user_role.name == "security":
-                security = True
-                break
+        if user.last_name == "system":
+            system = True
+            break
+        if user.last_name == "audit":
+            audit = True
+            break
+        if user.last_name == "security":
+            security = True
+            break
         if not system and not security and not audit and not user.is_superuser:
             member_users.append(user)
     LOG.info(member_users)
     serializer = UserSerializer(member_users, many=True)
     return Response(serializer.data)
 
-"""
-    ins_set = Instance.objects.all().filter(uuid = request.data['uuid'], deleted = False)
-    assign_set = []
-    return_set = []
-    for ins in ins_set:
-	if not ins.user.is_superuser:
-            assign_set.append(ins.user)
-    user_set = UserProxy.normal_users.filter(is_active=True)
-    for user in user_set:
-	if not user in assign_set:
-	    return_set.append(user)
-    serializer = UserSerializer(return_set, many=True)
-    return Response(serializer.data)
-"""
 def assign_ins(request):
     try:    
         check_user = User.objects.get(id = request.data["assign"])
@@ -463,35 +471,6 @@ def assign_ins(request):
         ins.save()
     except:
         pass
-"""
-    try:
-        check_user = User.objects.get(id = request.data["assign"])
-	ins = Instance.objects.get(id = request.data["id"])
-        check_ins = Instance.objects.filter(uuid = ins.uuid, user = check_user)
-        if check_ins.exists():
-	    #if check_ins[0].deleted == 1:
-	#	check_ins[0].deleted = False
-	#	check_ins[0].save()
-	#	LOG.info(check_ins[0].deleted)
-	    re_ins = Instance.objects.get(uuid = ins.uuid, user = check_user)
-	    re_ins.deleted = False
-	    re_ins.save()
-	else:
-            ser = InstanceSerializer(ins)
-	    ser_data = ser.data
-	    del ser_data['id']
-	#Instance.objects.create(ser_data)
-	    serializer = InstanceSerializer(data = ser_data, context = {"request":request})
-	    if serializer.is_valid():
-	        ins = serializer.save()
-	    ins.user = User.objects.get(id = request.data["assign"])
-	    ins.save() 
-    except:
-	pass
-	#traceback.print_exc()
-    #serializer = UserSerializer(queryset, many=True)
-    #return Response(serializer.data)
-"""
 def unassign_ins(request):
     try:
         check_user = User.objects.get(id = request.data["unassign"])
@@ -501,26 +480,11 @@ def unassign_ins(request):
     except:
         pass
 
-"""
-    try:
-        check_user = User.objects.get(id = request.data["unassign"])
-        ins = Instance.objects.get(id = request.data["id"])
-        check_ins = Instance.objects.filter(uuid = ins.uuid, user = check_user)
-	LOG.info(check_user)
-	LOG.info(ins)
-	LOG.info(check_ins)
-	if check_ins.exists():
-	    re_ins = Instance.objects.get(uuid = ins.uuid, user = check_user)
-	    re_ins.deleted = True
-	    re_ins.save()
-	else:
-	    return 0
-    except:
-	pass
-"""	    
-
 @api_view(["POST"])
 def instance_assign_instance(request):
+    """
+    Assing the instance to user
+    """
     LOG.info(request.data)
     assign_ins(request)
     unassign_ins(request)
@@ -529,6 +493,9 @@ def instance_assign_instance(request):
 
 @api_view(["POST"])
 def instance_action_view(request, pk):
+    """
+    Instance action view
+    """
     instance_id, action = request.data['instance'], request.data['action']
     LOG.info(" action is " + str(request.data['action']))
     data = instance_action(request.user, instance_id, action)
@@ -542,17 +509,20 @@ def instance_status_view(request):
 
 @api_view(["GET"])
 def instance_search_view(request):
+    """
+    Search instance by user id
+    """
     user_id = request.query_params.get('uid', None)
     LOG.info("*** user_id is ***" + str(user_id))
     LOG.info("*** user_id is ***" + str(request.query_params))
     if not user_id:
-        LOG.info(" user_id is none")
+        LOG.debug(" user_id is none")
         UDC = UserDataCenter.objects.all().filter(user=request.user)[0]
         project_id = UDC.tenant_uuid
         instance_set = Instance.objects.filter(Q(deleted=False, user=request.user, status=INSTANCE_STATE_RUNNING,
             user_data_center=request.session["UDC_ID"]) | Q(tenant_uuid=project_id))
     else:
-        LOG.info("user id is not none")
+        LOG.debug("user id is not none")
         instance_set = Instance.objects.filter(deleted=False, assigneduser_id=user_id)
 
     serializer = InstanceSerializer(instance_set, many=True)
@@ -597,6 +567,9 @@ def qos_get_instance_detail(instance):
 @authentication_classes([])
 @permission_classes([])
 def instance_detail_view_via_uuid_or_ip(request, uuid_or_ip):
+    """
+    List instance detailed info by uuid or ip
+    """
     instance_uuid = -1
     try:
         instance_uuid = uuid.UUID(uuid_or_ip) 
@@ -622,11 +595,13 @@ def instance_detail_view_via_uuid_or_ip(request, uuid_or_ip):
 
     return Response(qos_get_instance_detail(instance))
 
-### remove below two API for qos end
-
 
 @api_view(["GET"])
 def instance_detail_view(request, pk):
+    """
+    Display instance details by tab
+    Detailed info are instance_detail and instance_log 
+    """
     tag = request.GET.get("tag", 'instance_detail')
     try:
         #instance = Instance.objects.get(pk=pk, user=request.user)
@@ -643,11 +618,16 @@ def instance_detail_view(request, pk):
 
 
 def _get_instance_detail(instance):
+    """
+    Actually do getting instance detail
+    """
 
     instance_data = InstanceSerializer(instance).data
 
     try:
+        # Get instance info from openstack
         server = instance_get(instance)
+        # Get compute node instance running on
         instance_data['host'] = getattr(server, 'OS-EXT-SRV-ATTR:host', None)
         instance_data['instance_name'] = getattr(server,
                                 'OS-EXT-SRV-ATTR:instance_name', None)
@@ -673,7 +653,10 @@ def _get_instance_detail(instance):
 #update by dongdong
 @api_view(["GET"])
 def vdi_view(request):
-    LOG.info("****** i am vdi view with method get ********")
+    """
+    This is the vdi interface for contact with foldex
+    """
+    LOG.debug("****** i am vdi view with method get ********")
 
     #queryset = Instance.objects.all().filter(deleted=False, user_id=request.user.id)
     queryset = Instance.objects.all().filter(deleted=False, assigneduser_id=request.user.id)
@@ -686,17 +669,15 @@ def vdi_view(request):
     for q in queryset:
         LOG.info("****** q is *****" + str(q))
         novaAdmin = get_nova_admin(request)
-        LOG.info("******")
-        LOG.info(str(q.uuid))
+        LOG.debug(str(q.uuid))
         if not q.uuid:
             continue
         try:
+            # Get instance info from openstack admin
             server = novaAdmin.servers.get(q.uuid)
         except:
             continue
-        LOG.info("******")
         server_dict = server.to_dict()
-        LOG.info("******")
         server_host = server_dict['OS-EXT-SRV-ATTR:host']
         LOG.info("servier_dict" + str(server_dict))
         LOG.info("******* server_status is *******" + str(server_host))
@@ -704,10 +685,13 @@ def vdi_view(request):
         LOG.info("******* server_status is *******" + str(server_status))
         if server_status == "ERROR":
             continue
+        # Filter the compute hostname
         host_ip = settings.COMPUTE_HOSTS[server_host]
         LOG.info("host ip is" + str(host_ip))
+        # virsh remote connection
         cmd="virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + q.uuid
         LOG.info("cmd=" + cmd)
+        # Get instance vnc port by sys command
         p = subprocess.Popen("virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + q.uuid, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         port = None
         for line in p.stdout.readlines():
@@ -724,6 +708,7 @@ def vdi_view(request):
             vminfo.append({"vm_uuid": q.uuid, "vm_public_ip": public_ip, "vm_serverip": host_ip, "vm_status": server_status, "vnc_port": "no port", "vm_internalid": str(q.id), "policy_device": str(q.policy), "device_id": str(q.device_id), "vm_name": q.name})
             count = count + 1
             continue
+        # Get spice port by vnc port
         split_port = port.split(":")
         port_1 = split_port[1]
         port_2 = port_1.split("\\")
@@ -739,6 +724,7 @@ def vdi_view(request):
         LOG.info("*** count is ***" + str(count))
         count = count + 1
     LOG.info("count done")
+    # Return value
     json_value = {"method": method, "retvalue": retvalue, "vmnum": count, "vminfo": vminfo}
     LOG.info(str(json_value))
     if not json_value:
@@ -749,16 +735,21 @@ def vdi_view(request):
 
 @api_view(["POST"])
 def instance_action_view(request, pk):
-    LOG.info("9999999999")
+    """
+    Instance action view
+    """
     instance_id, action = request.data['instance'], request.data['action']
-    LOG.info("instance id is" + str(instance_id))
-    LOG.info("action is" + str(action))
+    LOG.debug("instance id is" + str(instance_id))
+    LOG.debug("action is" + str(action))
     data = instance_action(request.user, instance_id, action)
     return Response(data)
 
 @api_view(["GET"])
 def instance_action_vdi_view(request):
-    LOG.info("9999999999")
+    """
+    VDI Action view.
+    Method is get
+    """
     instance_id = request.GET.get('instance')
     action = request.GET.get('action')
     #instance_id, action = request.data['instance'], request.data['action']
@@ -770,6 +761,7 @@ def instance_action_vdi_view(request):
 
 @require_GET
 def monitor_settings(request):
+    ## TODO: Monitor settings
     LOG.info("------------ MONITOR FOR INSTANCE DETAIL! -------------------")
     monitor_config = settings.MONITOR_CONFIG.copy()
     monitor_config['intervals'] = MonitorInterval.\
@@ -781,6 +773,7 @@ def monitor_settings(request):
 
 
 class MonitorProxy(HttpProxy):
+    ## TODO: Monitor settings
     base_url = settings.MONITOR_CONFIG['base_url']
 
     forbidden_pattern = re.compile(r"elasticsearch/.kibana/visualization/")
@@ -796,7 +789,7 @@ class MonitorProxy(HttpProxy):
 @csrf_exempt
 @api_view(["GET"])
 def new_vdi_test(request):
-
+    ## Test scripts should remvoe from this file
     LOG.info("start to get data")
     method = request.GET.get("method")
     retval = 0 
@@ -879,6 +872,7 @@ def user_auth_failed(request):
     return Response({"status": "-1", "message": "failed"})
 
 def new_vdi(request):
+    ## TODO: remvoe this function to tests
     LOG.info("start to get data")
     method = request.GET.get("method")
     retval = 0
@@ -925,6 +919,7 @@ def instance_sec_status(request):
 
 
 def batch_create(request, user_id):
+    ## Normal user batch delete interface
     LOG.info("** user_id is ***" + str(user_id))
     user_data_center = UserDataCenter.objects.filter(user__id=request.user.id)[0]
     LOG.info("*** user_data_center ***" + str(user_data_center))
@@ -974,6 +969,7 @@ def batch_create(request, user_id):
 @check_quota(["instance", "vcpu", "memory"])
 @api_view(["POST"])
 def instance_batch_create_view(request):
+    ## Normal user batch creaet view
     LOG.info(request.data)
     user_ids = request.data.getlist('user_ids[]')
     LOG.info(user_ids)
@@ -989,7 +985,6 @@ def instance_batch_create_view(request):
         response = response + result_str
         if result['status'] == 'failed':
             error_flag = True
-            LOG.info('oooooooooooooooooooooooooooooo')
     LOG.info(response)
     LOG.info(error_flag)
     if error_flag:
@@ -997,9 +992,9 @@ def instance_batch_create_view(request):
     return Response({"OPERATION_STATUS":1, "msg":response})
 
 
-
-@api_view(["POST"])
-def post_test(request):
-    LOG.info("*** start to post data ****")
-    LOG.info("*** posted data is ***" + str(request.post))
-    return True
+@require_GET
+def instance_action_status(request):
+     vm_name = request.query_params.get("vm")
+     LOG.info("*** vm_name is ***" + str(vm_name))
+     instance = Instance.objects.filter(name=vm_name,deleted=0)[0]
+     return Response({"msg": instance.status_reason, "status": instance.status})

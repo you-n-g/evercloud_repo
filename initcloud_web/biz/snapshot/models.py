@@ -17,6 +17,13 @@ class Snapshot(models.Model):
     snapshot_type = models.CharField(_("Type"), max_length=255, null=False, default='')
     volume_id = models.CharField(_("Volume"), max_length=255, null=False, default='')
 
+
+    class Meta:
+        db_table = "snapshot"
+        ordering = ['-create_date']
+        verbose_name = _("Snapshot")
+        verbose_name_plural = _("Snapshot")
+
     """
     @classmethod
     def log(cls, obj, obj_name, action, result=1, udc=None, user=None):

@@ -21,15 +21,16 @@ from biz.volume.models import Volume
 
 LOG = logging.getLogger("cloud.tasks")
 
-
+# Get volume info from openstack
 def volume_get(volume):
     rc = create_rc_by_volume(volume)
     try:
+        # Cinder request
         return cinder.volume_get(rc, volume.volume_id)
     except NotFound:
         return None
 
-
+# Task: create a new volume interface
 @app.task
 def volume_create_task(volume, os_volume_type):
     assert volume is not None
@@ -37,15 +38,17 @@ def volume_create_task(volume, os_volume_type):
     rc = create_rc_by_volume(volume)
     begin = datetime.datetime.now()
     try:
+        # Forward request to cinder
         result = cinder.volume_create(rc, size=volume.size,
                                       name="Volume-%04d" % volume.id,
                                       description="",
                                       volume_type=os_volume_type)
-    except Exception:
+    except Exception as ex:
         end = datetime.datetime.now()
         LOG.exception("Volume create api call failed, [%s], "
                       "create api apply [%s] seconds.",
                       volume, (end-begin).seconds)
+        volume.status_reason = ex.message
         volume.change_status(VOLUME_STATE_ERROR)
         return False
     else:
@@ -62,7 +65,10 @@ def volume_create_task(volume, os_volume_type):
 
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
         try:
+            # Transfer status
+            LOG.info(str(volume_get(volume)))
             st = volume_get(volume).status.upper()
+            LOG.info("*** st is ***" + str(st))
         except Exception:
             LOG.exception("Volume create get status api failed, [%s].", volume)
             volume.change_status(VOLUME_STATE_ERROR)
@@ -73,11 +79,12 @@ def volume_create_task(volume, os_volume_type):
                  count, volume, st)
 
         end = datetime.datetime.now()
+        # Cinder status sync to db
         if st == "AVAILABLE":
             volume.change_status(VOLUME_STATE_AVAILABLE)
             LOG.info("Volume create succeed, [%s]. apply [%s] seconds.",
                      volume, (end - begin).seconds)
-
+            # TODO: Chargesystem logic
             billing_task.charge_resource.delay(volume.id, Volume)
             return True
         elif st == "ERROR":
@@ -93,7 +100,7 @@ def volume_create_task(volume, os_volume_type):
                     volume, (end-begin).seconds)
         return False
 
-
+# Task: delete a volume interface
 @app.task
 def volume_delete_task(volume):
     assert volume is not None
@@ -102,11 +109,14 @@ def volume_delete_task(volume):
     begin = datetime.datetime.now()
     if volume_get(volume) is None:
         volume.fake_delete()
+        # TODO: Chargesystem logic
         Order.disable_order_and_bills(volume)
         return False
 
     try:
+        # Construct auth info
         rc = create_rc_by_volume(volume)
+        # Delete a volume
         cinder.volume_delete(rc, volume.volume_id)
     except Exception:
         end = datetime.datetime.now() 
@@ -123,6 +133,7 @@ def volume_delete_task(volume):
         Order.disable_order_and_bills(volume)
 
     begin = datetime.datetime.now()
+    # Sync cinder volume status to db
     for count in xrange(settings.MAX_COUNT_SYNC * 2):
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
         try:
@@ -133,11 +144,13 @@ def volume_delete_task(volume):
             volume.change_status(VOLUME_STATE_ERROR_DELETING)
             return False
 
+        # Transfer cinder volume status
         st = cinder_volume.status.upper() if cinder_volume else "None"
         LOG.info('Volume synchronize status when delete, [Count:%s][%s][Status: %s].',
                     count, volume, st)
 
         end = datetime.datetime.now() 
+        # Sync status to db
         if cinder_volume is None:
             volume.volume_id = None
             volume.fake_delete()

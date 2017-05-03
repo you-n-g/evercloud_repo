@@ -18,6 +18,7 @@ class Volume(models.Model):
     volume_type = models.IntegerField(_('Volume Type'),  choices=VOLUME_TYPES, default=VOLUME_TYPE_VOLUME)
     status = models.IntegerField(_('Status'), choices=VOLUME_STATES, default=VOLUME_STATE_CREATING)
     create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
+    status_reason = models.CharField(_("Status Reason"), max_length=255, blank=True, null=True)
     deleted = models.BooleanField(_("Deleted"), default=False)
 
     user = models.ForeignKey('auth.User')

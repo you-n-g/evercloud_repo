@@ -8,10 +8,12 @@ CloudApp.controller('OperationController',
         DatePicker.initDatePickers();
     });
 
+    // Construct condition
     $scope.condition = {operator: "", data_center: "",
         resource: "", resource_name: "",
         start_date: "", end_date: ""};
 
+    // Get table data
     var table = $scope.operation_table = new ngTableParams({
         page: 1,
         count: 10,
@@ -31,12 +33,14 @@ CloudApp.controller('OperationController',
         }
     });
 
+    // Table search filter
     $scope.search = function(){
         angular.copy($scope.condition, table.filter());
         table.page(1);
         table.reload();
     };
 
+    // Reload table action
     $scope.reload = function(){
         table.reload();
         loadFilters();
@@ -49,6 +53,7 @@ CloudApp.controller('OperationController',
         }
     };
 
+    // Load table filters
     var loadFilters = function(){
         CommonHttpService.get('/api/operation/filters').then(function(filters){
             $scope.filters = filters;

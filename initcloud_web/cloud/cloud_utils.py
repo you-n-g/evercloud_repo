@@ -1,4 +1,7 @@
 #-*-coding=utf-8-*-
+"""
+The following is contructing openstack auth info by admin or any other normal users
+"""
 
 from keystoneclient.v2_0 import client
 from keystoneclient.auth.identity import v2
@@ -29,6 +32,7 @@ def _create_rc(obj=None):
     return rc
 
 
+# For nova admin client
 def get_nova_admin(instance):
     auth = v2.Password(auth_url=settings.AUTH_URL,
                            username=settings.ADMIN_NAME,
@@ -40,27 +44,29 @@ def get_nova_admin(instance):
     return novaClient
 
 
+# For keystone admin client
 def get_admin_client(instance=None):
     admin_client = client.Client(token=settings.ADMIN_TOKEN, endpoint=settings.ENDPOINT)
 
     return admin_client
 
+# Create openstack auth info by instance
 def create_rc_by_instance(instance=None):
     return _create_rc(instance)
 
-
+# Create openstack auth info by network
 def create_rc_by_network(network=None):
     return _create_rc(network)
 
-
+# Create openstack auth info by subnet
 def create_rc_by_subnet(subnet=None):
     return _create_rc(subnet)
 
-
+# Create openstack auth info by router
 def create_rc_by_router(router=None):
     return _create_rc(router)
 
-
+# Create openstack auth info by volume
 def create_rc_by_volume(volume=None):
     rc = _create_rc(volume)
     udc = UserDataCenter.objects.get(user=volume.user)
@@ -68,11 +74,11 @@ def create_rc_by_volume(volume=None):
     rc["tenant_uuid"] = udc.tenant_uuid
     return rc
 
-
+# Create openstack auth info by floating
 def create_rc_by_floating(floating=None):
     return _create_rc(floating)
 
-
+# Create openstack auth info by user data center(openstack tenant info)
 def create_rc_by_udc(udc=None):
     rc = RC_ENV.copy()
 
@@ -85,6 +91,7 @@ def create_rc_by_udc(udc=None):
     return rc
 
 
+# Create openstack auth info by admin user info
 def create_rc_by_dc(dc=None):
     rc = RC_ENV.copy()
 
@@ -95,11 +102,12 @@ def create_rc_by_dc(dc=None):
 
     return rc
 
-
+# Create openstack auth info by security
 def create_rc_by_security(firewall=None):
     return _create_rc(firewall)
 
 
+# Create openstack auth info by lb pool
 def create_rc_by_balancer_pool(pool=None):
     return _create_rc(pool)
 

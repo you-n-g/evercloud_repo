@@ -16,6 +16,7 @@ from cloud.network_task import edit_default_security_group
 LOG = logging.getLogger("cloud.tasks")
 
 
+# Sync user to keystone backend
 @app.task
 def link_user_to_dc_task(user, datacenter, tenant_id, password):
 
@@ -23,7 +24,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
 
     LOG.info("----------username is-------------" + str(user.username))
 
-
+    # Check if user data center existed or not
     if UserDataCenter.objects.filter(
             user=user, data_center=datacenter).exists():
         LOG.info("User[%s] has already registered to data center [%s]",
@@ -37,6 +38,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     LOG.info("---------------rc is------------" + str(rc))
 
     #Now we do not let user to create a new tenant.
+    # The following logic is create a new tenant for new created user
     """
     tenant_name = "%s-%04d" % (settings.OS_NAME_PREFIX, user.id)
 
@@ -52,6 +54,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
              "data center [%s]", user.username, t.id, tenant_name,
              datacenter.name)
     """
+    #Get tenant info from openstack
     tenant_ = keystone.tenant_get(rc, tenant_id)
     tenant_name = tenant_.name 
     LOG.info("************ tenant_name is ************" + str(tenant_name))
@@ -65,6 +68,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     #hard coded tenant id and name for test.
     project_id = tenant_id 
 
+    # Sync action 
     u = keystone.user_create(rc, name=keystone_user, email=user.email,
                              password=pwd, project=project_id)
 
@@ -72,21 +76,9 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     LOG.info("User[%s] is registered as keystone user[uid:%s] in "
              "data center[%s]", user.username, u.id, datacenter.name)
 
+    # Get all roles from openstack
     roles = keystone.role_list(rc)
     LOG.info("------------------roles are----------------" + str(roles))
-    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
-
-    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
-    #LOG.info("------------------ member role is ----------------" + str(member_role.id))
-    #LOG.info("------------------ user id is ----------------" + str(u.id))
-
-
-    #try:
-    #    keystone.add_tenant_user_role(rc, project=project_id, user=u.id,
-    #                                  role=member_role.id)
-    #except:
-    #    pass
-
 
     # Grant basic role to user
     roles_id = []
@@ -94,11 +86,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
         if role.name in ['SwiftOperator', '_member_', 'heat_stack_owner']:
             roles_id.append(role)
 
-    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
-    #LOG.info("------------------ member role is ----------------" + str(member_role.id))
-    #LOG.info("------------------ user id is ----------------" + str(u.id))
-
-
+    # Assign role to user
     for role in roles_id:
 
         try:
@@ -108,6 +96,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
             pass
 
 
+    # Save user info to cloud_web
     udc = UserDataCenter.objects.create(
         data_center=datacenter,
         user=user,
@@ -129,6 +118,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
         LOG.exception("Failed to edit default security group for user[%s] in "
                       "data center[%s]", user.username, datacenter.name)
 
+    # TODO: For chargesystem logic
     Contract.objects.create(
         user=user,
         udc=udc,
@@ -142,7 +132,7 @@ def link_user_to_dc_task(user, datacenter, tenant_id, password):
     return u
 
 
-
+# Create a new role in openstack
 @app.task
 def role_create(request, role_name):
 
@@ -156,6 +146,7 @@ def role_create(request, role_name):
         return False
     return True
 
+# Delete a role in openstack
 @app.task
 def role_delete(request, role_name):
 
@@ -175,10 +166,11 @@ def role_delete(request, role_name):
         return False
     return True
 
+# Add user role 
 @app.task
 def add_user_role(keystone_user, role, user_tenant_id):
 
-    LOG.info("ddddddddd")
+    # Get default datacenter info
     datacenter = DataCenter.get_default()
     rc = create_rc_by_dc(datacenter)
     LOG.info("********* keystone_user is *********" + str(keystone_user))
@@ -193,12 +185,15 @@ def add_user_role(keystone_user, role, user_tenant_id):
             user_id = u.id
     LOG.info("****** user_id is *********" + str(user_id))
 
+    # Format role
     role_id = None
     roles = keystone.role_list(rc)
     for r in roles:
         if r.name == role:
             role_id = r.id
     LOG.info("******** role_id is ********" + str(role_id))
+
+    # Openstack action
     try:
         keystone.add_tenant_user_role(rc, project=user_tenant_id, user=user_id,
                                       role=role_id)
@@ -206,6 +201,7 @@ def add_user_role(keystone_user, role, user_tenant_id):
         pass
     return False
 
+# Task: delete a user from user
 @app.task
 def delete_keystone_user(tenant_id, username):
     datacenter = DataCenter.get_default()
@@ -222,13 +218,14 @@ def delete_keystone_user(tenant_id, username):
         pass
     return True
 
+# Task: change user password in openstack
 @app.task
 def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
 
     datacenter = DataCenter.get_default()
     rc = create_rc_by_dc(datacenter)
     users = keystone.user_list(rc, project=tenant_id)
-    LOG.info("*** rc is ***" + str(rc))
+    LOG.debug("*** rc is ***" + str(rc))
     LOG.info("******* users are ******" + str(users))
     udc_user_id = user_id
     LOG.info("*** udc_user_id is ***" + str(udc_user_id))
@@ -237,6 +234,8 @@ def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
         if u.username == username:
             user_id = u.id
     LOG.info("**** user_id is ****" + str(user_id))
+
+    # Openstack action
     try:
         keystone.user_update_password(rc, user_id, new_passwd, admin=True)
         LOG.info("**** user password updated ****")
@@ -252,6 +251,7 @@ def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
     return True
 
 
+# Task: list keystone users
 @app.task
 def keystone_list_users(request):
 
@@ -267,10 +267,10 @@ def keystone_list_users(request):
         return False
     return users
 
+# Task: add user role
 @app.task
 def add_user_role(keystone_user, role, user_tenant_id):
 
-    LOG.info("ddddddddd")
     datacenter = DataCenter.get_default()
     rc = create_rc_by_dc(datacenter)
     LOG.info("********* keystone_user is *********" + str(keystone_user))
@@ -298,60 +298,16 @@ def add_user_role(keystone_user, role, user_tenant_id):
         pass
     return False
 
-@app.task
-def delete_keystone_user(tenant_id, username):
-    datacenter = DataCenter.get_default()
-    rc = create_rc_by_dc(datacenter)
-    users = keystone.user_list(rc, project=tenant_id)
-    LOG.info("******* users are ******" + str(users))
-    user_id = None
-    for u in users:
-        if u.username == username:
-            user_id = u.id
-    try:
-        keystone.user_delete(rc, user_id)
-    except:
-        pass
-    return True
 
-@app.task
-def change_user_keystone_passwd(user_id, username, tenant_id, new_passwd):
-
-    datacenter = DataCenter.get_default()
-    rc = create_rc_by_dc(datacenter)
-    users = keystone.user_list(rc, project=tenant_id)
-    LOG.info("*** rc is ***" + str(rc))
-    LOG.info("******* users are ******" + str(users))
-    udc_user_id = user_id
-    LOG.info("*** udc_user_id is ***" + str(udc_user_id))
-    user_id = None
-    for u in users:
-        if u.username == username:
-            user_id = u.id
-    LOG.info("**** user_id is ****" + str(user_id))
-    try:
-        keystone.user_update_password(rc, user_id, new_passwd, admin=True)
-        LOG.info("**** user password updated ****")
-        udc = UserDataCenter.objects.get(user_id=udc_user_id)
-        LOG.info("**** user password updated ****")
-        udc.keystone_password = new_passwd
-        LOG.info("**** user password updated ****")
-        udc.save()
-        LOG.info("**** user password updated ****")
-
-    except:
-        raise
-    return True
-
+# Task: add user to a tenant
 @app.task
 def add_user_tenants(request, tenant_id, ID):
 
-
+    # Get rc info
     datacenter = DataCenter.get_default()
     rc = create_rc_by_dc(datacenter)
     roles = keystone.role_list(rc)
     LOG.info("------------------roles are----------------" + str(roles))
-    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
 
     # Grant basic role to user
     roles_id = []
@@ -359,13 +315,9 @@ def add_user_tenants(request, tenant_id, ID):
         if role.name in ['SwiftOperator', '_member_', 'heat_stack_owner']:
             roles_id.append(role)
 
-    #member_role = filter(lambda r: r.name.lower() == "_member_", roles)[0]
-    #LOG.info("------------------ member role is ----------------" + str(member_role.id))
-    #LOG.info("------------------ user id is ----------------" + str(u.id))
 
-
+    # Openstack action
     for role in roles_id:
-
         try:
             keystone.add_tenant_user_role(rc, project=tenant_id, user=ID,
                                          role=role.id)
@@ -373,7 +325,7 @@ def add_user_tenants(request, tenant_id, ID):
             pass
     return True
 
-
+# Task: delete a user from openstack
 @app.task
 def user_delete(request, tenant_id, ID):
 
@@ -382,6 +334,7 @@ def user_delete(request, tenant_id, ID):
     keystone.remove_tenant_user(rc, project=tenant_id, user=ID)
     return True
 
+# Task: create a newproject in openstack
 @app.task
 def project_create(request, tenant_name, tenant_description):
 
@@ -401,7 +354,7 @@ def project_create(request, tenant_name, tenant_description):
         return False
     return tenant_id
 
-
+# Task: delete a project from openstack
 @app.task
 def project_delete(request, ID):
 
@@ -416,19 +369,19 @@ def project_delete(request, ID):
         return False
     return True
 
+# Task: get user member role from openstack
 @app.task
 def user_role_member(request,udc_id):
+
+    # Get user info
     UDC = UserDataCenter.objects.get(pk=udc_id)
     LOG.info(UDC)
-    LOG.info("4")
     keystone_user_id = UDC.keystone_user_id
-    LOG.info("4")
     tenant_uuid = UDC.tenant_uuid
-    LOG.info("4")
     rc = create_rc_by_dc(DataCenter.objects.all()[0])
-    LOG.info("4")
+
+    # List user roles by tenant
     user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-    LOG.info("4")
     tri = False
     for user_role in user_roles:
         if user_role.name == "system":
@@ -445,19 +398,16 @@ def user_role_member(request,udc_id):
             break
     return tri
 
+# Task: get user role
 @app.task
 def user_role(request,udc_id):
     UDC = UserDataCenter.objects.get(pk=udc_id)
     LOG.info(UDC)
-    LOG.info("4")
     keystone_user_id = UDC.keystone_user_id
-    LOG.info("4")
     tenant_uuid = UDC.tenant_uuid
-    LOG.info("4")
     rc = create_rc_by_dc(DataCenter.objects.all()[0])
-    LOG.info("4")
+    # List user role
     user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-    LOG.info("4")
     for user_role in user_roles:
         if user_role.name == "system":
             response = "system" 

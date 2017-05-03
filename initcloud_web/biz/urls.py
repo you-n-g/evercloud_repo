@@ -123,6 +123,7 @@ urlpatterns += [
     url(r'^instances/$', instance_view.InstanceList.as_view()),
     url(r'^instancemanage/$', instancemanage_view.InstancemanageList.as_view()),
     url(r'^instancemanage/assignedusers/$', instance_view.instance_assignedusers),
+    url(r'^instancemanage/actionstatus/$', instance_view.instance_action_status),
     url(r'^instancemanage/unassignedusers/$', instance_view.instance_unassignedusers),
     url(r'^instancemanage/assignins/$', instance_view.instance_assign_instance),
     url(r'^instancemanage/resize/$', instance_view.instance_resize),
@@ -229,6 +230,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^floatings/create/$', floating_view.create_view),
     url(r'^floatings/action/$', floating_view.floating_action_view),
     url(r'^floatings/status/$', floating_view.floating_status_view),
+    url(r'^floatings/actionstatus/$', floating_view.floating_action_status),
     url(r'^floatings/target_list/$', floating_view.floating_ip_target_list_view),
 ])
 
@@ -463,6 +465,7 @@ urlpatterns += format_suffix_patterns([
     url(r'^data-centers/is-name-unique/$', idc_views.is_name_unique),
     url(r'^data-centers/create/$', idc_views.create_data_center),
     url(r'^data-centers/update/$', idc_views.update_data_center),
+    url(r'^data-centers/change_ip/$', idc_views.data_center_change_ip),
     url(r'^data-centers/batch-delete/$', idc_views.delete_data_centers),
     url(r'^user-data-centers/$', idc_views.UserDataCenterList.as_view()),
     url(r'^user-data-centers/(?P<pk>[0-9]+)/$', idc_views.UserDataCenterDetail.as_view())
@@ -518,7 +521,6 @@ urlpatterns += [
 #heat
 urlpatterns += [
     url(r'^heat/$', heat_view.HeatList.as_view()),
-    url(r'^post_test/$', instance_view.post_test),
     url(r'^heat/create/$', heat_view.create_heat),
     url(r'^heat/details/(?P<tenant_id>[^/]+)/$', heat_view.detail.as_view()),
     url(r'^heat/batch-delete/$', heat_view.delete_heats),

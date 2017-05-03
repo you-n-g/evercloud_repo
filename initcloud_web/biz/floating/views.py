@@ -28,53 +28,12 @@ LOG = logging.getLogger(__name__)
 
 @api_view(["GET"])
 def list_view(request):
-
-    udc_id = request.session["UDC_ID"]
-    system = False
-    security = False
-    audit = False
-    member = False
-    UDC = UserDataCenter.objects.get(pk=udc_id)
-    LOG.info(UDC)
-    LOG.info("4")
-    keystone_user_id = UDC.keystone_user_id
-    LOG.info("4")
-    tenant_uuid = UDC.tenant_uuid
-    LOG.info("4")
-    rc = create_rc_by_dc(DataCenter.objects.all()[0])
-    LOG.info("4")
-    LOG.info(str(keystone_user_id))
-    LOG.info(str(tenant_uuid))
-    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-    LOG.info("4")
-    for user_role in user_roles:
-        LOG.info("5")
-        LOG.info(user_role.name)
-        if user_role.name == "system":
-            LOG.info("5")
-            system = True
-            break
-        if user_role.name == "security":
-            security = True
-            break
-        if user_role.name == "audit":
-            audit = True
-            break
-
-        if not system and not security and not audit:
-            member = True
     """
-    if system:
-        floatings = Floating.objects.filter(deleted=False)
-        serializer = FloatingSerializer(floatings, many=True)
-        return Response(serializer.data)
+    List all allocated floating ips(fips)
+
     """
+
     floatings = Floating.objects.filter(deleted=False)
-    serializer = FloatingSerializer(floatings, many=True)
-    return Response(serializer.data)
-    floatings = Floating.objects.filter(user=request.user,
-                                        user_data_center=request.session["UDC_ID"],
-                                        deleted=False)
     serializer = FloatingSerializer(floatings, many=True)
     return Response(serializer.data)
 
@@ -82,6 +41,14 @@ def list_view(request):
 @check_quota(["floating_ip"])
 @api_view(["POST"])
 def create_view(request):
+    """
+    Create floating ip with requested param.
+
+    param: bandwidth
+    param: pay_type
+    param: pay_num
+
+    """
     floating = Floating.objects.create(
         ip="N/A",
         status=FLOATING_ALLOCATE,
@@ -93,8 +60,9 @@ def create_view(request):
     pay_type = request.data['pay_type']
     pay_num = int(request.data['pay_num'])
 
-    Operation.log(floating, obj_name=floating.ip, action='allocate', result=1)
+    Operation.log(floating, obj_name=floating.ip, action='allocate', result=1) # operation logging
 
+    ## TODO: workflow logic
     workflow = Workflow.get_default(ResourceType.FLOATING)
 
     if settings.SITE_CONFIG['WORKFLOW_ENABLED'] and workflow:
@@ -107,29 +75,51 @@ def create_view(request):
                 "please waiting for approval result!") % {'bandwidth': floating.bandwidth}
     else:
         msg = _("Your operation is successful, please wait for allocation.")
-        allocate_floating_task.delay(floating)
+        LOG.debug("*** begin to call celery task to handle request ***")
+        allocate_floating_task.delay(floating) # celery handle the request to openstack API.
+
+        ## TODO: Chargesystem logic
         Order.for_floating(floating, pay_type, pay_num)
 
-    return Response({"OPERATION_STATUS": 1, 'msg': msg})
+    return Response({"OPERATION_STATUS": 1, 'msg': msg, 'fip':floating.id})
 
 
 @api_view(["POST"])
 def floating_action_view(request):
-    data = floating_action(request.user, request.DATA)
+
+    """
+    Floating ip actions view
+
+    """
+     
+    data = floating_action(request.user, request.DATA) # floating_action will exactly do the action 
+    LOG.info("*** floating action is done ****")
     return Response(data)
 
 
 @api_view(["GET"])
 def floating_status_view(request):
+    
+    """
+    GET the floating status
+    """
+
     return Response(FLOATING_STATUS_DICT)
 
 
 @api_view(['GET'])
 def floating_ip_target_list_view(request):
+    """
+    List the fip by target.The target can be INSTANCE or BALANCE
 
+    """
+
+    # Get instance sets
     instance_set = Instance.objects.filter(
         deleted=False,  user=request.user,
         user_data_center=request.session["UDC_ID"])
+
+    # Get pool sets
     pool_set = BalancerPool.objects.filter(
         vip__public_address=None, deleted=False, user=request.user,
         user_data_center=request.session["UDC_ID"]).exclude(vip=None)
@@ -138,6 +128,9 @@ def floating_ip_target_list_view(request):
     instance_floatings = Floating.objects.filter(
         deleted=False, resource_type="INSTANCE")
     ins_ids = [f.resource for f in instance_floatings]
+
+
+    # Get instance by INSTANCE list
     for instance in instance_set: 
         if instance.id not in ins_ids:
             resources.append({
@@ -145,9 +138,16 @@ def floating_ip_target_list_view(request):
                 "id": instance.id,
                 "resource_type": "INSTANCE"})
 
+    # Get pool by balance
     for pool in pool_set:
         resources.append({"name": "lb-vip:" + pool.name,
                           "id": pool.id,
                           "resource_type": "LOADBALANCER"})
 
     return Response(resources)
+
+@api_view(["GET"])
+def floating_action_status(request):
+     floating_id = request.query_params.get("fip")
+     fip = Floating.objects.get(pk=int(floating_id))
+     return Response({"msg": fip.status_reason, 'status':fip.status})

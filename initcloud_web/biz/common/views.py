@@ -26,6 +26,10 @@ LOG = logging.getLogger(__name__)
 
 
 def state_service(request):
+    """
+    Interactivating with frontend
+    Loading module settings from module dir
+    """
 
     params = (
         (instance_settings,
@@ -110,6 +114,10 @@ def gen_module(settings, value_labels, stable_dict,
 
 @login_required
 def site_config(request):
+    """
+    Global settings for the site
+    Containing user roles and other common settings
+    """
 
 
     user = request.user
@@ -119,76 +127,40 @@ def site_config(request):
     current_user = {'username': user.username, 'is_system_user': user_.is_system_user, 'is_safety_user': user_.is_safety_user, 'is_audit_user': user_.is_audit_user}
 
 
-    """
-    if user_.is_system_user:
-        return render(request, 'site_config.js',
-                      {'current_user': json.dumps(current_user),
-                       'site_config': json.dumps(settings.SITE_CONFIG)},
-                      content_type='application/javascript')
-    if user_.is_audit_user:
-        return render(request, 'site_config.js',
-                      {'current_user': json.dumps(current_user),
-                       'site_config': json.dumps(settings.SITE_CONFIG)},
-                      content_type='application/javascript')
-
-    if user_.is_safety_user:
-        return render(request, 'site_config.js',
-                      {'current_user': json.dumps(current_user),
-                       'site_config': json.dumps(settings.SITE_CONFIG)},
-                      content_type='application/javascript')
-    """
 
     if not user.is_superuser:
-        LOG.info("99999999")
         # Retrieve user to use some methods of UserProxy
         user = UserProxy.objects.get(pk=user.pk)
 
         if user.has_udc:
-            LOG.info("cccccc")
             udc_id = request.session["UDC_ID"]
             LOG.info(udc_id)
             data_center = DataCenter.objects.get(userdatacenter__pk=udc_id)
             data_center_name = data_center.name
             rc = create_rc_by_dc(data_center)
             sdn_enabled = neutron.is_neutron_enabled(rc)
-            LOG.info("ccc0000")
         else:
             data_center_name = u'N/A'
             sdn_enabled = False
 
         current_user['datacenter'] = data_center_name
-        LOG.info("1")
         current_user['sdn_enabled'] = sdn_enabled
-        LOG.info("2")
         current_user['has_udc'] = user.has_udc
-        LOG.info("3")
         current_user['is_approver'] = user.is_approver
-        LOG.info("4")
         current_user['email'] = user.email
 
-        LOG.info("4")
         udc_id = request.session["UDC_ID"]
-        LOG.info("4")
         system = False
         security = False
         audit = False
         member = False
         UDC = UserDataCenter.objects.get(pk=udc_id)
-        LOG.info(UDC)
-        LOG.info("4")
         keystone_user_id = UDC.keystone_user_id
-        LOG.info("4")
         tenant_uuid = UDC.tenant_uuid
-        LOG.info("4")
         rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        LOG.info("4")
         user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-        LOG.info("4")
         for user_role in user_roles:
-            LOG.info("5")
-            LOG.info(user_role.name)
             if user_role.name == "system":
-                LOG.info("5")
                 system = True
                 break
             if user_role.name == "security":
@@ -204,15 +176,14 @@ def site_config(request):
         current_user['security'] = security
         current_user['audit'] = audit
         current_user['member'] = member
+        current_user['flat'] = settings.FLAT
     if user.is_superuser:
         current_user['system'] = True
         current_user['security'] = True 
         current_user['audit'] = True
+        current_user['flat'] = settings.FLAT
 
-        LOG.info("*** current_user is ***" + str(current_user))
-        LOG.info("888888")
 
-    LOG.info("*** current_user is ***" + str(current_user))
     return render(request, 'site_config.js',
                   {'current_user': json.dumps(current_user),
                    'site_config': json.dumps(settings.SITE_CONFIG)},
@@ -258,17 +229,55 @@ class IsSystemUser(permissions.BasePermission):
         return False 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
-
+    """
+    Define a new csrf token auth method
+    """
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
 
 
 
 def user_has_instance(request,user):
+    """
+    Check if user has instance or not
 
+    """
     has_instances = False
     instances = Instance.objects.filter(user_id=user.id)
     LOG.info("instances are" + str(instances))
     if instances:
         has_instances = True
     return has_instances
+
+
+def get_user_role(request):
+    """
+    Get current user roles
+    """
+    udc_id = request.session["UDC_ID"]
+    system = False
+    security = False
+    audit = False
+    member = False
+    UDC = UserDataCenter.objects.get(pk=udc_id)
+    keystone_user_id = UDC.keystone_user_id
+    tenant_uuid = UDC.tenant_uuid
+    rc = create_rc_by_dc(DataCenter.objects.all()[0])
+    user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
+    for user_role in user_roles:
+        if user_role.name == "system":
+            system = True
+            return "system"
+            break
+        if user_role.name == "security":
+            security = True
+            return "security"
+            break
+        if user_role.name == "audit":
+            audit = True
+            return "audit"
+            break
+
+        if not system and not security and not audit:
+            member = True
+            return "member"

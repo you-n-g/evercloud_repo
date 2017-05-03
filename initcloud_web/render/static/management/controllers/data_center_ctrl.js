@@ -46,7 +46,60 @@ CloudApp.controller('DataCenterController',
                 }
             });
         };
+
+        $scope.change_ip = function(data_center){
+
+            data_center = data_center || {};
+
+            $modal.open({
+                templateUrl: 'change_ip.html',
+                controller: 'DataCenterChangeIPController',
+                backdrop: "static",
+                size: 'lg',
+                resolve: {
+                    data_center_table: function () {
+                        return $scope.data_center_table;
+                    },
+                    data_center: function(){return data_center;}
+                }
+            });
+        };
     })
+    .controller('DataCenterChangeIPController',
+        function($rootScope, $scope, $modalInstance,
+                 data_center_table, data_center, DataCenterForm,
+                 $i18next, CommonHttpService, ResourceTool, ToastrService){
+
+            $scope.data_center = ResourceTool.copy_only_data(data_center);
+
+            $modalInstance.rendered.then(DataCenterForm.init);
+
+            $scope.cancel = function () {
+                $modalInstance.dismiss();
+            };
+
+            $scope.submit = function(data_center){
+
+                if(!$("#DataCenterForm").validate().form()){
+                    return;
+                }
+
+                post_data = {"id": data_center.id, "new_host": data_center.new_host, "host": data_center.host}
+                var url = '/api/data-centers/change_ip/';
+
+
+                CommonHttpService.post(url, post_data).then(function(data){
+                    if (data.success) {
+                        ToastrService.success(data.msg, $i18next("success"));
+                        data_center_table.reload();
+                        $modalInstance.dismiss();
+                    } else {
+                        ToastrService.error(data.msg, $i18next("op_failed"));
+                    }
+                });
+            };
+        }
+    )
     .controller('DataCenterCreateController',
         function($rootScope, $scope, $modalInstance,
                  data_center_table, data_center, DataCenterForm,

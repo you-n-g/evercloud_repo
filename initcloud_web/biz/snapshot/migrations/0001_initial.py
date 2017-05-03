@@ -20,6 +20,10 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='Create Date')),
             ],
             options={
+                'ordering': ['-create_date'],
+                'db_table': 'snapshot',
+                'verbose_name': 'Snapshot',
+                'verbose_name_plural': 'Snapshot',
             },
             bases=(models.Model,),
         ),

@@ -52,6 +52,7 @@ class Instance(models.Model):
     tenant_uuid = models.CharField('tenant uuid', null=True, blank=True, max_length=128)
     private_ip = models.CharField(_("Private IP"), max_length=255, blank=True, null=True)
     public_ip = models.CharField(_("Public IP"), max_length=255, blank=True, null=True)
+    status_reason = models.CharField(_("Status Reason"), max_length=255, blank=True, null=True)
 
     deleted = models.BooleanField(_("Deleted"), default=False)
     

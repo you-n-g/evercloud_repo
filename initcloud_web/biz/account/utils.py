@@ -13,7 +13,14 @@ from biz.floating.models import Floating
 
 LOG = logging.getLogger(__name__)
 
+# TODO: QUOTA LOGIC get user's quota usage
 def get_quota_usage(user, udc_id):
+    """
+    instance_used: number of instances
+    volume_used: size of volumes
+    floating_used: number of floating ips
+    """
+
     def instance_used(quota):
         instances = Instance.objects.filter(user=user, user_data_center__id=udc_id, deleted=0)
         vcpu_count, memory_count = 0, 0
@@ -59,15 +66,14 @@ def get_quota_usage(user, udc_id):
         return d
 
     c = Contract.objects.filter(user=user, udc__id=udc_id, deleted=0)[0]
-    LOG.info("*********** get quota 1 ***********")
+    LOG.debug("*********** get quota ***********")
     quota = c.get_quotas()
-    LOG.info("*********** get quota 1 ***********")
+    LOG.info("*********** update instance quota  ***********")
     quota.update(instance_used(quota))
-    LOG.info("*********** get quota 1 ***********")
+    LOG.info("*********** update volume quota ***********")
     quota.update(volume_used(quota))
-    LOG.info("*********** get quota 1 ***********")
+    LOG.info("*********** update floating quota ***********")
     quota.update(floating_used(quota))
-    LOG.info("*********** get quota 1 ***********")
 
     if not settings.QUOTA_CHECK:
         for k in quota.keys():
@@ -76,6 +82,7 @@ def get_quota_usage(user, udc_id):
     return quota
 
 
+# Quota decorator
 def check_quota(resource_checkers):
     def __func__(func):
         def wraprer(request, *args, **kwargs):

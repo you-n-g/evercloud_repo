@@ -5,7 +5,7 @@
                 <label class="control-label col-md-3">
                     {[{ 'instance.name' | i18next }]} <span class="required"> * </span>
                 </label>
-
+                <!-- 虚拟机名称 -->
                 <div class="col-md-7">
                     <input type="text" class="form-control input-inline" name="name" maxlength="24"
                            ng-model="instance_config.name" value=""
@@ -23,6 +23,7 @@
                 <div class="col-md-6">
                     <div data-ng-if="site_config.BATCH_INSTANCE_LIMIT > 1" style="float:left;">
                         <div style="width:150px;" class="input-group">
+                            <!-- 虚拟机个数选择 -->
                             <div class="spinner-buttons input-group-btn">
                                 <button class="btn spinner-down red" type="button" ng-click="instance_counter(-1)">
                                     <i class="fa fa-minus"></i>
@@ -72,7 +73,7 @@
             <div class="form-group" style="margin-bottom: 10px;">
                 <label class="control-label col-md-3">{[{ 'instance.login_name' | i18next }]}
                 </label>
-
+                <!-- 虚拟机登录用户名  -->
                 <div class="col-md-7">
                     <input type="text" class="form-control" name="login_name" value="root"
                            readonly ng-model="instance_config.select_image.login_name"/>
@@ -85,6 +86,7 @@
                         class="required">* </span>
                 </label>
 
+                <!-- 虚拟机密码 -->
                 <div class="col-md-7">
                     <input id="login_password" type="password" class="form-control input-inline"
                            name="password" ng-model="instance_config.password" value=""/>
