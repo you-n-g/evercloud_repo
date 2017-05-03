@@ -259,6 +259,7 @@ def uninstall_software(software_list, hosts_list):
                 },
                 win_package_task,
             ], hosts=hosts))
+    return bool(res)
 
 def set_reg(host_list, key, value, data, state='present', datatype='string'):
     for hosts in host_list:
