@@ -41,6 +41,10 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
+                'ordering': ['-create_date'],
+                'db_table': 'templatemanager',
+                'verbose_name': 'Templatemanager',
+                'verbose_name_plural': 'Templatemanager',
             },
             bases=(models.Model,),
         ),

@@ -1058,27 +1058,46 @@ CloudApp.controller('InstancemanageController',
             CommonHttpService.post("/api/instances/create/", post_data).then(function (data) {
                 if (data.OPERATION_STATUS == 1) {
 
-            ToastrService.success(data.msg, $i18next('success'));
-            $modalInstance.close();
-            $scope.cancel = $modalInstance.dismiss;
-            var trace_status = function (instance_name, pro) {
-              CommonHttpService.get('/api/instancemanage/actionstatus?vm='+instance_name).then(function(data) {
-                if(data.status == 11){
-                  ToastrService.success(data.msg, $i18next('success'));
-                  $interval.cancel(pro)
-                 }
-              })
+                    ToastrService.success(data.msg, $i18next("success"));
+                    $modalInstance.dismiss();
+                    instancemanage_table.reload();
+                    alert(instance_name)
+        $rootScope.setInterval(function () {
+            var list = $scope.instancemanages;
+            var need_refresh = false;
+            for (var i = 0; i < list.length; i++) {
+                CommonHttpService.get('/api/instancemanage/actionstatus?vm='+instance_name).then(function(data) {
+                if(data.status == 11)
+                $interval.cancel(pro)
+                ToastrService.success(data.msg, $i18next('failed'));
+                })
+                if (list[i].is_unstable) {
+                    need_refresh = true;
+                    break;
+                }
             }
-            for(var i = 0; i < 1; ++i) {
-              (function(x) {
-                var pro = $interval(function() {
-                  trace_status(instance_name, pro)
-                }, 2000)
-              })(i);
+            if (need_refresh) {
+                $scope.instancemanage_table.reload();
+                previous_refresh = true;
             }
-              instancemanage_table.reload()
+            else {
+                if (previous_refresh) {
+                    $scope.instancemanage_table.reload();
+                }
+                previous_refresh = false;
+            }
+
+        }, 5000);
 
 
+                    var trace_status = function (instance_name, pro) {
+                         alert('dog')
+                         CommonHttpService.get('/api/instancemanage/actionstatus?vm='+instance_name).then(function(data) {
+                         if(data.status == 11)
+                            $interval.cancel(pro)
+                            ToastrService.success(data.msg, $i18next('failed'));
+                         })
+                    }
                 }
                 else if (data.OPERATION_STATUS == 2) {
                     ToastrService.warning($i18next("op_forbid_msg"), $i18next("op_failed"));

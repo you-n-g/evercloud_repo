@@ -29,18 +29,8 @@ class Templatemanager(models.Model):
     template_iso = models.CharField(_("Template_ISO"), max_length=60, null=True)
 
 
-    """
-    @classmethod
-    def log(cls, obj, obj_name, action, result=1, udc=None, user=None):
-
-        try:
-            Templatemanager.objects.create(
-                resource=obj.__class__.__name__,
-                resource_id=obj.id,
-                resource_name=obj_name,
-                action=action,
-                result=result
-            )
-        except Exception as e:
-            pass
-    """
+    class Meta:
+        db_table = "templatemanager"
+        ordering = ['-create_date']
+        verbose_name = _("Templatemanager")
+        verbose_name_plural = _("Templatemanager")

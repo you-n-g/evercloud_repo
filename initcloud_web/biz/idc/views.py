@@ -82,6 +82,47 @@ def create_data_center(request):
         return Response({"success": False,
                 "msg": _('Failed to create data center for unknown reason.')})
 
+@api_view(['POST'])
+def data_center_change_ip(request):
+    """
+    Change controller management ip
+    param: ID,current data center id
+    param: new_host, new host ip address
+    param: old_host, old host ip address
+    """
+    try:
+        pk = request.data['id']
+        new_host = request.data['new_host']
+        old_host = request.data['host']
+
+        LOG.info("new host is" + str(new_host))
+        LOG.info("host is" + str(old_host))
+        if DataCenter.objects.filter(host=new_host).exclude(pk=pk).exists():
+            return Response({"success": False,
+                            "msg": _('This host has been used by other data center.')},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        data_center = DataCenter.objects.get(pk=pk)
+        for field, value in request.data.items():
+            setattr(data_center, field, value)
+	try:
+	    cmd = 'sudo /var/www/initcloud_web/change_ip.sh ' + old_host + ' ' + new_host
+	    subprocess.Popen(cmd,shell=True)
+            data_center.host = new_host
+	except:
+	    traceback.print_exc()
+        data_center.save()
+	
+        return Response({'success': True,
+                        "msg": _('Data Center is updated successfully!')},
+                        status=status.HTTP_201_CREATED)
+    except Exception as e:
+        LOG.error("Failed to create data center, msg:[%s]" % e)
+        return Response({"success": False,
+                "msg": _('Failed to create data center for unknown reason.')})
+
+
+
 
 @api_view(['POST'])
 def update_data_center(request):

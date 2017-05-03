@@ -504,6 +504,7 @@
 
   "data_center":{
     "name": "名称",
+    "change_ip": "修改管理节点IP",
     "host": "管理节点IP",
     "project": "项目名",
     "user": "用户名",
@@ -511,6 +512,7 @@
     "auth_url": "Auth Url",
     "ext_net": "外网名称",
     "title_create": "创建openstack集群",
+    "title_change_ip": "修改openstack管理节点IP",
     "title_update": "更新openstack集群",
     "confirm_delete": "确认删除openstack集群?",
     "host_is_used": "该地址已被使用或者主机不可用",

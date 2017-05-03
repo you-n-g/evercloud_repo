@@ -13,6 +13,7 @@ angular.module("CloudApp")
             $scope.current_floating_data = [];
             $scope.selected_floatingIP = false;
 
+            // Get floating data table 
             $scope.floating_table = new ngTableParams({
                 page: 1,
                 count: 10
@@ -26,6 +27,7 @@ angular.module("CloudApp")
                 }
             });
 
+           // floating action refresh
             var previous_refresh = false;
 
             $rootScope.setInterval(function () {
@@ -50,6 +52,7 @@ angular.module("CloudApp")
 
             }, 5000);
 
+            // Create floating ip
             $scope.modal_create_floating = function () {
                 $modal.open({
                     templateUrl: 'addFloating.html',
@@ -60,9 +63,11 @@ angular.module("CloudApp")
                         floating_table: function () {
                             return $scope.floating_table;
                         },
+                        // Get quota
                         quota: function(CommonHttpService){
                             return CommonHttpService.get("/api/account/quota/");
                         },
+                        // Get floating prices
                         floatingPrices: function(){
                             return PriceRule.query({'resource_type': 'floating_ip'}).$promise;
                         },
@@ -73,6 +78,7 @@ angular.module("CloudApp")
                 });
             };
 
+            // Bind fip to instance
             $scope.modal_binding_instance = function (floating) {
                 $modal.open({
                     templateUrl: 'associate.html',
@@ -92,6 +98,7 @@ angular.module("CloudApp")
                 });
             };
 
+            // Modal change bandwidth
             $scope.modal_change_bandwidth = function (floating) {
                 $scope.floatingIP = floating;
                 $modal.open({
@@ -109,6 +116,7 @@ angular.module("CloudApp")
 
             };
 
+            //Actually action perfrom
             var post_action = function (floating, action) {
                 bootbox.confirm($i18next("floatingIP.confirm_" + action), function (confirm) {
                     if (confirm) {
@@ -130,13 +138,16 @@ angular.module("CloudApp")
                 });
             };
 
+            // Release the fip
             var action_release = function (floating) {
                 post_action(floating, "release");
             };
+            // Disassociate fip
             var action_disassociate = function (floating) {
                 post_action(floating, "disassociate");
             };
 
+            // Total actions
             $scope.floating_action = function (floating, action) {
                 var action_func = {
                     "release": action_release,
@@ -148,8 +159,9 @@ angular.module("CloudApp")
         }
     )
 
+     // Floating create action
     .controller('FloatCreateController',
-        function ($rootScope, $scope, $modalInstance, $i18next, lodash,
+        function ($rootScope, $scope, $modalInstance, $i18next, lodash,$interval,
                   CommonHttpService, ToastrService, PriceTool,
                   floating_table, quota, floatingPrices, bandwidthPrices) {
 
@@ -169,6 +181,23 @@ angular.module("CloudApp")
                         ToastrService.success(data.msg, $i18next("success"));
                         floating_table.reload();
                         $modalInstance.close();
+                        var floating_id = data.fip
+
+            var trace_status = function (floating_id, pro) {
+              CommonHttpService.get('/api/floatings/actionstatus?fip='+floating_id).then(function(data) {
+                if(data.status == 0){
+                  ToastrService.success(data.msg, $i18next('faied'));
+                  $interval.cancel(pro)
+                 }
+              })
+            }
+            for(var i = 0; i < 1; ++i) {
+              (function(x) {
+                var pro = $interval(function() {
+                  trace_status(floating_id, pro)
+                }, 2000)
+              })(i);
+            }
                     } else {
                         ToastrService.error($i18next("op_failed_msg"), $i18next("op_failed"));
                     }
@@ -184,6 +213,7 @@ angular.module("CloudApp")
         }
     )
 
+    // Associate Controller Taking care of exactly action
     .controller('AssociateController',
         function ($rootScope, $scope, $filter, $modalInstance,
                   $i18next, ToastrService, CommonHttpService,
@@ -221,6 +251,7 @@ angular.module("CloudApp")
         }
     )
 
+    //Slider of bandwidth
     .directive("floatslider", function(){
         return {
             restrict: 'E',

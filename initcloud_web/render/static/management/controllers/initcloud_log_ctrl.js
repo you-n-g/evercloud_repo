@@ -3,14 +3,15 @@
  * Date: 16-4-17
  **/
 CloudApp.controller('InitcloudController',
-    function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox, $sce, $http,
+    function($rootScope, $scope, $filter, $modal, $i18next, $ngBootbox, $sce, $http, $location,
              CommonHttpService, ToastrService, ngTableParams, ngTableHelper,
              Ceilometer, CheckboxGroup, DataCenter){
 
         $scope.$on('$viewContentLoaded', function(){
                 Metronic.initAjax();
         });
-        $scope.dashboard = "http://192.168.1.48:5601/app/kibana#/dashboard/initcloud_log?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-12h,mode:relative,to:now))&_a=(filters:!(),options:(darkTheme:!t),panels:!((col:5,id:LOG_LINE,panelIndex:1,row:1,size_x:7,size_y:8,type:visualization),(col:1,id:LOG_LEVEL,panelIndex:3,row:1,size_x:4,size_y:4,type:visualization),(col:1,id:%E6%9C%8D%E5%8A%A1%E5%8D%A0%E6%AF%94,panelIndex:4,row:5,size_x:4,size_y:4,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:initcloud_log,uiState:())"
+        
+        $scope.dashboard = "http://" + $location.host() + ":5601/app/kibana#/dashboard/initcloud_log?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-12h,mode:relative,to:now))&_a=(filters:!(),options:(darkTheme:!t),panels:!((col:5,id:LOG_LINE,panelIndex:1,row:1,size_x:7,size_y:8,type:visualization),(col:1,id:LOG_LEVEL,panelIndex:3,row:1,size_x:4,size_y:4,type:visualization),(col:1,id:%E6%9C%8D%E5%8A%A1%E5%8D%A0%E6%AF%94,panelIndex:4,row:5,size_x:4,size_y:4,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:initcloud_log,uiState:())"
         var loadMonitor = function(){
                 $scope.monitorUrl = $sce.trustAsResourceUrl($scope.dashboard);
             };

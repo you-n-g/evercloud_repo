@@ -3,11 +3,13 @@
 from django.utils.translation import ugettext_lazy as _
 
 
+# Signup 
 USER_TYPE_CHOICES = (
     (1, _("Personal")),
     (2, _("Company")),
 )
 
+# TODO: QUOTA
 QUOTA_ITEM = (
     ("instance", _("Instance")),
     ("vcpu", _("CPU")),
@@ -18,6 +20,7 @@ QUOTA_ITEM = (
 )
 
 
+# Operation resource choice
 RESOURCE_CHOICES = (
     ("Instance", _("Instance")),
     ("Volume", _("Volume")),
@@ -31,7 +34,7 @@ RESOURCE_CHOICES = (
     ("BackupItem", _("BackupItem")),
 )
 
-
+# Operation resource action choice
 RESOURCE_ACTION_CHOICES = (
     ("reboot", _("reboot")),
     ("power_on", _("power_on")),

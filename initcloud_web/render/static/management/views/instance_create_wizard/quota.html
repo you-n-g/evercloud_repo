@@ -3,6 +3,7 @@
         <h4 class="form-section">{[{ 'constant.quota' | i18next }]}</h4>
         <div class="row">
             <div class="col-md-12">
+                <!-- 虚拟机个数配额 -->
                 <div class="form-group">
                     <label class="control-label">{[{ 'constant.instance' | i18next }]}({[{ resource_persent_desc('instance') }]})</label>
                     <div class="progress" style="margin-bottom:0px;">
@@ -16,6 +17,7 @@
                 </div>
             </div>
             <div class="col-md-12">
+                <!-- vcpu个数配置  -->
                 <div class="form-group">
                     <label class="control-label">{[{ 'constant.vcpu' | i18next }]}({[{ resource_persent_desc('vcpu') }]})</label>
                     <div class="progress" style="margin-bottom:0px;">
@@ -30,6 +32,7 @@
                 </div>
             </div>
             <div class="col-md-12">
+                <!-- 内存配置  -->
                 <div class="form-group">
                     <label class="control-label">{[{ 'constant.memory' | i18next }]}({[{ resource_persent_desc('memory') }]})</label>
                     <div class="progress" style="margin-bottom:0px;">

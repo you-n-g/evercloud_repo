@@ -30,8 +30,10 @@ from api import neutron
 LOG = logging.getLogger(__name__)
 
 
+# Task: create a new flavor if not existing
 def flavor_create(instance):
     assert instance  
+    # Generate a new name of flavor
     def _generate_name(instance):
         gpu = 'no'
         if instance.gpu == True:
@@ -41,11 +43,13 @@ def flavor_create(instance):
         name = u"%s.cpu-%s-ram-%s-disk-%s-core-%s-socket-%s-gpu-%s" % (settings.OS_NAME_PREFIX,
                     instance.cpu, instance.memory, instance.sys_disk, instance.core, instance.socket, gpu)
         return name
-
+    # Get flavor by name
     def _get_flavor_by_name(instance, name):
         rc = create_rc_by_instance(instance)
         flavor = None
+        # Construct nova admin client
         novaAdmin = get_nova_admin(instance)
+        # List all the flavors
         try:
             flavors = novaAdmin.flavors.list(rc)
         except Exception:
@@ -66,14 +70,12 @@ def flavor_create(instance):
     name = _generate_name(instance)
     flavor = _get_flavor_by_name(instance, name)
     metadata = {"hw:cpu_cores":int(instance.core),"hw:cpu_sockets":int(instance.socket)}
+    # For gpu, set metadata
     if instance.gpu:
         #metadata['pci_passthrough:alias'] = ['alias_1:1']
         metadata['pci_passthrough:alias'] = settings.GPU
-    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
-    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
-    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
-    LOG.info('pppppppppppppppppppppppccccccccccccccccccciiiiii')
-    LOG.info(metadata)
+
+    # Not existing, create a new one
     if flavor is None:
         try:
             LOG.info(u"Flavor not exist, create new, [%s][%s].", instance, name)
@@ -83,7 +85,6 @@ def flavor_create(instance):
                                   vcpus=instance.cpu, disk=instance.sys_disk,
                                   is_public=True)
 	    flavor.set_keys(metadata)
-	    #LOG.info(flavor.get_keys(flavor))
         except nova.nova_exceptions.Conflict:
             LOG.info(u"Flavor name conflict, [%s][%s].", instance, name)
             flavor = _get_flavor_by_name(instance, name)
@@ -95,11 +96,12 @@ def flavor_create(instance):
                 instance, name, (end-begin).seconds)
     return flavor
 
-
+# Create a new instance
 def instance_create(instance, password):
     if instance.image.os_type not in (LINUX, WINDOWS):
         raise ValueError(u"Unknown image os type, [%s].", instance)
 
+    # Cloud-init formated script
     user_data_format = "#cloud-config\n"\
                        "password: %s\n"\
                        "chpasswd: { expire: False }\n"\
@@ -114,12 +116,17 @@ def instance_create(instance, password):
 
     LOG.info("**** flavor is ****" + str(instance.flavor_id))
     if instance.image.os_type == LINUX:
-        server = nova.server_create(rc, name=instance.name,
-                                    image=instance.image.uuid,
-                                    flavor=instance.flavor_id, key_name=None,
-                                    security_groups=[], nics=nics,
-                                    user_data=user_data)
+        # OpenStack nova server creation
+        try:
+            server = nova.server_create(rc, name=instance.name,
+                                        image=instance.image.uuid,
+                                        flavor=instance.flavor_id, key_name=None,
+                                        security_groups=[], nics=nics,
+                                        user_data=user_data)
+        except Exception as e:
+            LOG.info("*** error is ***" + str(e))
     else: 
+        # For windows generate complexity passwd
         new_pwd = []
         for c in password:
             if c in ["&", "|", "(", ")", "<", ">", "^"]:
@@ -137,18 +144,20 @@ def instance_create(instance, password):
     return server
 
 
+# Get nova server specific info
 def instance_get(instance):
     assert instance
     if instance.uuid is None:
         return None
 
     rc = create_rc_by_instance(instance)
+    # Make novaclient to get server detailed info
     try:
         return nova.server_get(rc, instance.uuid)
     except nova.nova_exceptions.NotFound:
         return None
 
-
+# Get get server vnc console
 def instance_get_vnc_console(instance):
     assert instance
     LOG.info("*** start to get novnc ****")
@@ -163,7 +172,7 @@ def instance_get_vnc_console(instance):
         LOG.exception("Failed to get vnc console, [%s].", instance)
         return None
 
-
+# Get server console log
 def instance_get_console_log(instance, tail_length=None):
     assert instance
     if instance.uuid is None:
@@ -177,7 +186,7 @@ def instance_get_console_log(instance, tail_length=None):
         LOG.exception("Failed to get console output, [%s].", instance)
         return None
         
-
+# Collecting instance deleted resource
 def instance_deleted_release_resource(instance):
     # floatings
     from biz.floating.models import Floating
@@ -199,7 +208,7 @@ def instance_deleted_release_resource(instance):
         LOG.info('Volume[%s] of instance[%s][%s] is released.',
                  vol.name, instance.id, instance.name)
 
-
+# Task: sync instance status
 @app.task
 def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid, rc,
                                     retry_count=1):
@@ -216,9 +225,10 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
         LOG.info(u"Instance create synchronize status, [Count:%s][%s], "
                 "[Status: %s].", count, instance, status)
 
+        # If server status is active, get network info,update server status and save
         if status == "ACTIVE":
             instance.status = INSTANCE_STATE_RUNNING
-
+            # Get network info from neutron
             network_ = neutron.network_list_for_tenant(rc, tenant_id=user_tenant_uuid)
             LOG.info("********** network is ******************" + str(network_))
             network_name = None
@@ -227,17 +237,16 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
                 network_id = net.id
                 network_name = net.name
             try:
-                #if neutron_enabled:
-                #    private_net = "network-%s" % instance.network.id
-                #else:
                 network_ = Network.objects.get(pk=instance.network.id)
                 LOG.info(network_)
                 private_net = network_.name
                 LOG.info("*** private_net is ***" + str(private_net))
+                # For vlan and flat
                 if  settings.VLAN_ENABLED == False and not settings.FLAT:
                     instance.private_ip = srv.addresses.\
                                 get(private_net)[0].get("addr", "---")
                 else:
+                    # For vxlan
                     instance.private_ip = srv.addresses.\
                                 get(network_name)[0].get("addr", "---")
             except Exception as ex:
@@ -249,7 +258,7 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
             LOG.info(u"Instance create succeed, [%s], apply [%s] seconds.",
                             instance, (end-begin).seconds)
             break
-        
+        # If server status is error, save in db 
         if status == "ERROR":
             instance.status = INSTANCE_STATE_ERROR
             instance.save() 
@@ -264,6 +273,7 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
 
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND) 
     else:
+        # Sync timeout
         end = datetime.datetime.now()
         if retry_count <= 3:
             LOG.warn(u"Instance create timeout, [%s], apply [%s] seconds.",
@@ -277,10 +287,10 @@ def instance_create_sync_status_task(instance, neutron_enabled, user_tenant_uuid
             return False
     return True
 
-
+# Instance create task interface
 @app.task
 def instance_create_task(instance, **kwargs):
-    LOG.info("*************** I am instance create in instance_create_task ****************")
+    LOG.debug("*************** I am instance create in instance_create_task ****************")
     password = kwargs.get("password", None)
     assert instance
     assert password
@@ -293,6 +303,7 @@ def instance_create_task(instance, **kwargs):
                         instance, password)
      
     rc = create_rc_by_instance(instance)
+    # Try to create a flavor if not existing
     try: 
         flavor = flavor_create(instance)
         instance.flavor_id = flavor.id 
@@ -313,13 +324,6 @@ def instance_create_task(instance, **kwargs):
         LOG.info("********** neutron_enabled *************")
         LOG.info("********** start to make sure make_sure_default_private_network ***********")
         network = make_sure_default_private_network(instance, rc, user_tenant_uuid)
-        #network = neutron.network_list_for_tenant(rc, tenant_id=user_tenant_uuid)
-        #LOG.info("********** network is ******************" + str(network))
-        #network_id = None
-        #for net in network:
-        #    LOG.info("***** net is *******" + str(net))
-        #    network_id = net.id
-        #LOG.info("********* network_id is *********" + str(network_id))
         LOG.info("**** network is ****" + str(network))
         instance.network_id = network.id
         instance.save() 
@@ -330,11 +334,13 @@ def instance_create_task(instance, **kwargs):
         LOG.info("********** start to set default firewall ************")
         instance.set_default_firewall()
  
+    # Server creation action
     try:
         LOG.info("********** start to create instance *****************")
         server = instance_create(instance, password)
     except Exception as ex:
         instance.status = INSTANCE_STATE_ERROR
+        instance.status_reason = ex.message
         instance.save()
         LOG.exception(u"Instace create api call raise an exception, [%s][%s].",
                         instance, ex.message)
@@ -357,19 +363,20 @@ def instance_create_task(instance, **kwargs):
                     "apply [%s] seconds.",
                     instance, status, (end-begin).seconds)
             time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
+            # Try to sync status
             instance_create_sync_status_task.delay(
                 instance, neutron_enabled, user_tenant_uuid, rc, retry_count=1)
             billing_task.charge_resource(instance.id, Instance)
 
     return instance
 
-
+# Reboot server
 def reboot(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
     if server:
         nova.server_reboot(rc, instance.uuid) 
-    
+    # After rebooting,sync status 
     for count in xrange(settings.MAX_COUNT_SYNC):
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
         server = instance_get(instance)
@@ -390,7 +397,7 @@ def reboot(instance):
 
     return True
 
-
+# Delete server from openstack
 def _server_delete(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
@@ -421,36 +428,40 @@ def _server_delete(instance):
    
     return True
 
+# Start a server
 def _server_start(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
     if server:
         nova.server_start(rc, instance.uuid)
-
+# Stop a server
 def _server_stop(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
     if server:
         nova.server_stop(rc, instance.uuid)
 
+# Unpause a server
 def _server_unpause(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
     if server:
         nova.server_unpause(rc, instance.uuid)
 
+# Pause a server
 def _server_pause(instance):
     rc = create_rc_by_instance(instance)
     server = instance_get(instance)
     if server:
         nova.server_pause(rc, instance.uuid)
 
-
+# Sync server status
 @app.task
 def instance_status_synchronize_task(instance, action):
     assert instance
     assert action 
 
+    # For different status,save status to db
     def _server_is_active(instance, status):
         if status == u"ACTIVE":
             instance.status = INSTANCE_STATE_RUNNING
@@ -523,7 +534,7 @@ def instance_status_synchronize_task(instance, action):
 
     return True
 
-
+# Task: attach volume to a instance
 @app.task
 def attach_volume_to_instance(volume, instance):
     rc = create_rc_by_instance(instance)
@@ -531,6 +542,7 @@ def attach_volume_to_instance(volume, instance):
                     instance, volume)
 
     begin = datetime.datetime.now()
+    # Try to attach volume to a instance
     try:
         nova.instance_volume_attach(rc, volume_id=volume.volume_id,
                                     instance_id=instance.uuid, device=None)
@@ -548,6 +560,7 @@ def attach_volume_to_instance(volume, instance):
                       instance, volume, (end-begin).seconds)
 
     begin = datetime.datetime.now()
+    # Sync status
     for count in xrange(settings.MAX_COUNT_SYNC):
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
         vol = volume_task.volume_get(volume)
@@ -601,6 +614,7 @@ def attach_volume_to_instance(volume, instance):
         return True
 
 
+# Task detach volume from a instance
 @app.task
 def detach_volume_from_instance(volume):
     assert volume is not None
@@ -612,7 +626,9 @@ def detach_volume_from_instance(volume):
              instance, volume)
     
     begin = datetime.datetime.now()
+    # OpenStack action
     try:
+        # OpenStack action
         nova.instance_volume_detach(rc, instance.uuid, volume.volume_id)
     except Exception:
         volume.change_status(VOLUME_STATE_ERROR)
@@ -627,6 +643,7 @@ def detach_volume_from_instance(volume):
                       "apply [%s] seconds.",
                       instance, volume, (end-begin).seconds)
 
+    # Sync status
     begin = datetime.datetime.now()
     for count in xrange(settings.MAX_COUNT_SYNC):
         time.sleep(settings.INSTANCE_SYNC_INTERVAL_SECOND)
@@ -678,12 +695,14 @@ def detach_volume_from_instance(volume):
         return True
 
 
+# Overview data
 @app.task
 def hypervisor_stats_task(data_center):
     assert data_center is not None
     rc = create_rc_by_dc(data_center)
     stats = None
     
+    # Get hypervisor data
     try:
         stats = nova.hypervisor_stats(rc)
     except:
@@ -691,7 +710,7 @@ def hypervisor_stats_task(data_center):
 
     return stats
 
-
+# Get server port info, including ip, mac and so on.
 def instance_get_port(instance):
     assert instance
     if instance.uuid is None:
@@ -704,6 +723,7 @@ def instance_get_port(instance):
         return None
 
 
+# Task: delete user instance and related network
 @app.task
 def delete_user_instance_network(request, instance_id):
 
@@ -719,6 +739,7 @@ def delete_user_instance_network(request, instance_id):
         pass
     return True
 
+# Get vnc port by qemu remote command
 def instance_get_realvnc_console(instance):
 
     assert instance
@@ -730,19 +751,19 @@ def instance_get_realvnc_console(instance):
 
     spice = {}
     if instance:
-        LOG.info("******")
+        # Construct nova admin client
         novaAdmin = get_nova_admin(instance)
-        LOG.info("******")
         server = novaAdmin.servers.get(instance.uuid)
-        LOG.info("******")
+        # Get detailed info
         server_dict = server.to_dict()
-        LOG.info("******")
         server_host = server_dict['OS-EXT-SRV-ATTR:host']
         server_status = server_dict['status']
         LOG.info("******* server_status is *******" + str(server_status))
         LOG.info("******* server_host is *******" + str(server_host))
+        # Get instance running host
         host_ip = settings.COMPUTE_HOSTS[server_host]
         LOG.info("host ip is" + str(host_ip))
+        # Format command
         cmd="virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid
         LOG.info("cmd=" + cmd)
         p = subprocess.Popen("virsh -c qemu+tcp://" + host_ip + "/system vncdisplay " + instance.uuid, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -756,6 +777,7 @@ def instance_get_realvnc_console(instance):
         LOG.info("port=" + str(port))
         if "error" in str(port):
             return Response({"success": False, "msg": _('Failed to create flavor for unknown reason.')})
+        # Get spice port by vnc port
         split_port = port.split(":")
         LOG.info(split_port)
         port_1 = split_port[1]
@@ -772,6 +794,7 @@ def instance_get_realvnc_console(instance):
 
         return vnc
 
+# Task get spice console
 def instance_get_spice_console(instance):
 
     assert instance

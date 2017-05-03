@@ -27,9 +27,18 @@ LOG = logging.getLogger(__name__)
 
 @api_view(["GET"])
 def summary(request):
+    """
+    Summary overview
+    user_num
+    instance_num
+    data_center_num
+    flavor_num
+    """
     LOG.info('-------------------- this is for admin UDC -------------------')
     try:
+        
         user = User.objects.filter(username=request.user)[0]
+        # For superuser,we will create a tenant in openstack
         if user.is_superuser:
             dc = DataCenter.get_default()
             rc = create_rc_by_dc(dc)
@@ -48,18 +57,8 @@ def summary(request):
                             if role.name == 'admin':
                                 role_id = role.id
                                 keystone.add_tenant_user_role(rc, user=admin_user, role=role_id, project=tenant)
-                #tenants = keystone.keystoneclient(rc).tenants.list()
-                #for tenant in tenants:
-                #    if tenant.name == settings.ADMIN_TENANT_NAME:
-                #	admin_tenant_id = tenant.id
-                #	admin_tenant_name = tenant.name
-                #	LOG.info(tenant.name)
-                #	LOG.info(tenant.id)
                 admin_UDC = UserDataCenter.objects.create(data_center=dc,user=user,tenant_name=tenant.name,tenant_uuid = tenant.id,keystone_user=settings.ADMIN_NAME,keystone_password=settings.ADMIN_PASS, keystone_user_id = keystone_user_id)
                 Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
-            #if not Contract.objects.filter(user=user).exists():
-                #admin_UDC = UserDataCenter.objects.filter(data_center=dc, user=user)[0]
-                #Contract.objects.create(user=user,udc=admin_UDC,name=user.username,customer=user.username,start_date=datetime.datetime.now(),end_date=datetime.datetime.now(),deleted=False)	
     except:
         traceback.print_exc()
     return Response({"user_num": User.objects.filter(is_superuser=False).count(),
@@ -72,12 +71,16 @@ def summary(request):
 
 @api_view(["POST"])
 def init_data_center(request):
+    """
+    Initialize a new data center
+    """
 
     params = {'name': request.data['name']}
 
     for key in ('host', 'project', 'user', 'password', 'auth_url', 'ext_net'):
         params[key] = request.data[key]
 
+    # Save new data center info to db
     try:
         data_center = DataCenter.objects.create(**params)
     except IntegrityError:
@@ -100,6 +103,13 @@ def init_data_center(request):
 
 @api_view(['POST'])
 def init_flavors(request):
+    """
+    Init flavors with param
+    names: flavor name
+    cpus: flavor cpus
+    prices: flavor prices
+    memory: flavor memory
+    """
 
     data = request.data
     names = data.getlist('names[]')
@@ -122,6 +132,14 @@ def init_flavors(request):
 
 @api_view(['POST'])
 def init_images(request):
+    """
+    Init images with params
+    param: names
+    param: login_names
+    param: uuids
+    param: os_types
+    param: disk_size
+    """
 
     data = request.data
 
@@ -151,11 +169,13 @@ def init_images(request):
 
 @api_view(['GET'])
 def hypervisor_stats(request):
+    """
+    Get hypervisor stats from celery 
+    """
 
     user = request.user
     user_ = UserProxy.objects.get(pk=user.pk)
     
-    #if request.user.is_superuser or user_.is_system_user or user_.is_safety_user or user_.is_audit_user:
     if True:
         data_center = DataCenter.get_default()
         stats = hypervisor_stats_task(data_center)

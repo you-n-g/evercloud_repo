@@ -337,7 +337,8 @@ def uninstall_software(software_list, hosts_list):
                 },
                 win_package_task,
             ], hosts=hosts))
-    return res
+
+    return bool(res)
 
 def set_reg(host_list, key, value, data, state='present', datatype='string'):
     """edit the registry of the hosts

@@ -46,6 +46,8 @@ LOG = logging.getLogger(__name__)
 
 @api_view(["GET"])
 def contract_view(request):
+
+    ## TODO: For chargesystem
     c = Contract.objects.filter(user=request.user,
                                 udc__id=request.session["UDC_ID"])[0]
     s = ContractSerializer(c)
@@ -54,19 +56,25 @@ def contract_view(request):
 
 @api_view(["GET"])
 def quota_view(request):
-    LOG.info("*********** get quota *******")
+    LOG.debug("*********** get quota *******")
+    ## Get quota usage
     quota = get_quota_usage(request.user, request.session["UDC_ID"])
     return Response(quota)
 
 
 class OperationList(generics.ListAPIView):
     #permission_classes = (IsAuditUser,)
+    """
+    Get Operations list
+    """
     queryset = Operation.objects
     serializer_class = OperationSerializer
+    # Pagination support
     pagination_class = PagePagination
 
     def get_queryset(self):
  
+        # Get requery params
         request = self.request
         resource = request.query_params.get('resource')
         resource_name = request.query_params.get('resource_name')
@@ -76,6 +84,7 @@ class OperationList(generics.ListAPIView):
         user_id = request.user.id
         user = UserProxy.objects.get(pk=user_id)
 
+        # Filter operation with resource, resource_name, start_date, end_date
         queryset = super(OperationList, self).get_queryset()
 
         if resource:
@@ -90,6 +99,7 @@ class OperationList(generics.ListAPIView):
         if end_date:
             queryset = queryset.filter(create_date__lte=end_date)
 
+        # For superuser return all operations
         if request.user.is_superuser or user.is_audit_user :
 
             LOG.info("superuser")
@@ -103,102 +113,76 @@ class OperationList(generics.ListAPIView):
                 queryset = queryset.filter(user__pk=operator_pk)
             return queryset.order_by('-create_date')
         else:
-            udc_id = request.session["UDC_ID"]
-            LOG.info("4")
-            system = False
-            security = False
-            audit = False
-            member = False
-            UDC = UserDataCenter.objects.get(pk=udc_id)
-            LOG.info(UDC)
-            LOG.info("4")
-            keystone_user_id = UDC.keystone_user_id
-            LOG.info("4")
-            tenant_uuid = UDC.tenant_uuid
-            LOG.info("4")
-            rc = create_rc_by_dc(DataCenter.objects.all()[0])
-            LOG.info("4")
-            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-            LOG.info("4")
-            for user_role in user_roles:
-           
-                if user_role.name == "system":
-                    system = True
-                    break
-                if user_role.name == "security":
-                    security = True
-                    break
-                if user_role.name == "audit":
-                    audit = True
-                    break
-            if not system and not security and not audit:
-                member = True
- 
-            LOG.info("cccc")
+
+            LOG.debug("*** Try to get operations ***")
             querys = Operation.objects.all()
-            LOG.info("aaa")
             sec_avail_userids = []
             audit_avail_userids = []
+
+            # Filter user operation by user role
             for q in querys:
                 q_system = False
                 q_security = False
                 q_audit = False
                 q_member = False
-                LOG.info("aaa")
-                LOG.info(q.user_id)
-                ud = UserDataCenter.objects.filter(user_id=q.user_id)[0] 
-                LOG.info(str(ud))
-                keystone_user_id = ud.keystone_user_id
-                LOG.info(str(keystone_user_id))
-                tenant_uuid = ud.tenant_uuid
-                LOG.info("ccc")
-                user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-                LOG.info("aaa")
-                for user_role in user_roles:
-                    if user_role.name == "system":
-                        q_system = True
-                        break
-                    if user_role.name == "security":
-                        q_security = True
-                        break
-                    if user_role.name == "audit":
-                        q_audit = True
-                        break
+                LOG.debug("**** user id is ****" + str(q.user_id))
+                user = None
+                try:
+                    user = User.objects.get(pk=int(q.user_id))
+                except:
+                    continue
+                if user.last_name == "system":
+                    q_system = True
+                    break
+                if user.last_name == "security":
+                    q_security = True
+                    break
+                if user.last_name == "audit":
+                    q_audit = True
+                    break
 
                 if not q_system and not q_security and not q_audit:
                       q_member = True
                 if q_audit or q_member:
-                    LOG.info("2221111")
+                    LOG.debug("user is member or audit")
                     if q.user_id not in sec_avail_userids:
                         sec_avail_userids.append(q.user_id) 
                 if q_system or q_security:
-                    LOG.info("00000")
+                    LOG.debug("user is system or security")
                     if q.user_id not in audit_avail_userids:
                         audit_avail_userids.append(q.user_id)
   
 
-            if security:
-                LOG.info("aaa")
-                LOG.info(str(request.session["UDC_ID"]))
-                LOG.info(str(sec_avail_userids))
+            # Get current user role by user last name
+            last_name = request.user.last_name
+            LOG.debug("*** last name is ***" + str(last_name))
+
+            # If request user is security
+            if last_name == 'security':
                 queryset = Operation.objects.exclude(user_id__in=sec_avail_userids)
 
-                LOG.info("*** process done with queryset")
                 return queryset.order_by('-create_date')
-            if audit:
-                LOG.info("audit_can_log")
+
+            # If request user is audit
+            if last_name == 'audit':
+                LOG.debug("audit_can_log")
                 queryset = Operation.objects.exclude(user_id__in=audit_avail_userids)
 
                 return queryset.order_by('-create_date')
 
-            if system:
-                LOG.info("audit_can_log")
+            # If request user is system
+            if last_name == 'system':
+                LOG.debug("system_can_log")
                 queryset = Operation.objects.filter(user_id=request.user.id)
 
                 return queryset.order_by('-create_date')
 
 @api_view()
 def operation_filters(request):
+    """
+    Composite operation filters
+    """
+
     resources = Operation.objects.values('resource').distinct()
 
     for data in resources:
@@ -212,18 +196,21 @@ def operation_filters(request):
 
 
 class ContractList(generics.ListCreateAPIView):
+    ## TODO: Chargesystem logic
     queryset = Contract.living.filter(deleted=False)
     serializer_class = ContractSerializer
     pagination_class = PagePagination
 
 
 class ContractDetail(generics.RetrieveAPIView):
+    ## TODO: Chargesystem logic
     queryset = Contract.living.all()
     serializer_class = ContractSerializer
 
 
 @api_view(['POST'])
 def create_contract(request):
+    ## TODO: Chargesystem logic
     try:
         serializer = ContractSerializer(data=request.data,
                                         context={"request": request})
@@ -249,9 +236,6 @@ def create_contract(request):
 def batchdelete(request):
 
     # If we delete user first, all the related things delete.So we should collect information first.
-
-    
-
     # Delete user staff.
 
     # First delete user from any models.
@@ -278,23 +262,6 @@ def batchdelete(request):
                     pass
             LOG.info("*** user_instances are ***" + str(user_instances))
 
-            """
-            queryset = RouterInterface.objects.all().filter(deleted=False, user_id=user_id)
-            for q in queryset:
-                network = Network.objects.get(pk=q.network_id)
-                network_id = network.network_id or "no"
-
-                subnet = Subnet.objects.get(pk=q.subnet_id)
-                subnet_id = subnet.subnet_id or "no"
-
-                router = Router.objects.get(pk=q.router_id)
-                router_id = router.router_id or "no"
-                try:
-                    delete_user_router_interface(q, router_id, subnet_id, q.os_port_id)
-                except:
-                    pass
-                #routerinterfaces = network_id + ";" + subnet_id + ";" + router_id + ";" + q.os_port_id
-            """
             queryset = Router.objects.all().filter(deleted=False, user_id=user_id)
             for q in queryset:
                 user_routers.append(q.router_id)
@@ -324,26 +291,6 @@ def batchdelete(request):
                     pass
             LOG.info("*** user_networks are ***" + str(user_networks))
 
-            """
-            queryset = Subnet.objects.all().filter(deleted=False, user_id=user_id)
-            for q in queryset:
-                user_subnets.append(q.subnet_id)
-            LOG.info("*** user_subnets are ***" + str(user_subnets))
-            queryset = RouterInterface.objects.all().filter(deleted=False, user_id=user_id)
-            for q in queryset:
-                network = Network.objects.get(pk=q.network_id)
-                network_id = network.network_id or "no"
-
-                subnet = Subnet.objects.get(pk=q.subnet_id)
-                subnet_id = subnet.subnet_id or "no"
-
-                router = Router.objects.get(pk=q.router_id)
-                router_id = router.router_id or "no"
-
-                routerinterfaces = network_id + ";" + subnet_id + ";" + router_id + ";" + q.os_port_id
-                user_routersinterfaces.append(routerinterfaces)
-            LOG.info("*** user_routerinterfaces are ***" + str(user_routersinterfaces))
-            """
             try:
                 user_keystone = UserDataCenter.objects.get(user_id=user_id)
                 LOG.info("**** user_keystone is ***" + str(user_keystone))
@@ -358,40 +305,6 @@ def batchdelete(request):
             except:
                 raise
  
-        """
-        # Delete instances
-        LOG.info("** user_instances ***" + str(user_instances))
-        for instance_id in user_instances:
-            LOG.info(" start to post celery")
-            try:
-                delete_user_instance_network(request, instance_id)
-            except:
-                pass
-            #action = "terminate"
-            #data = instance_action(request.user, instance_id, action)
-        # Delete Routers
-
-
-
-        # Delete Router
-        for router_id in user_routers:
-
-            LOG.info(" start to post celery to delete router")
-            try:
-                delete_user_router(request, router_id)
-            except:
-                pass
-
-        # Delete Network
-        for network_id in user_networks:
-
-            LOG.info(" start to post celery to delete network")
-            try:
-                delete_user_network(request, network_id)
-            except:
-                pass
-
-        """
         return Response(
             {'success': True, "msg": _('Contract is updated successfully!')},
             status=status.HTTP_201_CREATED)
@@ -405,6 +318,7 @@ def batchdelete(request):
 
 @api_view(['POST'])
 def update_contract(request):
+    ## TODO: Chargesystem logic
     try:
 
         pk = request.data['id']
@@ -433,6 +347,7 @@ def update_contract(request):
 
 @api_view(['POST'])
 def delete_contracts(request):
+    ## TODO: Chargesystem logic
     try:
 
         contract_ids = request.data.getlist('contract_ids[]')
@@ -458,82 +373,22 @@ def delete_contracts(request):
 
 
 class UserList(generics.ListAPIView):
+    """
+    Get user list by user role
 
+    """
     #permission_classes = (IsSystemUser,)
 
     queryset = UserProxy.normal_users.all()
-    """
-    for q in queryset:
-        rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        roles = []
-        LOG.info("q is" + str(q))
-        user_id = q.id
-        udc = UserDataCenter.objects.filter(user_id=int(user_id))[0]
-        keystone_user_id = udc.keystone_user_id
-        user_tenant_id = udc.tenant_uuid
-        try:
-            current_user_roles = keystone.roles_for_user(rc, keystone_user_id, user_tenant_id)
-        except:
-            continue
-        #for role in keystone.role_list(rc):
-        tri_checked = False
-        user_roles = []
-        for role in current_user_roles:
-            user_roles.append(role.name)
-            checked = False
-        s = ["system","security","audit","_member_"]
-        tri_list = sorted(s, reverse=True)
-        system = False
-        audit = False
-        security = False
-        member = False
-        for role in user_roles:
-            if role == "system":
-                system = True
-            elif role == "security":
-                security = True
-            elif role == "audit":
-                audit = True
-            else:
-                member = True
-        if system or audit or security:
-            member = False
-        for all_role in tri_list:
-            checked = False
-            name = ''
-            if all_role == "system":
-                if system:
-                    checked = True
-                else:
-                    checked = False
-                name = "系统管理员"
-            if all_role == "security":
-                if security:
-                    checked = True
-                else:
-                    checked = False
-                name = "安全保密员"
-            if all_role == "audit":
-                if audit:
-                    checked = True
-                else:
-                    checked = False
-                name = "安全审计员"
-            if all_role == "_member_":
-                if member:
-                    checked = True
-                else:
-                    checked = False
-                name = "普通用户"
-        q.tri_type = name
-
-    """
     serializer_class = UserSerializer
     pagination_class = PagePagination
 
 
 @require_GET
 def active_users(request):
+    """
+    Active user by user id
+    """
     queryset = UserProxy.normal_users.filter(is_active=True)
     serializer = UserSerializer(queryset.all(), many=True)
     return Response(serializer.data)
@@ -541,6 +396,7 @@ def active_users(request):
 
 @require_GET
 def workflow_approvers(request):
+    ## TODO: Workflow logic
     queryset = UserProxy.normal_users.filter(
         is_active=True, user_permissions__codename='approve_workflow')
     serializer = UserSerializer(queryset.all(), many=True)
@@ -548,9 +404,13 @@ def workflow_approvers(request):
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Get user detailed infos
+    """
     queryset = UserProxy.normal_users.all()
     serializer_class = DetailedUserSerializer
 
+    # Exact action of destroy
     def perform_destroy(self, instance):
         instance.is_active = False
         instance.save()
@@ -558,9 +418,12 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 @api_view(['POST'])
 def deactivate_user(request):
+    """
+    Deactivate user
+    """
     pk = request.data['id']
 
-    LOG.info(str(pk))
+    LOG.debug(str(pk))
     LOG.info(str(request.user.id))
     if str(pk) == str(request.user.id):
         LOG.info("*** aaaaa ****")
@@ -571,6 +434,7 @@ def deactivate_user(request):
     user.save()
 
 
+    # Operation logic
     try:
         operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource=user.username, resource_id=1, resource_name='用户',action="禁用用户", result=1)
         operation.save()
@@ -583,6 +447,10 @@ def deactivate_user(request):
 
 @api_view(['POST'])
 def activate_user(request):
+    """
+    Activate user by user id
+    """
+    
     pk = request.data['id']
 
     user = User.objects.get(pk=pk)
@@ -590,6 +458,7 @@ def activate_user(request):
     user.save()
 
 
+    # Opration logic
     try:
         operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource=user.username, resource_id=1, resource_name='用户',action="启用用户", result=1)
         operation.save()
@@ -600,14 +469,19 @@ def activate_user(request):
 
 @api_view(["POST"])
 def resetuserpassword(request):
+    """
+    Reset user password
+    """
+
+
 
     LOG.info("*** start to change password")
     new_password = request.data['new_password']
-    LOG.info("*** new_password is ****" + str(new_password))
+    LOG.debug("*** new_password is ****" + str(new_password))
     user_id = request.data['user_id']
-    LOG.info("*** user_id is ****" + str(user_id))
+    LOG.debug("*** user_id is ****" + str(user_id))
     confirm_password = request.data['confirm_password']
-    LOG.info("*** confirm_password is ****" + str(confirm_password))
+    LOG.debug("*** confirm_password is ****" + str(confirm_password))
 
     if new_password != confirm_password:
         return Response({"success": False, "msg": _(
@@ -618,7 +492,7 @@ def resetuserpassword(request):
     user.set_password(new_password)
     user.save()
 
-    LOG.info("************* CHANGE PASSWORD !!!!!!!!!!!!!!!!!!")
+    LOG.debug("************* CHANGE PASSWORD !!!!!!!!!!!!!!!!!!")
 
     try:
         user_id = user.id
@@ -631,6 +505,7 @@ def resetuserpassword(request):
         raise 
 
 
+    # Operation logic
     try:
         operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='用户', resource_id=1, resource_name='重置密码',action="resetpassword", result=1)
         operation.save()
@@ -679,14 +554,20 @@ def change_password(request):
 
 @api_view(["POST"])
 def change_profile(request):
+    """
+    Update user profile
+
+    """
 
     user = request.user
     profile = user.profile
     email, mobile = retrieve_params(request.data, 'email', 'mobile')
 
+    # Check email if existing
     if UserProxy.objects.filter(email=email).exclude(pk=user.pk).exists():
         return fail(_("This email has already been used."))
 
+    # Check mobile if existing
     if UserProfile.objects.filter(mobile=mobile).exclude(pk=profile.pk).exists():
         return fail(_("This mobile has already been used."))
 
@@ -701,6 +582,7 @@ def change_profile(request):
 
 
 class QuotaList(generics.ListAPIView):
+    ## TODO: Quota List
     queryset = Quota.living
     serializer_class = QuotaSerializer
 
@@ -715,17 +597,20 @@ class QuotaList(generics.ListAPIView):
 
 
 class QuotaDetail(generics.RetrieveUpdateDestroyAPIView):
+    ## TODO: Quota List
     queryset = Quota.living
     serializer_class = QuotaSerializer
 
 
 @api_view(['GET'])
 def resource_options(request):
+    ## TODO: Quota List
     return Response(QUOTA_ITEM)
 
 
 @api_view(['POST'])
 def create_quotas(request):
+    ## TODO: Quota List
     try:
 
         contract = Contract.objects.get(pk=request.data['contract_id'])
@@ -760,6 +645,7 @@ def create_quotas(request):
 
 @api_view(['POST'])
 def create_quota(request):
+    ## TODO: Quota List
     try:
         contract = Contract.objects.get(pk=request.data['contract'])
         resource, limit = request.data['resource'], request.data['limit']
@@ -786,6 +672,7 @@ def create_quota(request):
 
 @api_view(['POST'])
 def delete_quota(request):
+    ## TODO: Quota List
     try:
         Quota.living.filter(pk=request.data['id']).update(deleted=True)
 
@@ -802,11 +689,13 @@ def delete_quota(request):
 
 @require_GET
 def notification_options(request):
+    ## TODO: Notification options 
     return Response(NotificationLevel.OPTIONS)
 
 
 @require_POST
 def broadcast(request):
+    ## TODO: Notification
     receiver_ids = request.data.getlist('receiver_ids[]')
     level, title, content = retrieve_params(request.data,
                                             'level', 'title', 'content')
@@ -819,6 +708,7 @@ def broadcast(request):
 
 @require_POST
 def data_center_broadcast(request):
+    ## TODO: Notification
     level, title, content = retrieve_params(
         request.data, 'level', 'title', 'content')
 
@@ -832,6 +722,7 @@ def data_center_broadcast(request):
 
 @require_POST
 def announce(request):
+    ## TODO: Notification
     level, title, content = retrieve_params(request.data, 'level', 'title',
                                             'content')
     Notification.objects.create(title=title, content=content,
@@ -841,6 +732,9 @@ def announce(request):
                      "msg": _('Announcement is sent successfully!')})
 
 class tenants_list(generics.ListAPIView):
+    """
+    Signup Tenants list
+    """
 
     def list(self, request):
         datacenter = DataCenter.get_default()
@@ -859,6 +753,7 @@ class tenants_list(generics.ListAPIView):
 
 
 class NotificationList(generics.ListAPIView):
+    ## TODO: Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
@@ -869,11 +764,13 @@ class NotificationList(generics.ListAPIView):
 
 
 class NotificationDetail(generics.RetrieveDestroyAPIView):
+    ## TODO: Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
 
 class FeedList(generics.ListAPIView):
+    ## TODO: Notification
     queryset = Feed.living.all()
     serializer_class = FeedSerializer
 
@@ -884,6 +781,7 @@ class FeedList(generics.ListAPIView):
 
 
 class FeedDetail(generics.RetrieveDestroyAPIView):
+    ## TODO: Notification
     queryset = Feed.living.all()
     serializer_class = FeedSerializer
 
@@ -893,6 +791,7 @@ class FeedDetail(generics.RetrieveDestroyAPIView):
 
 @require_GET
 def feed_status(request):
+    ## TODO: Notification
     Notification.pull_announcements(request.user)
     num = Feed.living.filter(receiver=request.user, is_read=False).count()
     return Response({"num": num})
@@ -900,14 +799,16 @@ def feed_status(request):
 
 @require_POST
 def mark_read(request, pk):
+    ## TODO: Notification
     Feed.living.get(pk=pk).mark_read()
     return Response(status=status.HTTP_200_OK)
 
 @require_POST
 @csrf_exempt
 def push_operation(request):
-
-    LOG.info('cccccccccccccccc')
+    """
+    Operation restful api 
+    """
     LOG.info(" post data is " + str(request.data))
     try:
         Operation.objects.create(
@@ -927,6 +828,9 @@ def push_operation(request):
 
 @require_POST
 def initialize_user(request):
+    """
+    Initializer user with auth_user
+    """
     user_id = request.data['user_id']
     user = User.objects.get(pk=user_id)
     link_user_to_dc_task(user, DataCenter.get_default())
@@ -936,6 +840,12 @@ def initialize_user(request):
 
 @require_POST
 def create_user(request):
+    """
+    Create user with params
+    param: username
+    param: password
+    param: tenant_id
+    """
 
     LOG.info("****** start to create user *****")
     LOG.info("******* data is ******" + str(request.data))
@@ -946,51 +856,13 @@ def create_user(request):
                      "msg": _("Service user must not be created.")})
     LOG.info("****** password is ******" + str(request.data['password1']))
     user = User()
-    LOG.info("ccccccccccccc")
     form = CloudUserCreateFormWithoutCapatcha(data=request.POST, instance=user)
-    LOG.info("ddddddddddddd")
     if not form.is_valid():
         LOG.info("form is not valid")
         return Response({"success": False, "msg": _("Data is not valid")})
 
     user = form.save()
 
-
-
-    #update start
-    if settings.TRI_ENABLED and request.data['is_system_user'] == 'true':
-
-        LOG.info("******** I am systemuser  ***************")
-        #user = User.objects.create_superuser(username=username, email=email, password=password1)
-        UserProxy.grant_system_user(user)
-        LOG.info("fffffffffff")
-
-        #return Response({"success": True,
-        #                 "msg": _("User is created successfully!")})
-
-
-    if settings.TRI_ENABLED and request.data['is_safety_user'] == 'true':
-
-        LOG.info("******** I am safetyuser  ***************")
-        #user = User.objects.create_superuser(username=username, email=email, password=password1)
-        LOG.info("******** SUPERUSER CREATE SUCCESS **********")
-        UserProxy.grant_safety_user(user)
-        LOG.info("fffffffffff")
-
-        #return Response({"success": True,
-        #                 "msg": _("User is created successfully!")})
-
-
-    if settings.TRI_ENABLED and request.data['is_audit_user'] == 'true':
-
-        LOG.info("******** I am audituser  ***************")
-        #user = User.objects.create_superuser(username=username, email=email, password=password1)
-        LOG.info("******** SUPERUSER CREATE SUCCESS **********")
-        UserProxy.grant_audit_user(user)
-        LOG.info("fffffffffff")
-
-        #return Response({"success": True,
-        #                 "msg": _("User is created successfully!")})
 
 
     # If workflow is disabled, then only resrouce user can be created,
@@ -1002,6 +874,7 @@ def create_user(request):
         link_user_to_dc_task.delay(user, DataCenter.get_default(), tenant_id, password)
 
 
+        # Operation logic
         try:
             operation = Operation(user=request.user, udc_id=request.session['UDC_ID'], resource='用户', resource_id=1, resource_name='用户',action="创建用户", result=1)
             operation.save()
@@ -1024,6 +897,7 @@ def create_user(request):
 
 @require_POST
 def grant_workflow_approve(request):
+    ## TODO: Workflow logic
     user_id = request.data['user_id']
     user = UserProxy.objects.get(pk=user_id)
 
@@ -1036,6 +910,7 @@ def grant_workflow_approve(request):
 
 @require_POST
 def revoke_workflow_approve(request):
+    ## TODO: Workflow logic
     user_id = request.data['user_id']
     user = UserProxy.objects.get(pk=user_id)
 
@@ -1054,7 +929,13 @@ def revoke_workflow_approve(request):
 
 @require_POST
 def update_user(request):
+    """
+    Update user with param
 
+    param: username
+    param: email
+    param: mobile
+    """
     LOG.info("******* data is ******" + str(request.data))
     LOG.info("****** username is ******" + str(request.data['username']))
     posted_username = request.data['username']
@@ -1079,9 +960,11 @@ def update_user(request):
     if str(posted_username) in ['neutron', 'cinder', 'keystone', 'nova', 'glance', 'heat', 'swift', 'admin', 'ceilometer']:     
         return Response({"success": False,
                      "msg": _("Service user must not be created.")})
-    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
-    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
-    LOG.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+
+
+    """
+    The following logic is synced user info with keystone
+    """
     try:
         user_data_center = UserDataCenter.objects.all().get(user = user)
         keystone_user_id = user_data_center.keystone_user_id
@@ -1108,6 +991,9 @@ def update_user(request):
 
 @require_POST
 def get_user_mobile(request):
+    """
+    Get user mobile
+    """
     LOG.info(" request.data is" + str(request.data))
     LOG.info(request.data['user_id'])
     user = User.objects.get(id = request.data['user_id'])
@@ -1117,6 +1003,10 @@ def get_user_mobile(request):
 
 @require_GET
 def update_username_unique(request):
+    """
+    Determide where username is unique or not
+    """
+
     LOG.info(" request.data is" + str(request.GET))
     username = request.GET['username']
     LOG.info(str(username))
@@ -1124,63 +1014,71 @@ def update_username_unique(request):
     return Response(not UserProxy.objects.filter(username=username).exists())
 @require_GET
 def update_email_unique(request):
+    """
+    Determide where email is unique or not
+    """
     email = request.GET['email']
     LOG.info(request.GET['id'])
     return Response(not UserProxy.objects.filter(email=email).exists())
 @require_GET
 def update_mobile_unique(request):
+    """
+    Determide where mobile is unique or not
+    """
     mobile = request.GET['mobile']
     LOG.info(request.GET['id'])
     return Response(not UserProfile.objects.filter(mobile=mobile).exists())
 
 @require_GET
 def is_username_unique(request):
+    """
+    Determide where username is unique or not
+    """
     username = request.GET['username']
     return Response(not UserProxy.objects.filter(username=username).exists())
 
 
 @require_GET
 def is_email_unique(request):
+    """
+    Determide where email is unique or not
+    """
     email = request.GET['email']
     return Response(not UserProxy.objects.filter(email=email).exists())
 
 
 @require_GET
 def is_mobile_unique(request):
+    """
+    Determide where mobile is unique or not
+    """
     mobile = request.GET['mobile']
     return Response(not UserProfile.objects.filter(mobile=mobile).exists())
 
 @require_GET
 def get_member_users(request):
+    """
+    Get member users
+    """
     LOG.info("---------- members -------------")
     users = User.objects.all()
     member_users = []
+    # user role is determided by last name,because we save user role to user.last_name
     for user in users:
-        try:
-            keystone_user_id = UserDataCenter.objects.get(user_id=user.id).keystone_user_id
-            tenant_uuid = UserDataCenter.objects.get(user_id=user.id).tenant_uuid
-        except:
-            continue
-        #LOG.info(keystone_user_id)
-        #LOG.info(tenant_uuid)
-        rc = create_rc_by_dc(DataCenter.objects.all()[0])
-        try:
-            user_roles = keystone.roles_for_user(rc, keystone_user_id, tenant_uuid)
-        except:
-            continue
         system = False
         security = False
         audit = False
-        for user_role in user_roles:
-            if user_role.name == "system":
-                system = True
-                break
-            if user_role.name == "audit":
-                audit = True
-                break
-            if user_role.name == "security":
-                security = True
-                break
+        LOG.info("**** user is *****" + str(user))
+        LOG.info(str(user.last_name))
+        if user.last_name == "system":
+            system = True
+            break
+        if user.last_name == "audit":
+            audit = True
+            break
+        if user.last_name == "security":
+            security = True
+            break
         if not system and not security and not audit and not user.is_superuser:
             member_users.append(user)
     LOG.info(member_users)
@@ -1190,20 +1088,17 @@ def get_member_users(request):
 
 @require_GET
 def collector_operation(request):
+    """
+    Operation interface for other systems
+    """
     LOG.info("*** get data is ***" + str(request.GET))
     user = request.GET['user']
-    LOG.info('1')
     resource = request.GET['resource']
     resource_name = request.GET['resource_name']
-    LOG.info('1')
     action= request.GET['action']
-    LOG.info('1')
     result = request.GET['result']
-    LOG.info('1')
     operation_type = request.GET['operation_type']
-    LOG.info('1')
     message = request.GET['message']
-    LOG.info('1')
 
 
     # Pending issue: user_id, udc_id, resource_id

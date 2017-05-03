@@ -31,6 +31,7 @@ class Floating(models.Model):
     resource_type = models.CharField(_("Resource type"), null=True,
                 blank=True, choices=RESOURCE_TYPE, max_length=40)
 
+    status_reason = models.CharField(_("Status Reason"), max_length=255, blank=True, null=True)
     user = models.ForeignKey('auth.User')
     user_data_center = models.ForeignKey('idc.UserDataCenter')
     create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
@@ -62,11 +63,14 @@ class Floating(models.Model):
 
     @property
     def workflow_info(self):
+        ## TODO: Chargesystem logic
         return _("Floating IP: %d Mbps") % (self.bandwidth,)
 
     @classmethod
     def get_instance_ip(cls, instance_id):
-
+        """
+        Get instance fip
+        """
         floating = None
         try:
             floating = cls.objects.get(resource_type=RESOURCE_INSTANCE,
@@ -82,6 +86,7 @@ class Floating(models.Model):
 
     @classmethod
     def get_lbaas_ip(cls, resource_id):
+        ## TODO: lbaas logic
 
         floating = None
         try:
@@ -152,6 +157,10 @@ class Floating(models.Model):
         self.save()
 
     def can_bill(self):
+        """
+
+        Determided by deleted or status
+        """
         return not (self.deleted or self.status in CANNOT_BILL_STATES)
 
     def __unicode__(self):

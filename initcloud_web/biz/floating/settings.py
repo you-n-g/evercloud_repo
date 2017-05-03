@@ -2,6 +2,8 @@
 
 from django.utils.translation import ugettext_lazy as _
 
+
+# Floating ip available status
 FLOATING_ERROR = 0
 FLOATING_ALLOCATE = 1
 FLOATING_APPLYING = 2
@@ -13,6 +15,7 @@ FLOATING_RELEASED = 90
 FLOATING_RELEASING = 91
 
 
+# Floating ip status i18n
 FLOATING_STATUS = (
     (FLOATING_ERROR, _("Floating ERROR")),
     (FLOATING_ALLOCATE, _("Floating Allocate")),
@@ -42,13 +45,14 @@ FLOATING_STATUS_DICT = {
 }
 
 
-
+# Floating ip available action
 ACTION_FLOATING_ALLOCATE = "allocate"
 ACTION_FLOATING_RELEASE = "release"
 ACTION_FLOATING_ASSOCIATE = "associate"
 ACTION_FLOATING_DISASSOCIATE = "disassociate"
 
 
+# Floating ip next state
 FLOATING_ACTION_NEXT_STATE = {
     ACTION_FLOATING_ALLOCATE: FLOATING_AVAILABLE,
     ACTION_FLOATING_RELEASE: FLOATING_RELEASING,
@@ -56,7 +60,7 @@ FLOATING_ACTION_NEXT_STATE = {
     ACTION_FLOATING_DISASSOCIATE: FLOATING_RELEASING,
 }
 
-
+# Allowed floating actions
 ALLOWED_FLOATING_ACTIONS = {
     ACTION_FLOATING_ALLOCATE: _("allocate"),
     ACTION_FLOATING_RELEASE: _("release"),

@@ -41,27 +41,39 @@ LOG = logging.getLogger(__name__)
 
 
 class TemplateManagerList(generics.ListAPIView):
-    LOG.info("--------- I am templatemanager list in TemplatemanagerList ----------")
+    """
+    List all the templates  
+
+    """
+    LOG.debug("--------- I am templatemanager list in TemplatemanagerList ----------")
 
     def list(self, request):
         queryset = Templatemanager.objects.all()
         template = [] 
         template_console = None
         for q in queryset:
-            
-            LOG.info("ets")
             template_console = "http://" + settings.CONSOLE_IP + ":" + settings.CONSOLE_PORT + "/vnc_auto.html?token=%s" %q.template_uuid
-            LOG.info("template_console" + str(template_console))
+            LOG.debug("*** tempalte_console is ***" + str(template_console))
             template.append({"id": q.id, "template_name": q.template_name, "template_uuid": q.template_uuid, "create_date": q.create_date, "template_softwarelist": q.template_softwarelist, "template_disksize": q.template_disksize, "template_protocol": q.template_protocol, "template_console": template_console})
 
-        LOG.info(template)
+        LOG.info("*** template is ****" + str(template))
         return Response(template)
 
 
 @require_POST
 def create_templatemanager(request):
+    """
+    Create template with requested params
+    param:  template -- new template or existed template
+    param:  iso -- template based on iso
+    param:  disk -- img file size
+    param:  pro -- protocol used
+    param:  software -- TODO param
+    param:  name -- template name
+    param: select_os -- template os type
+    """
 
-
+    # Generate uuid
     template_uuid = uuid.uuid4().hex
     template_baseuuid = ''
 
@@ -77,11 +89,11 @@ def create_templatemanager(request):
     LOG.info("*** template is ***" +str(template))
     if template == "root":
 
-        LOG.info("start to create root template")
+        LOG.debug("start to create root template")
         template_baseuuid = template_uuid
     else:
 
-        LOG.info("start to create child template")
+        LOG.debug("start to create child template")
         template_baseuuid = template
     try:
         LOG.info("*** request.data is ***" + str(request.data))
@@ -93,10 +105,14 @@ def create_templatemanager(request):
         ## begin -- construct create root template json message
         template_message = {}
         template_param = {}
+
+        # Determined request method by template_baseuuid
         if (template_uuid == template_baseuuid):
             template_message['method']      = 'requestTemplateNew'
         else:
             template_message['method']      = 'requestTemplateCreate'
+
+
         template_param['template_name']     = request.data.get('name')
         template_param['template_baseuuid'] = template_baseuuid
         template_param['template_uuid']     = template_uuid
@@ -133,17 +149,25 @@ def create_templatemanager(request):
 
 @api_view(["POST"])
 def delete_templatemanagers(request):
+    """
+    Delete template by ids
+    """
     ids = request.data.getlist('ids[]')
     Templatemanager.objects.filter(pk__in=ids).delete()
     return Response({'success': True, "msg": _('Templatemanagers have been deleted!')}, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 def get_isos(request):
+    """
+    Get isos list from /vmstorage/iso/
+
+    """
     try:
 
         file_name = os.listdir("/vmstorage/iso/")
         template_iso = []
         i = 1
+        # Filter file with non-driver
         for f in file_name:
             if not f.startswith('virtio') and not f.startswith('RHEV'):
                 template_iso.append({"name":f})
@@ -159,6 +183,9 @@ def get_isos(request):
 
 @api_view(['GET'])
 def get_templates(request):
+    """
+    Get all templates 
+    """
     try:
 
         templates = Templatemanager.objects.all()
@@ -176,20 +203,18 @@ def get_templates(request):
 
 @api_view(['POST'])
 def update_templatemanager(request):
+    """
+    Update template with name
+    """
     try:
 
         pk = request.data['id']
         LOG.info("---- templatemanager pk is --------" + str(pk))
 
         templatemanager = Templatemanager.objects.get(pk=pk)
-        LOG.info("ddddddddddddd")
-        LOG.info("request.data is" + str(request.data))
+        LOG.debug("request.data is" + str(request.data))
         templatemanager.templatemanagername = request.data['templatemanagername']
-
-        LOG.info("dddddddddddd")
         templatemanager.save()
-        #Operation.log(templatemanager, templatemanager.name, 'update', udc=templatemanager.udc,
-        #              user=request.user)
 
         return Response(
             {'success': True, "msg": _('Templatemanager is updated successfully!')},
@@ -203,12 +228,20 @@ def update_templatemanager(request):
 
 @require_GET
 def is_templatemanagername_unique(request):
+    """
+    Make sure template name is unique in db
+    """
+
     templatemanagername = request.GET['templatemanagername']
     LOG.info("templatemanagername is" + str(templatemanagername))
     return Response(not Templatemanager.objects.filter(templatemanagername=templatemanagername).exists())
 
 @api_view(['POST'])
 def template_action(request, template_id):
+    """
+    Template action view
+    Allowed actions are power_on,power_off,template_delete and upload
+    """
 
     template_id = template_id
 
@@ -220,7 +253,7 @@ def template_action(request, template_id):
     template_name = template.template_name
     if action == "power_on":
 
-        LOG.info("start to power_on the template")
+        LOG.debug("start to power_on the template")
         try:
             template_message = {}
             template_param = {}
@@ -228,17 +261,14 @@ def template_action(request, template_id):
             template_param['template_uuid'] = template_uuid
             template_message['param'] = template_param
             send_message = json.dumps(template_message)
-            LOG.info("666666666")
-            ## end
             ## begin -- socket
             host = '127.0.0.1'
             port = 5999
             sockobj = socket(AF_INET, SOCK_STREAM)
-            LOG.info("666666666")
             sockobj.connect((host, port))
             sockobj.send(send_message)
             data = sockobj.recv(1024)
-            LOG.info('Client received:%s', repr(data))
+            LOG.debug('Client received:%s', repr(data))
             sockobj.close( )
         except :
 
@@ -248,7 +278,7 @@ def template_action(request, template_id):
 
     if action == "power_off":
 
-        LOG.info("start to power_off the template")
+        LOG.debug("start to power_off the template")
         try:
 
             ## begin start/stop/delete templte
@@ -259,7 +289,7 @@ def template_action(request, template_id):
             template_message['param'] = template_param
             send_message = json.dumps(template_message)
             ## end
-            ## socker send
+            ## socket send
             host = '127.0.0.1'
             port = 5999
             sockobj = socket(AF_INET, SOCK_STREAM)
@@ -280,6 +310,7 @@ def template_action(request, template_id):
 
         LOG.info("start to delete the template")
         try:
+            ## start to composite info
             template_message = {}
             template_param = {}
             template_message['method'] = 'requestTemplateDelete'
@@ -287,14 +318,14 @@ def template_action(request, template_id):
             template_message['param'] = template_param
             send_message = json.dumps(template_message)
             ## end
-            ## begin -- socker
+            ## begin -- socket
             host = '127.0.0.1'
             port = 5999
             sockobj = socket(AF_INET, SOCK_STREAM)
             sockobj.connect((host, port))
             sockobj.send(send_message)
             data = sockobj.recv(1024)
-            LOG.info('Client received:%s', repr(data))
+            LOG.debug('Client received:%s', repr(data))
             sockobj.close( )
             ## end
             template.delete()
@@ -327,7 +358,7 @@ def template_action(request, template_id):
             sockobj.connect((host, port))
             sockobj.send(send_message)
             data = sockobj.recv(1024)
-            LOG.info('Client received:%s', repr(data))
+            LOG.debug('Client received:%s', repr(data))
             sockobj.close( )
             LOG.info("response data is" + str(data))
             if str(data) == "OK":
@@ -337,7 +368,7 @@ def template_action(request, template_id):
                     images = glanceclient_tm(request,url, '2').images.list()
                 except Exception as e:
                     LOG.info(str(e))
-                LOG.info("start to get images")
+                LOG.debug("start to get images")
                 LOG.info(images)
                 for img in images:
                     LOG.info(img)
@@ -364,12 +395,9 @@ def template_action(request, template_id):
                             else:
                                 os_type = 2
                             glance_obj = Image(name=template_name, disk_size=image_size, login_name="admin", os_type=os_type, uuid=image_id, data_center=data_center, create_at=timezone.now())
-                            LOG.info("dd")
                             glance_obj.save()
-                            LOG.info("dd")
                         except Exception as e:
                             LOG.exception(e)
-                        LOG.info("ccccccc")
                         glance_obj.save()
                         break;
                         LOG.info("glance obj is" + str(glance_obj))
@@ -382,6 +410,9 @@ def template_action(request, template_id):
                       status=status.HTTP_201_CREATED)
 @require_POST
 def batch_delete(request):
+    """
+    Batch action with template deletions
+    """
 
     template_id_list = request.data.getlist('ids[]')
     for template_id in template_id_list:

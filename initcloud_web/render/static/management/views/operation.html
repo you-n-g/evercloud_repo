@@ -2,11 +2,14 @@
     <div class="col-md-12">
         <div class="portlet">
             <div class="portlet-title">
+                <!-- Table action -->
                 <div class="caption font-green-sharp">
                     <a class="btn btn-icon-only btn-default" href="#" data-ng-click="reload();">
                         <i class="fa fa-refresh"></i>
                     </a>
                 </div>
+                <!-- Table action end -->
+                <!-- Table filter list -->
                 <div class="tools" data-ng-keypress="keypress($event)">
                     <form class="form-inline">
                         <div class="form-group" style="margin-right: 10px;">
@@ -58,6 +61,8 @@
                     </form>
                 </div>
             </div>
+            <!-- Table filter end  -->
+            <!-- Table main content -->
             <div class="portlet-body">
                 <div id="" class="dataTables_wrapper no-footer">
                     <table ng-table="operation_table"
@@ -85,6 +90,7 @@
                     </table>
                 </div>
             </div>
+            <!-- Table main content end -->
         </div>
     </div>
 </div>

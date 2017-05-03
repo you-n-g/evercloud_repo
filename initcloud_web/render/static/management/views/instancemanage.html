@@ -8,6 +8,7 @@
     <div class="col-md-12">
          <div class="portlet">
             <div class="portlet-title">
+                <!-- table action -->
                 <div class="caption font-green-sharp" data-ng-if="current_user.system">
                     <a class="btn btn-icon-only btn-default" href="#" ng-click="instancemanagemanage_table.reload();">
                         <i class="fa fa-refresh"></i>
@@ -18,21 +19,17 @@
                     <a class="btn btn-primary" href="#" ng-click="openBatchNewModal()">
                         <i class="fa fa-plus"></i>{[{ 'action.batch_add' | i18next }]}
                     </a>
-                    <!--
-                    <a class="btn btn-info" href="javascript:void(0)"
-                       data-ng-click="openDataCenterBroadcastModal();">
-                        <i class="fa  fa-bullhorn"></i> {[{ 'notification.data_center_broadcast' | i18next }]}
-                    </a>
-                    -->
                     <a class="btn btn-danger" ng-click="batchDelete()" ng-class="{disabled: checkboxGroup.noneChecked()}">
                         <i class="fa fa-trash"></i>
                         {[{ 'action.batch_delete' | i18next }]}
                     </a>
                 </div>
+                <!-- table action end -->
                 </div>
             </div>
            <div class="portlet-body">
                 <div id="" class="dataTables_wrapper no-footer">
+                    <!-- Main table content -->
                     <table ng-table="instancemanage_table"
                            class="table table-striped table-bordered table-advance table-hover">
                         <tbody>
@@ -127,8 +124,10 @@
                                 <span data-ng-if="instancemanage.security_cls == 2 && current_user.security">{[{'instancemanage.all_security_level.setting' | i18next}]}</span>
                                 <span data-ng-if="instancemanage.security_cls == 3 && current_user.security">{[{'instancemanage.all_security_level.mimi_fail' | i18next}]}</span>
                             </td>
+                                <!-- Table row actions -->
                                 <td class="action-group" data-title="'actions' | i18next" >
                                     <div class="btn-group">
+                                         <!-- 分配权限 -->
                                         <button class="btn btn-default" data-ng-if="current_user.security"
                                                 type="button" ng-click="edit(instancemanage)">
                                             <i class="fa fa-edit"></i>
@@ -139,77 +138,72 @@
                                             <i class="fa fa-angle-down"></i>
                                         </button>
                                         <ul role="menu" class="dropdown-menu" data-ng-if="current_user.system">
+                                        <!--关机 -->
                                         <li data-ng-if="(instancemanage.is_poweroff || instancemanage.is_error) && is_available(instancemanage)">
                                             <a href="#" ng-click="instance_action(instancemanage, 'power_on')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.power_on' | i18next }]}
                                             </a>
                                         </li>
+                                        <!--确认调整大小 -->
                                         <li data-ng-if="is_resize(instancemanage)">
                                             <a href="#" ng-click="confirm_resize(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instancemanage.confirm_resize' | i18next }]}
                                             </a>
                                         </li>
+                                        <!--重启 -->
                                         <li data-ng-class="{disabled: !instancemanage.is_running}">
                                             <a href="#" ng-click="instance_action(instancemanage, 'reboot')">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.reboot' | i18next }]}
                                             </a>
                                         </li>
-                                        <!--<li >
-                                            <a href="#/firewall/">
-                                                <i class="fa fa-edit"></i>
-                                                {[{ 'instance.add_sc' | i18next }]} </a>
-                                        </li>
-                                        <li >
-                                            <a data-ng-click="instance_action(instancemanage, 'add_qos')">
-                                                <i class="fa fa-ban"></i>
-                                                {[{ 'instance.add_qos' | i18next }]} </a>
-                                        </li>-->
+                                        <!-- 调整大小 -->
                                         <li data-ng-if="!(is_resize(instancemanage))">
                                             <a href="#" data-ng-click="resize(instancemanage)">
                                                 <i class="fa fa-desktop"></i>
                                                 {[{ 'instancemanage.resize' | i18next }]} </a>
                                         </li>
-                                        <!--<li data-ng-if="is_resize(instancemanage)">
-                                            <a href="#" data-ng-click="confirm_resize(instancemanage)">
-                                                <i class="fa fa-desktop"></i>
-                                                {[{ 'instancemanage.confirm_resize' | i18next }]} </a>
-                                        </li>-->
+                                        <!-- 撤销调整大小 -->
                                         <li data-ng-if="is_resize(instancemanage)">
                                             <a href="#" data-ng-click="revert_resize(instancemanage)">
                                                 <i class="fa fa-desktop"></i>
                                                 {[{ 'instancemanage.revert_resize' | i18next }]} </a>
                                         </li>
+                                        <!-- vnc console界面 -->
                                         <li data-ng-if="!(is_resize(instancemanage))">
                                             <a href="#" data-ng-click="instance_action(instancemanage, 'vnc_console')">
                                                 <i class="fa fa-desktop"></i>
                                                 {[{ 'instance.vnc_console' | i18next }]} </a>
                                         </li>
+                                        <!-- 挂载volume -->
                                         <li>
                                             <a data-ng-click="instance_action(instancemanage, 'attach_volume')">
                                                 <i class="fa fa-hdd-o"></i>
                                                 {[{ 'instance.attach_volume' | i18next }]} </a>
                                         </li>
+                                        <!-- 卸载volume -->
                                         <li data-ng-if-end >
                                             <a data-ng-click="instance_action(instancemanage, 'detach_volume')">
                                                 <i class="fa fa-times"></i>
                                                 {[{ 'instance.detach_volume' | i18next }]} </a>
                                         </li>
-
+                                        <!-- 制作快照 -->
                                         <li data-ng-if="!(is_resize(instancemanage))">
                                             <a href="#" ng-click="snapshot(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instance.create_snap' | i18next }]}
                                             </a>
                                         </li>
+                                        <!-- 分配虚拟机 -->
                                         <li data-ng-if="!(is_resize(instancemanage))">
                                             <a href="#" ng-click="assign(instancemanage)">
                                                 <i class="fa fa-play"></i>
                                                 {[{ 'instancemanage.assign' | i18next }]}
                                             </a>
                                         </li>
+                                        <!-- 关机 -->
                                         <li data-ng-if="instancemanage.is_running">
                                             <a href="#" data-ng-click="instance_action(instancemanage, 'power_off')">
                                                 <span class="text-danger">
@@ -218,18 +212,13 @@
                                                 </span>
                                             </a>
                                         </li>
-                                            <!--
-                                            <li data-ng-if="!(is_resize(instancemanage))">
-                                                <a href="javascript:void(0);"  ng-click="delete(instancemanage)">
-                                                    <i class="fa fa-trash"></i>
-                                                    {[{ 'instancemanage.delete' | i18next }]} </a>
-                                            </li>
-                                            -->
+                                        <!-- 删除虚拟机 -->
                                             <li>
                                                 <a href="javascript:void(0);"  ng-click="delete_instance(instancemanage)">
                                                     <i class="fa fa-trash"></i>
                                                     {[{ 'instancemanage.deleteinstance' | i18next }]} </a>
                                             </li>
+                                        <!-- 设置虚拟机密级 -->
                                             <li data-ng-if="instancemanage.public_ip && instancemanage.is_running && ( instancemanage.security_cls==0 || instancemanage.security_cls==3 )">
                                                 <a href="#" ng-click="instance_action(instancemanage, 'set_jimi')">
                                                     <i class="fa fa-play"></i>
@@ -251,17 +240,17 @@
 </div>
 <!-- END MAIN CONTENT -->
 
-
+<!-- 表头 -->
 <script type="text/ng-template" id="checkbox-header.html">
     <input type="checkbox"  data-ng-model="checkboxGroup.checked" data-ng-change="checkboxGroup.toggleAll()"/>
 </script>
 
 <!-- BEGIN MAIN JS & CSS -->
-<!-- BEGIN MAIN JS & CSS -->
 <script type="text/ng-template" id="ng-table/headers/checkbox.html">
     <input type="checkbox" ng-model="checkboxes.checked" id="select_all" name="filter-checkbox" value=""/>
 </script>
 
+<!-- vnc console界面 -->
 <script type="text/ng-template" id="vnc_console.html">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
@@ -284,6 +273,7 @@
     </div>
 </script>
 
+<!-- 弹性ip界面 -->
 <script type="text/ng-template" id="floating.html">
     <div class="modal-header">
         <button type="button" class="close" aria-hidden="true" data-ng-click="cancel()"></button>
@@ -333,7 +323,7 @@
     </div>
 </script>
 
-
+<!-- 防火墙界面 -->
 <script type="text/ng-template" id="firewall.html">
     <div class="modal-header">
         <button type="button" class="close" aria-hidden="true" ng-click="cancel()"></button>
@@ -427,7 +417,7 @@
     </div>
 </script>
 
-
+<!-- 云硬盘界面（挂载/卸载） -->
 <script type="text/ng-template" id="volume.html">
     <div class="modal-header">
         <button type="button" class="close" aria-hidden="true" ng-click="cancel()"></button>
@@ -474,6 +464,7 @@
     </div>
 </script>
 
+<!-- 备份界面 -->
 <script type="text/ng-template" id="backup.html">
     <div class="modal-header">
         <button type="button" class="close" aria-hidden="true" data-ng-click="cancel()"></button>
@@ -717,7 +708,7 @@
 </script>
 <!-- END TEMPLATE UPDATE -->
 
-
+<!-- vnc界面 -->
 <script type="text/ng-template" id="vnc_console.html">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
@@ -743,6 +734,7 @@
 </script>
 
 
+<!-- spice界面 -->
 <script type="text/ng-template" id="spice_console.html">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
@@ -768,7 +760,7 @@
 </script>
 
 
-
+<!-- novnc 界面 -->
 <script type="text/ng-template" id="novnc_console.html">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close" type="button" ng-click="cancel()">
